@@ -1,4 +1,4 @@
-import { DashboardSidebarMenuInterface } from "../lib/types";
+import { DashboardSidebarMenuInterface } from "../../components/lib/types";
 
 export const adminDashboardSidebarOptions: DashboardSidebarMenuInterface[] = [
   {

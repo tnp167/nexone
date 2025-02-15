@@ -3,7 +3,7 @@ import { FC } from "react";
 import Logo from "@/components/shared/logo";
 import UserInfo from "./UserInfo";
 import { SidebarNavAdmin } from "./NavAdmin";
-import { adminDashboardSidebarOptions } from "@/components/constants/data";
+import { adminDashboardSidebarOptions } from "@/constants/data";
 interface SidebarProps {
   isAdmin: boolean;
 }

@@ -1,7 +1,6 @@
 "use client";
 
-import { DashboardSidebarMenuInterface } from "@/components/lib/types";
-import { adminDashboardSidebarOptions } from "@/components/constants/data";
+import { DashboardSidebarMenuInterface } from "@/lib/types";
 import {
   Command,
   CommandEmpty,
@@ -13,7 +12,7 @@ import {
 } from "@/components/ui/command";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
-import { icons } from "@/components/constants/icons";
+import { icons } from "@/constants/icons";
 import { usePathname } from "next/navigation";
 export const SidebarNavAdmin = ({
   options,
