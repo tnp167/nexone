@@ -31,7 +31,7 @@ import ImageUpload from "../Shared/ImageUpload";
 import { v4 as uuidv4 } from "uuid";
 import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
-import { upsertCategory } from "@/app/queries/category";
+import { upsertCategory } from "@/queries/category";
 interface CategoryDetailsProps {
   data?: Category;
   cloudinary_key: string;
