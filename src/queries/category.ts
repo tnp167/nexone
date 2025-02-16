@@ -63,3 +63,32 @@ export const getAllCategories = async () => {
   });
   return categories;
 };
+
+// Retrieves a specific category from database
+export const getCategory = async (categoryId: string) => {
+  const category = await db.category.findUnique({
+    where: {
+      id: categoryId,
+    },
+  });
+  return category;
+};
+
+// Delete Category for Admin
+export const deleteCategory = async (categoryId: string) => {
+  const user = await currentUser();
+  if (!user) throw new Error("Unauthorized");
+
+  if (user.privateMetadata.role !== "ADMIN")
+    throw new Error("Unauthorized: Admin role required");
+
+  if (!categoryId) throw new Error("Category ID is required");
+
+  const result = await db.category.delete({
+    where: {
+      id: categoryId,
+    },
+  });
+
+  return result;
+};

@@ -32,15 +32,12 @@ import { v4 as uuidv4 } from "uuid";
 import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
 import { upsertCategory } from "@/queries/category";
+
 interface CategoryDetailsProps {
   data?: Category;
-  cloudinary_key: string;
 }
 
-const CategoryDetails: FC<CategoryDetailsProps> = ({
-  data,
-  cloudinary_key,
-}) => {
+const CategoryDetails: FC<CategoryDetailsProps> = ({ data }) => {
   const { toast } = useToast();
   const router = useRouter();
 
@@ -68,18 +65,22 @@ const CategoryDetails: FC<CategoryDetailsProps> = ({
     }
   }, [data, form]);
 
-  const handleSubmit = async (data: z.infer<typeof CategoryFormSchema>) => {
+  const handleSubmit = async (values: z.infer<typeof CategoryFormSchema>) => {
     try {
       const response = await upsertCategory({
         id: data?.id ? data.id : uuidv4(),
-        name: data.name,
-        image: data.image[0].url,
-        url: data.url,
-        featured: data.featured,
+        name: values.name,
+        image: values.image[0].url,
+        url: values.url,
+        featured: values.featured,
         createdAt: new Date(),
         updatedAt: new Date(),
       });
-      toast({ title: data?.id ? "Category updated" : "Category created" });
+      toast({
+        title: data?.id
+          ? "Category updated"
+          : `Category ${response?.name} has been created`,
+      });
 
       if (data?.id) {
         router.refresh();
@@ -120,7 +121,6 @@ const CategoryDetails: FC<CategoryDetailsProps> = ({
                     <FormControl>
                       <ImageUpload
                         type="profile"
-                        cloudinary_key={cloudinary_key}
                         value={field.value.map((image) => image.url)}
                         disabled={isLoading}
                         onChange={(url) => field.onChange([{ url }])}

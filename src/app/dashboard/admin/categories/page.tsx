@@ -3,13 +3,10 @@ import React from "react";
 import DataTable from "@/components/ui/data-table";
 import { Plus } from "lucide-react";
 import CategoryDetails from "@/components/dashboard/Forms/CategoryDetails";
-
+import { columns } from "./columns";
 const AdminCategoriesPage = async () => {
   const categories = await getAllCategories();
   if (!categories) return null;
-
-  const CLOUDINARY_KEY = process.env.NEXT_PUBLIC_CLOUDINARY_PRESET_NAME;
-  if (!CLOUDINARY_KEY) return null;
 
   return (
     <DataTable
@@ -19,11 +16,11 @@ const AdminCategoriesPage = async () => {
           Create Category
         </>
       }
-      modalChildren={<CategoryDetails cloudinary_key={CLOUDINARY_KEY} />}
+      modalChildren={<CategoryDetails />}
       filterValue="name"
       data={categories}
       searchPlaceholder="Search category name"
-      columns={[]}
+      columns={columns}
     />
   );
 };

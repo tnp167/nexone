@@ -10,7 +10,6 @@ interface ImageUploadProps {
   value: string[];
   type: "standard" | "profile" | "cover";
   dontShowPreview?: boolean;
-  cloudinary_key: string;
 }
 
 const ImageUpload: FC<ImageUploadProps> = ({
@@ -20,7 +19,6 @@ const ImageUpload: FC<ImageUploadProps> = ({
   value,
   type,
   dontShowPreview,
-  cloudinary_key,
 }) => {
   const [isMounted, setIsMounted] = useState(false);
 
@@ -36,7 +34,7 @@ const ImageUpload: FC<ImageUploadProps> = ({
 
   if (type === "profile") {
     return (
-      <div className="relative rounded-full w-52 h-52 inset-x-96 bg-gray-200 border-2 border-white">
+      <div className="relative rounded-full w-52 h-52 bg-gray-200 border-2 border-white">
         {value.length > 0 && (
           <Image
             src={value[0]}
@@ -46,7 +44,7 @@ const ImageUpload: FC<ImageUploadProps> = ({
             className="w-52 h-52 rounded-full object-cover absolute inset-0"
           />
         )}
-        <CldUploadWidget uploadPreset={cloudinary_key} onSuccess={onUpload}>
+        <CldUploadWidget uploadPreset="labpcmihw" onSuccess={onUpload}>
           {({ open }) => {
             const onClick = () => {
               open();

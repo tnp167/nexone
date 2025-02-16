@@ -29,7 +29,6 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { useModal } from "@/providers/modal-provider";
 
-// Lucide icons
 import {
   BadgeCheck,
   BadgeMinus,
@@ -37,14 +36,8 @@ import {
   MoreHorizontal,
   Trash,
 } from "lucide-react";
-
-// Queries
 import { deleteCategory, getCategory } from "@/queries/category";
-
-// Tanstack React Table
 import { ColumnDef } from "@tanstack/react-table";
-
-// Prisma models
 import { Category } from "@prisma/client";
 
 export const columns: ColumnDef<Category>[] = [
@@ -143,7 +136,7 @@ const CellActions: React.FC<CellActionsProps> = ({ rowData }) => {
                 // Custom modal component
                 <CustomModal>
                   {/* Store details component */}
-                  <CategoryDetails cloudinary_key={""} data={{ ...rowData }} />
+                  <CategoryDetails data={{ ...rowData }} />
                 </CustomModal>,
                 async () => {
                   return {
