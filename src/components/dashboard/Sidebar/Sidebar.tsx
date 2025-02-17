@@ -3,9 +3,16 @@ import { FC } from "react";
 import Logo from "@/components/shared/logo";
 import UserInfo from "./UserInfo";
 import { SidebarNavAdmin } from "./NavAdmin";
-import { adminDashboardSidebarOptions } from "@/constants/data";
+import {
+  adminDashboardSidebarOptions,
+  sellerDashboardSidebarOptions,
+} from "@/constants/data";
+import { Store } from "@prisma/client";
+import { SidebarNavSeller } from "./NavSeller";
+
 interface SidebarProps {
   isAdmin: boolean;
+  stores?: Store[];
 }
 
 const Sidebar: FC<SidebarProps> = async ({ isAdmin }) => {
@@ -15,7 +22,11 @@ const Sidebar: FC<SidebarProps> = async ({ isAdmin }) => {
       <Logo width="100%" height="180px" />
       <span className="mt-3" />
       <UserInfo user={user} />
-      {isAdmin && <SidebarNavAdmin options={adminDashboardSidebarOptions} />}
+      {isAdmin ? (
+        <SidebarNavAdmin options={adminDashboardSidebarOptions} />
+      ) : (
+        <SidebarNavSeller options={sellerDashboardSidebarOptions} />
+      )}
     </div>
   );
 };
