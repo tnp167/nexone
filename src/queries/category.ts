@@ -66,6 +66,8 @@ export const getAllCategories = async () => {
 
 // Retrieves a specific category from database
 export const getCategory = async (categoryId: string) => {
+  if (!categoryId) throw new Error("Category ID is required");
+
   const category = await db.category.findUnique({
     where: {
       id: categoryId,

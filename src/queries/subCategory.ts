@@ -53,39 +53,44 @@ export const upsertSubCategory = async (subCategory: SubCategory) => {
   }
 };
 
-//Retrieve all categories
-export const getAllCategories = async () => {
-  const categories = await db.category.findMany({
+//Retrieve all sub categories
+export const getAllSubCategories = async () => {
+  const subCategories = await db.subCategory.findMany({
+    include: {
+      category: true,
+    },
     orderBy: {
       updatedAt: "desc",
     },
   });
-  return categories;
+  return subCategories;
 };
 
 // Retrieves a specific category from database
-export const getCategory = async (categoryId: string) => {
-  const category = await db.category.findUnique({
+export const getSubCategory = async (subCategoryId: string) => {
+  if (!subCategoryId) throw new Error("Sub Category ID is required");
+
+  const subCategory = await db.subCategory.findUnique({
     where: {
-      id: categoryId,
+      id: subCategoryId,
     },
   });
-  return category;
+  return subCategory;
 };
 
-// Delete Category for Admin
-export const deleteCategory = async (categoryId: string) => {
+// Delete Sub Category for Admin
+export const deleteSubCategory = async (subCategoryId: string) => {
   const user = await currentUser();
   if (!user) throw new Error("Unauthorized");
 
   if (user.privateMetadata.role !== "ADMIN")
     throw new Error("Unauthorized: Admin role required");
 
-  if (!categoryId) throw new Error("Category ID is required");
+  if (!subCategoryId) throw new Error("Sub Category ID is required");
 
-  const result = await db.category.delete({
+  const result = await db.subCategory.delete({
     where: {
-      id: categoryId,
+      id: subCategoryId,
     },
   });
 
