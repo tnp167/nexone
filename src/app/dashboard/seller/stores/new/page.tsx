@@ -1,5 +1,11 @@
+import StoreDetails from "@/components/dashboard/Forms/StoreDetails";
+
 const SellerStoreNewPage = () => {
-  return <div className="text-4xl font-bold">Create a new store</div>;
+  return (
+    <div className="p-2">
+      <StoreDetails />
+    </div>
+  );
 };
 
 export default SellerStoreNewPage;
