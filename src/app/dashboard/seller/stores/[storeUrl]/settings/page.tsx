@@ -17,7 +17,7 @@ const SelletStoreSettingsPage = async ({
   if (!storeDetails) redirect("/dashboard/seller/stores");
   return (
     <div>
-      <StoreDetails data={storeDetails} />
+      <StoreDetails data={storeDetails} />{" "}
     </div>
   );
 };
