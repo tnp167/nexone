@@ -1,7 +1,7 @@
 "use client";
 
-import { Category, Store } from "@prisma/client";
-import { FC, useEffect } from "react";
+import { Category } from "@prisma/client";
+import { FC, useEffect, useState } from "react";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { ProductFormSchema } from "@/lib/schemas";
@@ -34,6 +34,8 @@ import { useRouter } from "next/navigation";
 import { Textarea } from "@/components/ui/textarea";
 import { upsertStore } from "@/queries/store";
 import { ProductWithVariantType } from "@/lib/types";
+import ImagePreviewGrid from "../Shared/ImagesPreviewGrid";
+import ClickToAdd from "./ClickToAdd";
 
 interface ProductDetailsProps {
   data?: ProductWithVariantType;
@@ -48,6 +50,11 @@ const ProductDetails: FC<ProductDetailsProps> = ({
 }) => {
   const { toast } = useToast();
   const router = useRouter();
+
+  //State for colors
+  //const [colors, setColors] = useState<{color: string}[]>([{color:"", hex:""}]);
+
+  const [images, setImages] = useState<{ url: string }[]>([]);
 
   const form = useForm<z.infer<typeof ProductFormSchema>>({
     mode: "onChange",
@@ -150,25 +157,54 @@ const ProductDetails: FC<ProductDetailsProps> = ({
                   render={({ field }) => (
                     <FormItem>
                       <FormControl>
-                        <ImageUpload
-                          dontShowPreview={true}
-                          type="standard"
-                          value={field.value.map((image) => image.url)}
-                          disabled={isLoading}
-                          onChange={(url) => field.onChange([{ url }])}
-                          onRemove={(url) =>
-                            field.onChange([
-                              ...field.value.filter(
-                                (current) => current.url !== url
-                              ),
-                            ])
-                          }
-                        />
+                        <>
+                          <ImagePreviewGrid
+                            images={form.getValues().images}
+                            onRemove={(url) => {
+                              const updatedImages = images.filter(
+                                (img) => img.url != url
+                              );
+                              setImages(updatedImages);
+                              field.onChange(updatedImages);
+                            }}
+                            // colors={colors}
+                            // setColors={setColors}
+                          />
+                          <FormMessage className="!mt-4" />
+                          <ImageUpload
+                            dontShowPreview={true}
+                            type="standard"
+                            value={field.value.map((image) => image.url)}
+                            disabled={isLoading}
+                            onChange={(url) =>
+                              setImages((prev) => {
+                                const updatedImages = [...prev, { url }];
+                                field.onChange(updatedImages);
+                                return updatedImages;
+                              })
+                            }
+                            onRemove={(url) =>
+                              field.onChange([
+                                ...field.value.filter(
+                                  (current) => current.url !== url
+                                ),
+                              ])
+                            }
+                          />
+                        </>
                       </FormControl>
-                      <FormMessage />
                     </FormItem>
                   )}
                 />
+                {/* Colors */}
+                {/* <div className="w-full flex flex-col gap-y-3" xl:pl-5>
+                  <ClickToAdd
+                    details={colors}
+                    setDetails={setColors}
+                    initialDetail={{color:""}}
+                    header="Colors"
+                  />
+                 </div> */}
               </div>
               <FormField
                 control={form.control}
