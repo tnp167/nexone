@@ -35,7 +35,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { upsertStore } from "@/queries/store";
 import { ProductWithVariantType } from "@/lib/types";
 import ImagePreviewGrid from "../Shared/ImagesPreviewGrid";
-import ClickToAdd from "./ClickToAdd";
+import ClickToAddInputs from "./ClickToAddInputs";
 
 interface ProductDetailsProps {
   data?: ProductWithVariantType;
@@ -51,8 +51,11 @@ const ProductDetails: FC<ProductDetailsProps> = ({
   const { toast } = useToast();
   const router = useRouter();
 
-  //State for colors
-  //const [colors, setColors] = useState<{color: string}[]>([{color:"", hex:""}]);
+  const [colors, setColors] = useState<{ color: string }[]>([{ color: "" }]);
+
+  const [sizes, setSizes] = useState<
+    { size: string; price: number; quantity: number; discount: number }[]
+  >([{ size: "", price: 0.01, quantity: 1, discount: 0 }]);
 
   const [images, setImages] = useState<{ url: string }[]>([]);
 
@@ -75,6 +78,13 @@ const ProductDetails: FC<ProductDetailsProps> = ({
       isSale: data?.isSale,
     },
   });
+
+  const errors = form.formState.errors;
+  //Whenever colors,sizes update the form
+  useEffect(() => {
+    form.setValue("colors", colors);
+    form.setValue("sizes", sizes);
+  }, [colors, sizes]);
 
   const isLoading = form.formState.isSubmitting;
 
@@ -167,8 +177,8 @@ const ProductDetails: FC<ProductDetailsProps> = ({
                               setImages(updatedImages);
                               field.onChange(updatedImages);
                             }}
-                            // colors={colors}
-                            // setColors={setColors}
+                            colors={colors}
+                            setColors={setColors}
                           />
                           <FormMessage className="!mt-4" />
                           <ImageUpload
@@ -197,15 +207,21 @@ const ProductDetails: FC<ProductDetailsProps> = ({
                   )}
                 />
                 {/* Colors */}
-                {/* <div className="w-full flex flex-col gap-y-3" xl:pl-5>
-                  <ClickToAdd
+                <div className="w-full flex flex-col gap-y-3 xl:pl-5">
+                  <ClickToAddInputs
                     details={colors}
                     setDetails={setColors}
-                    initialDetail={{color:""}}
+                    initialDetail={{ color: "" }}
                     header="Colors"
                   />
-                 </div> */}
+                  {errors.colors && (
+                    <span className="text-sm font-medium text-destructive">
+                      {errors.colors.message}
+                    </span>
+                  )}
+                </div>
               </div>
+              {/* Name */}
               <FormField
                 control={form.control}
                 name="name"
@@ -219,6 +235,7 @@ const ProductDetails: FC<ProductDetailsProps> = ({
                   </FormItem>
                 )}
               />
+              {/* Description  */}
               <FormField
                 control={form.control}
                 name="description"
@@ -232,7 +249,25 @@ const ProductDetails: FC<ProductDetailsProps> = ({
                   </FormItem>
                 )}
               />
-
+              {/* Sizes */}
+              <div className="w-full flex flex-col gap-y-3 xl:pl-5">
+                <ClickToAddInputs
+                  details={sizes}
+                  setDetails={setSizes}
+                  initialDetail={{
+                    size: "",
+                    price: 0.01,
+                    quantity: 1,
+                    discount: 0,
+                  }}
+                  header="Sizes, Quantity, Price, Discount"
+                />
+                {errors.sizes && (
+                  <span className="text-sm font-medium text-destructive">
+                    {errors.sizes.message}
+                  </span>
+                )}
+              </div>
               <Button type="submit" disabled={isLoading}>
                 {isLoading
                   ? "Saving..."
