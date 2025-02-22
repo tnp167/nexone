@@ -208,7 +208,7 @@ const ProductDetails: FC<ProductDetailsProps> = ({
               onSubmit={form.handleSubmit(handleSubmit)}
               className="space-y-4"
             >
-              {/* Images */}
+              {/* Images and Colors */}
               <div className="flex flex-col gap-y-6 xl:flex-row">
                 <FormField
                   control={form.control}
@@ -262,6 +262,7 @@ const ProductDetails: FC<ProductDetailsProps> = ({
                     setDetails={setColors}
                     initialDetail={{ color: "" }}
                     header="Colors"
+                    colorPicker
                   />
                   {errors.colors && (
                     <span className="text-sm font-medium text-destructive">

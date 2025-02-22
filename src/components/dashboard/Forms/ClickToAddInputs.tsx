@@ -1,6 +1,9 @@
-import { Dispatch, FC, SetStateAction } from "react";
-import { Plus, Minus } from "lucide-react";
+"use client";
+
+import { Dispatch, FC, SetStateAction, useState } from "react";
+import { Plus, Minus, PaintBucket } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { SketchPicker } from "react-color";
 
 export interface Detail {
   [key: string]: string | number | boolean | undefined;
@@ -11,6 +14,7 @@ export interface ClickToAddProps {
   setDetails: Dispatch<SetStateAction<Detail[]>>;
   initialDetail?: Detail;
   header: string;
+  colorPicker?: boolean;
 }
 
 const ClickToAddInputs: FC<ClickToAddProps> = ({
@@ -18,7 +22,10 @@ const ClickToAddInputs: FC<ClickToAddProps> = ({
   setDetails,
   initialDetail = {},
   header,
+  colorPicker,
 }) => {
+  const [colorPickerIndex, setColorPickerIndex] = useState<number | null>(null);
+
   const handleDetailsChange = (
     index: number,
     property: string,
@@ -101,6 +108,34 @@ const ClickToAddInputs: FC<ClickToAddProps> = ({
         <div key={idx} className="flex items-center gap-x-4">
           {Object.keys(detail).map((property) => (
             <div key={property} className="flex items-center gap-x-2">
+              {/* Color picker toggle*/}
+              {property === "color" && colorPicker && (
+                <div className="flex gap-x-4">
+                  <button
+                    type="button"
+                    className="cursor-pointer"
+                    onClick={() =>
+                      setColorPickerIndex(colorPickerIndex === idx ? null : idx)
+                    }
+                  >
+                    <PaintBucket />
+                  </button>
+                  <span
+                    className="w-8 h-8 rounded-full"
+                    style={{ backgroundColor: detail[property] as string }}
+                  ></span>
+                </div>
+              )}
+
+              {/* Color picker */}
+              {colorPickerIndex === idx && property === "color" && (
+                <SketchPicker
+                  color={detail[property] as string}
+                  onChange={(color) =>
+                    handleDetailsChange(idx, property, color.hex)
+                  }
+                />
+              )}
               <Input
                 className="w-28"
                 type={typeof detail[property] === "number" ? "number" : "text"}
