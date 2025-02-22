@@ -26,6 +26,16 @@ import {
   CardTitle,
   CardDescription,
 } from "@/components/ui/card";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+
 import { Input } from "@/components/ui/input";
 import ImageUpload from "../Shared/ImageUpload";
 import { v4 as uuidv4 } from "uuid";
@@ -36,6 +46,7 @@ import { upsertStore } from "@/queries/store";
 import { ProductWithVariantType } from "@/lib/types";
 import ImagePreviewGrid from "../Shared/ImagesPreviewGrid";
 import ClickToAddInputs from "./ClickToAddInputs";
+import { getAllCategoriesForCategory } from "@/queries/category";
 
 interface ProductDetailsProps {
   data?: ProductWithVariantType;
@@ -50,6 +61,8 @@ const ProductDetails: FC<ProductDetailsProps> = ({
 }) => {
   const { toast } = useToast();
   const router = useRouter();
+
+  const [subCategories, setSubCategories] = useState<SubCategory[]>([]);
 
   const [colors, setColors] = useState<{ color: string }[]>([{ color: "" }]);
 
@@ -80,11 +93,21 @@ const ProductDetails: FC<ProductDetailsProps> = ({
   });
 
   const errors = form.formState.errors;
+
   //Whenever colors,sizes update the form
   useEffect(() => {
     form.setValue("colors", colors);
     form.setValue("sizes", sizes);
   }, [colors, sizes]);
+
+  //Get sub categories when user pick/change a category
+  useEffect(() => {
+    const getSubCategories = async () => {
+      const res = await getAllCategoriesForCategory(form.watch().categoryId);
+      setSubCategories(res);
+    };
+    getSubCategories();
+  }, [form.watch().categoryId]);
 
   const isLoading = form.formState.isSubmitting;
 
@@ -159,8 +182,8 @@ const ProductDetails: FC<ProductDetailsProps> = ({
               onSubmit={form.handleSubmit(handleSubmit)}
               className="space-y-4"
             >
+              {/* Images */}
               <div className="flex flex-col gap-y-6 xl:flex-row">
-                {/* Images */}
                 <FormField
                   control={form.control}
                   name="images"
@@ -222,35 +245,178 @@ const ProductDetails: FC<ProductDetailsProps> = ({
                 </div>
               </div>
               {/* Name */}
-              <FormField
-                control={form.control}
-                name="name"
-                render={({ field }) => (
-                  <FormItem className="flex-1">
-                    <FormLabel>Store Name</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Name" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
+              <div className="flex flex-col gap-4 lg:flex-row">
+                <FormField
+                  control={form.control}
+                  name="name"
+                  render={({ field }) => (
+                    <FormItem className="flex-1">
+                      <FormLabel>Product Name</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Name" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="variantName"
+                  render={({ field }) => (
+                    <FormItem className="flex-1">
+                      <FormLabel>Variant Name</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Name" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+              {/* Description */}
+              <div className="flex flex-col gap-4 lg:flex-row">
+                <FormField
+                  control={form.control}
+                  name="description"
+                  render={({ field }) => (
+                    <FormItem className="flex-1">
+                      <FormLabel>Product Description</FormLabel>
+                      <FormControl>
+                        <Textarea
+                          placeholder="Description"
+                          {...field}
+                          rows={4}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="variantDescription"
+                  render={({ field }) => (
+                    <FormItem className="flex-1">
+                      <FormLabel>Variant Description</FormLabel>
+                      <FormControl>
+                        <Textarea
+                          placeholder="Description"
+                          {...field}
+                          rows={4}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+              {/* Category - Sub Category */}
+              <div className="flex gap-4">
+                <FormField
+                  control={form.control}
+                  name="categoryId"
+                  render={({ field }) => (
+                    <FormItem className="flex-1">
+                      <FormLabel>Product Category</FormLabel>
+                      <FormControl>
+                        <Select
+                          disabled={isLoading || categories?.length === 0}
+                          onValueChange={field.onChange}
+                          value={field.value}
+                          defaultValue={field.value}
+                        >
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue
+                                defaultValue={field.value}
+                                placeholder="Select a category"
+                              />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {categories?.map((category) => (
+                              <SelectItem key={category.id} value={category.id}>
+                                {category.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                {form.watch().categoryId && (
+                  <FormField
+                    control={form.control}
+                    name="subCategoryId"
+                    render={({ field }) => (
+                      <FormItem className="flex-1">
+                        <FormLabel>Product Sub Category</FormLabel>
+                        <FormControl>
+                          <Select
+                            disabled={isLoading || categories?.length === 0}
+                            onValueChange={field.onChange}
+                            value={field.value}
+                            defaultValue={field.value}
+                          >
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue
+                                  defaultValue={field.value}
+                                  placeholder="Select a category"
+                                />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              {subCategories?.map((subCategory) => (
+                                <SelectItem
+                                  key={subCategory.id}
+                                  value={subCategory.id}
+                                >
+                                  {subCategory.name}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
                 )}
-              />
-              {/* Description  */}
-              <FormField
-                control={form.control}
-                name="description"
-                render={({ field }) => (
-                  <FormItem className="flex-1">
-                    <FormLabel>Store Description</FormLabel>
-                    <FormControl>
-                      <Textarea placeholder="Description" {...field} rows={4} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              </div>
+              {/* Brand, Sku */}
+              <div className="flex flex-col lg:flex-row gap-4">
+                <FormField
+                  control={form.control}
+                  name="brand"
+                  render={({ field }) => (
+                    <FormItem className="flex-1">
+                      <FormLabel>Product Brand</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Brand" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="sku"
+                  render={({ field }) => (
+                    <FormItem className="flex-1">
+                      <FormLabel>Product Sku</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Sku" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
               {/* Sizes */}
-              <div className="w-full flex flex-col gap-y-3 xl:pl-5">
+              <div className="w-full flex flex-col gap-y-3">
                 <ClickToAddInputs
                   details={sizes}
                   setDetails={setSizes}
@@ -268,6 +434,27 @@ const ProductDetails: FC<ProductDetailsProps> = ({
                   </span>
                 )}
               </div>
+              {/* Is On Slae */}
+              <FormField
+                control={form.control}
+                name="isSale"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-start space-x-2 space-y-0 rounded-md ">
+                    <FormControl>
+                      <Checkbox
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    </FormControl>
+                    <div className="space-y-1 leading-none">
+                      <FormLabel>On Sale</FormLabel>
+                      <FormDescription>
+                        Is this product on sale?
+                      </FormDescription>
+                    </div>
+                  </FormItem>
+                )}
+              />
               <Button type="submit" disabled={isLoading}>
                 {isLoading
                   ? "Saving..."

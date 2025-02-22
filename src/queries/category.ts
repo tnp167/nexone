@@ -64,6 +64,20 @@ export const getAllCategories = async () => {
   return categories;
 };
 
+//Retrieve all SubCategories for a category
+//Return: Array of subCategories of a category sorted by updatedAt date in descending order
+export const getAllCategoriesForCategory = async (categoryId: string) => {
+  const subCategories = await db.subCategory.findMany({
+    where: {
+      categoryId,
+    },
+    orderBy: {
+      updatedAt: "desc",
+    },
+  });
+  return subCategories;
+};
+
 // Retrieves a specific category from database
 export const getCategory = async (categoryId: string) => {
   if (!categoryId) throw new Error("Category ID is required");
