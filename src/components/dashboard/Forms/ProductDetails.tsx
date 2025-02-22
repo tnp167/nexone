@@ -47,6 +47,7 @@ import { ProductWithVariantType } from "@/lib/types";
 import ImagePreviewGrid from "../Shared/ImagesPreviewGrid";
 import ClickToAddInputs from "./ClickToAddInputs";
 import { getAllCategoriesForCategory } from "@/queries/category";
+import { WithOutContext as ReactTags } from "react-tag-input";
 
 interface ProductDetailsProps {
   data?: ProductWithVariantType;
@@ -93,12 +94,6 @@ const ProductDetails: FC<ProductDetailsProps> = ({
   });
 
   const errors = form.formState.errors;
-
-  //Whenever colors,sizes update the form
-  useEffect(() => {
-    form.setValue("colors", colors);
-    form.setValue("sizes", sizes);
-  }, [colors, sizes]);
 
   //Get sub categories when user pick/change a category
   useEffect(() => {
@@ -165,6 +160,37 @@ const ProductDetails: FC<ProductDetailsProps> = ({
       });
     }
   };
+
+  interface Keyword {
+    id: string;
+    text: string;
+  }
+  const [keywords, setKeywords] = useState<string[]>([]);
+
+  const handleAddition = (keyword: Keyword) => {
+    if (keywords.length === 10) return;
+    if (!keywords.some((k) => k.toLowerCase() === keyword.text.toLowerCase())) {
+      setKeywords([...keywords, keyword.text]);
+    } else {
+      toast({
+        variant: "destructive",
+        title: "Duplicate keyword",
+        description: "This keyword has already been added",
+      });
+    }
+  };
+
+  const handleDeleteKeyword = (index: number) => {
+    setKeywords(keywords.filter((_, i) => index !== i));
+  };
+
+  //Whenever colors,sizes update the form
+  useEffect(() => {
+    form.setValue("colors", colors);
+    form.setValue("sizes", sizes);
+    form.setValue("keywords", keywords);
+  }, [colors, sizes, keywords]);
+
   return (
     <AlertDialog>
       <Card className="w-full">
@@ -414,6 +440,44 @@ const ProductDetails: FC<ProductDetailsProps> = ({
                     </FormItem>
                   )}
                 />
+              </div>
+              {/* Keywords */}
+              <div className="space-y-2">
+                <FormField
+                  control={form.control}
+                  name="keywords"
+                  render={({ field }) => (
+                    <FormItem className="flex-1">
+                      <FormLabel>Product Keywords</FormLabel>
+                      <FormControl>
+                        <ReactTags
+                          handleAddition={handleAddition}
+                          placeholder="Add a keyword"
+                          classNames={{
+                            tagInputField:
+                              "bg-background border rounded-md p-2 w-full focus:outline-none",
+                          }}
+                        />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+                <div className="flex flex-wrap gap-1">
+                  {keywords.map((keyword, idx) => (
+                    <div
+                      key={idx}
+                      className="text-xs inline-flex items-center px-3 py-1 bg-blue-200 text-blue-700 rounded-full gap-2"
+                    >
+                      <span>{keyword}</span>
+                      <span
+                        className="cursor-pointer"
+                        onClick={() => handleDeleteKeyword(idx)}
+                      >
+                        x
+                      </span>
+                    </div>
+                  ))}
+                </div>
               </div>
               {/* Sizes */}
               <div className="w-full flex flex-col gap-y-3">
