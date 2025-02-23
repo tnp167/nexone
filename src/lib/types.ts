@@ -14,6 +14,8 @@ export type SubCategoryWithCategoryType = Prisma.PromiseReturnType<
 
 //Product + Variant
 export type ProductWithVariantType = {
+  productId: string;
+  variantId: string;
   name: string;
   description: string;
   variantName: string;

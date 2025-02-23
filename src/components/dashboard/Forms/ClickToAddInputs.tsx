@@ -101,13 +101,13 @@ const ClickToAddInputs: FC<ClickToAddProps> = ({
   };
 
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex flex-col gap-y-2">
       <div>{header}</div>
       {details.length === 0 && <PlusButton onClick={handleAddDetail} />}
       {details.map((detail, idx) => (
         <div key={idx} className="flex items-center gap-x-4">
-          {Object.keys(detail).map((property) => (
-            <div key={property} className="flex items-center gap-x-2">
+          {Object.keys(detail).map((property, propIndex) => (
+            <div key={propIndex} className="flex items-center gap-x-2">
               {/* Color picker toggle*/}
               {property === "color" && colorPicker && (
                 <div className="flex gap-x-4">

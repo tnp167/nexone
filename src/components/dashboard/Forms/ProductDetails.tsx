@@ -42,7 +42,7 @@ import { v4 as uuidv4 } from "uuid";
 import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
 import { Textarea } from "@/components/ui/textarea";
-import { upsertStore } from "@/queries/store";
+import { upsertProduct } from "@/queries/product";
 import { ProductWithVariantType } from "@/lib/types";
 import ImagePreviewGrid from "../Shared/ImagesPreviewGrid";
 import ClickToAddInputs from "./ClickToAddInputs";
@@ -126,30 +126,42 @@ const ProductDetails: FC<ProductDetailsProps> = ({
   }, [data, form]);
 
   const handleSubmit = async (values: z.infer<typeof ProductFormSchema>) => {
+    console.log("hi");
     try {
-      const response = await upsertStore({
-        id: data?.id ? data.id : uuidv4(),
-        name: values.name,
-        description: values.description,
-        email: values.email,
-        phone: values.phone,
-        logo: values.logo[0].url,
-        cover: values.cover[0].url,
-        url: values.url,
-        featured: values.featured,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      });
+      const response = await upsertProduct(
+        {
+          productId: data?.productId || uuidv4(),
+          variantId: data?.variantId ? data.variantId : uuidv4(),
+          name: values.name,
+          description: values.description,
+          variantName: values.variantName,
+          variantDescription: values.variantDescription || "",
+          categoryId: values.categoryId,
+          subCategoryId: values.subCategoryId,
+          images: values.images,
+          isSale: values.isSale || false,
+          brand: values.brand,
+          sku: values.sku,
+          colors: values.colors || [],
+          sizes: values.sizes || [],
+          keywords: values.keywords || [],
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
+        storeUrl
+      );
+
       toast({
-        title: data?.id
-          ? "Store updated"
-          : `Store ${response?.name} has been created`,
+        title:
+          data?.productId && data?.variantId
+            ? "Product updated"
+            : `Product ${response?.slug} has been created`,
       });
 
-      if (data?.id) {
+      if (data?.productId && data?.variantId) {
         router.refresh();
       } else {
-        router.push(`/dashboard/seller/stores/${response.url}`);
+        router.push(`/dashboard/seller/stores/${storeUrl}/products`);
       }
     } catch (error: any) {
       console.log(error);
@@ -165,7 +177,7 @@ const ProductDetails: FC<ProductDetailsProps> = ({
     id: string;
     text: string;
   }
-  const [keywords, setKeywords] = useState<string[]>([]);
+  const [keywords, setKeywords] = useState<string[]>(data?.keywords || []);
 
   const handleAddition = (keyword: Keyword) => {
     if (keywords.length === 10) return;
@@ -443,16 +455,17 @@ const ProductDetails: FC<ProductDetailsProps> = ({
                 />
               </div>
               {/* Keywords */}
-              <div className="space-y-2">
+              <div className="w-full flex-1 space-y-2">
                 <FormField
                   control={form.control}
                   name="keywords"
                   render={({ field }) => (
-                    <FormItem className="flex-1">
+                    <FormItem className="relative flex-1">
                       <FormLabel>Product Keywords</FormLabel>
                       <FormControl>
                         <ReactTags
                           handleAddition={handleAddition}
+                          handleDelete={handleDeleteKeyword}
                           placeholder="Add a keyword"
                           classNames={{
                             tagInputField:
@@ -460,6 +473,7 @@ const ProductDetails: FC<ProductDetailsProps> = ({
                           }}
                         />
                       </FormControl>
+                      <FormMessage className="!mt-4" />
                     </FormItem>
                   )}
                 />
@@ -487,8 +501,8 @@ const ProductDetails: FC<ProductDetailsProps> = ({
                   setDetails={setSizes}
                   initialDetail={{
                     size: "",
-                    price: 0.01,
                     quantity: 1,
+                    price: 0.01,
                     discount: 0,
                   }}
                   header="Sizes, Quantity, Price, Discount"

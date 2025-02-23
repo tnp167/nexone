@@ -135,8 +135,8 @@ export const ProductFormSchema = z.object({
       required_error: "Product description is mandatory.",
       invalid_type_error: "Product description must be a valid string.",
     })
-    .min(200, {
-      message: "Product description should be at least 200 characters long.",
+    .min(10, {
+      message: "Product description should be at least 10 characters long.",
     }),
   variantName: z
     .string({
@@ -169,10 +169,10 @@ export const ProductFormSchema = z.object({
     .array()
     .min(3, "Please upload at least 3 images for the product.")
     .max(6, "You can upload up to 6 images for the product."),
-  variantImage: z
-    .object({ url: z.string() })
-    .array()
-    .length(1, "Choose a product variant image."),
+  // variantImage: z
+  //   .object({ url: z.string() })
+  //   .array()
+  //   .length(1, "Choose a product variant image."),
   categoryId: z
     .string({
       required_error: "Product category ID is mandatory.",
@@ -224,8 +224,8 @@ export const ProductFormSchema = z.object({
       invalid_type_error: "Keywords must be valid strings.",
     })
     .array()
-    .min(5, {
-      message: "Please provide at least 5 keywords.",
+    .min(3, {
+      message: "Please provide at least 3 keywords.",
     })
     .max(10, {
       message: "You can provide up to 10 keywords.",
