@@ -1,6 +1,6 @@
 "use client";
 
-import { Category } from "@prisma/client";
+import { Category, SubCategory } from "@prisma/client";
 import { FC, useEffect, useState } from "react";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
@@ -50,7 +50,7 @@ import { getAllCategoriesForCategory } from "@/queries/category";
 import { WithOutContext as ReactTags } from "react-tag-input";
 
 interface ProductDetailsProps {
-  data?: ProductWithVariantType;
+  data?: Partial<ProductWithVariantType>;
   categories: Category[];
   storeUrl: string;
 }
@@ -126,7 +126,6 @@ const ProductDetails: FC<ProductDetailsProps> = ({
   }, [data, form]);
 
   const handleSubmit = async (values: z.infer<typeof ProductFormSchema>) => {
-    console.log("hi");
     try {
       const response = await upsertProduct(
         {
