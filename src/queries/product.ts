@@ -154,3 +154,64 @@ export const getProductMainInfo = async (productId: string) => {
     storeId: product.storeId,
   };
 };
+
+// Function: getAllStoreProducts
+// Description: Retrieves all products from a specific store based on the store URL.
+// Access Level: Public
+// Parameters:
+//   - storeUrl: The URL of the store whose products are to be retrieved.
+// Returns: Array of products from the specified store, including category, subcategory, and variant details.
+export const getAllStoreProducts = async (storeUrl: string) => {
+  const store = await db.store.findUnique({ where: { url: storeUrl } });
+  if (!store) return null;
+
+  //Retrieve all products from the store
+  const products = await db.product.findMany({
+    where: {
+      storeId: store.id,
+    },
+    include: {
+      category: true,
+      subCategory: true,
+      variants: {
+        include: {
+          images: true,
+          colors: true,
+          sizes: true,
+        },
+      },
+      store: {
+        select: {
+          id: true,
+          url: true,
+        },
+      },
+    },
+  });
+
+  return products;
+};
+
+// Function: deleteProduct
+// Description: Deletes a product from the database.
+// Permission Level: Seller only
+// Parameters:
+//   - productId: The ID of the product to be deleted.
+// Returns: Response indicating success or failure of the deletion operation.
+export const deleteProduct = async (productId: string) => {
+  const user = await currentUser();
+
+  if (!user) throw new Error("Unauthorized");
+
+  if (user.privateMetadata.role !== "SELLER")
+    throw new Error("Unauthorized access: Seller role required");
+
+  if (!productId) throw new Error("Please provide product data.");
+
+  const response = await db.product.delete({
+    where: {
+      id: productId,
+    },
+  });
+  return response;
+};

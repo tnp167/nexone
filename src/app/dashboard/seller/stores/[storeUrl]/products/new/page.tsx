@@ -11,7 +11,11 @@ export default async function SellerNewProductPage({
 
   return (
     <div className="w-full">
-      <ProductDetails categories={categories} storeUrl={storeUrl} />
+      <ProductDetails
+        categories={categories}
+        storeUrl={storeUrl}
+        //offerTags={}
+      />
     </div>
   );
 }
