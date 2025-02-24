@@ -1,7 +1,7 @@
 "use client";
 
 import { Category, SubCategory } from "@prisma/client";
-import { FC, useEffect, useState } from "react";
+import { FC, useEffect, useRef, useState } from "react";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { ProductFormSchema } from "@/lib/schemas";
@@ -35,7 +35,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import ImageUpload from "../Shared/ImageUpload";
 import { v4 as uuidv4 } from "uuid";
@@ -48,6 +48,14 @@ import ImagePreviewGrid from "../Shared/ImagesPreviewGrid";
 import ClickToAddInputs from "./ClickToAddInputs";
 import { getAllCategoriesForCategory } from "@/queries/category";
 import { WithOutContext as ReactTags } from "react-tag-input";
+
+import { format } from "date-fns";
+import DateTimePicker from "react-datetime-picker";
+import "react-datetime-picker/dist/DateTimePicker.css";
+import "react-calendar/dist/Calendar.css";
+import "react-clock/dist/Clock.css";
+
+import JoditEditor from "jodit-react";
 
 interface ProductDetailsProps {
   data?: Partial<ProductWithVariantType>;
@@ -62,6 +70,9 @@ const ProductDetails: FC<ProductDetailsProps> = ({
 }) => {
   const { toast } = useToast();
   const router = useRouter();
+
+  const productDescEditor = useRef(null);
+  const variantDescEditor = useRef(null);
 
   const [subCategories, setSubCategories] = useState<SubCategory[]>([]);
 
@@ -91,6 +102,8 @@ const ProductDetails: FC<ProductDetailsProps> = ({
       sizes: data?.sizes,
       keywords: data?.keywords || [],
       isSale: data?.isSale,
+      saleEndDate:
+        data?.saleEndDate || format(new Date(), "yyyy-MM-dd'T'HH:mm:ss"),
     },
   });
 
@@ -191,6 +204,7 @@ const ProductDetails: FC<ProductDetailsProps> = ({
     form.setValue("keywords", keywords);
   }, [colors, sizes, keywords]);
 
+  console.log("date", form.getValues().saleEndDate);
   return (
     <AlertDialog>
       <Card className="w-full">
@@ -300,8 +314,58 @@ const ProductDetails: FC<ProductDetailsProps> = ({
                   )}
                 />
               </div>
+
+              {/* Product and variant description editors (tabs) */}
+              <Tabs defaultValue="product" className="w-full">
+                <TabsList className="w-full grid grid-cols-2">
+                  <TabsTrigger value="product">Product description</TabsTrigger>
+                  <TabsTrigger value="variant">Variant description</TabsTrigger>
+                </TabsList>
+                <TabsContent value="product">
+                  <FormField
+                    control={form.control}
+                    name="description"
+                    render={({ field }) => (
+                      <FormItem className="flex-1">
+                        <FormLabel>Product Description</FormLabel>
+                        <FormControl>
+                          <JoditEditor
+                            ref={productDescEditor}
+                            value={form.getValues().description}
+                            onChange={(content) => {
+                              form.setValue("description", content);
+                            }}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </TabsContent>
+                <TabsContent value="variant">
+                  <FormField
+                    control={form.control}
+                    name="variantDescription"
+                    render={({ field }) => (
+                      <FormItem className="flex-1">
+                        <FormLabel>Variant Description</FormLabel>
+                        <FormControl>
+                          <JoditEditor
+                            ref={variantDescEditor}
+                            value={form.getValues().description}
+                            onChange={(content) => {
+                              form.setValue("description", content);
+                            }}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </TabsContent>
+              </Tabs>
               {/* Description */}
-              <div className="flex flex-col gap-4 lg:flex-row">
+              <div className="flex flex-col gap-4 lg:flex-row hidden">
                 <FormField
                   control={form.control}
                   name="description"
@@ -533,27 +597,47 @@ const ProductDetails: FC<ProductDetailsProps> = ({
                   </span>
                 )}
               </div>
-              {/* Is On Slae */}
-              <FormField
-                control={form.control}
-                name="isSale"
-                render={({ field }) => (
-                  <FormItem className="flex flex-row items-start space-x-2 space-y-0 rounded-md ">
-                    <FormControl>
-                      <Checkbox
-                        checked={field.value}
-                        onCheckedChange={field.onChange}
-                      />
-                    </FormControl>
-                    <div className="space-y-1 leading-none">
-                      <FormLabel>On Sale</FormLabel>
-                      <FormDescription>
-                        Is this product on sale?
-                      </FormDescription>
-                    </div>
-                  </FormItem>
-                )}
-              />
+              {/* Is On Sale */}
+              <div className="flex border rounded-md">
+                <FormField
+                  control={form.control}
+                  name="isSale"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-row p-4 items-start space-x-2 rounded-md ">
+                      <FormControl>
+                        <Checkbox
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
+                        />
+                      </FormControl>
+                      <div className="space-y-1 leading-none">
+                        <FormLabel>On Sale</FormLabel>
+                        <FormDescription>
+                          Is this product on sale?
+                        </FormDescription>
+                      </div>
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="saleEndDate"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-row p-4 items-start space-x-2 rounded-md ">
+                      <FormControl>
+                        <DateTimePicker
+                          onChange={(date) => {
+                            field.onChange(
+                              date ? format(date, "yyyy-MM-dd'T'HH:mm:ss") : ""
+                            );
+                          }}
+                          value={field.value ? new Date(field.value) : null}
+                        />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+              </div>
               <Button type="submit" disabled={isLoading}>
                 {isLoading
                   ? "Saving..."

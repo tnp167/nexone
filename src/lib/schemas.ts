@@ -255,4 +255,5 @@ export const ProductFormSchema = z.object({
         message: "All size inputs must be filled correctly.",
       }
     ),
+  saleEndDate: z.string().optional(),
 });
