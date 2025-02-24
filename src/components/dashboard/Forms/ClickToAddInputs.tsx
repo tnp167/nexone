@@ -13,7 +13,7 @@ export interface ClickToAddProps {
   details: Detail[];
   setDetails: Dispatch<SetStateAction<Detail[]>>;
   initialDetail?: Detail;
-  header: string;
+  header?: string;
   colorPicker?: boolean;
 }
 
@@ -102,7 +102,7 @@ const ClickToAddInputs: FC<ClickToAddProps> = ({
 
   return (
     <div className="flex flex-col gap-y-2">
-      <div>{header}</div>
+      {header && <div>{header}</div>}
       {details.length === 0 && <PlusButton onClick={handleAddDetail} />}
       {details.map((detail, idx) => (
         <div key={idx} className="flex items-center gap-x-4">

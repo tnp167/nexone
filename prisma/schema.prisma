@@ -120,7 +120,11 @@ model Product {
   subCategoryId String
   subCategory   SubCategory @relation("SubCategoryToProduct", fields: [subCategoryId], references: [id])
 
-  variants ProductVariant[] @relation("ProductToProductVariant")
+  offerTagsId String
+
+  variants  ProductVariant[] @relation("ProductToProductVariant")
+  specs     Spec[]           @relation("ProductToSpec")
+  questions Question[]       @relation("ProductToQuestion")
 
   @@index([storeId])
   @@index([categoryId])
@@ -130,7 +134,7 @@ model Product {
 model ProductVariant {
   id                 String  @id @default(uuid())
   variantName        String
-  variantDescription String?  @db.LongText
+  variantDescription String? @db.LongText
   variantImage       String
   slug               String  @unique
   isSale             Boolean @default(false)
@@ -144,6 +148,7 @@ model ProductVariant {
   sizes  Size[]                @relation("ProductVariantToSizes")
   images ProductVariantImage[] @relation("ProductVariantToImage")
   colors Color[]               @relation("ProductVariantToColor")
+  specs  Spec[]                @relation("ProductVariantToSpec")
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
@@ -189,4 +194,34 @@ model Color {
   updatedAt DateTime @default(now()) @updatedAt
 
   @@index([productVariantId])
+}
+
+model Spec {
+  id    String @id @default(uuid())
+  name  String
+  value String
+
+  productId String?
+  product   Product? @relation("ProductToSpec", fields: [productId], references: [id])
+
+  variantId String?
+  variant   ProductVariant? @relation("ProductVariantToSpec", fields: [variantId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  @@index([productId])
+  @@index([variantId])
+}
+
+model Question {
+  id       String @id @default(uuid())
+  question String
+  answer   String
+
+  productId String
+  product   Product @relation("ProductToQuestion", fields: [productId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
 }
