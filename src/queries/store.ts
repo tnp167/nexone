@@ -1,13 +1,18 @@
 "use server";
 
 import { db } from "@/lib/db";
-import { StoreDefaultShippingDetailsType } from "@/lib/types";
+import {
+  CountryWithShippingRatesType,
+  StoreDefaultShippingDetailsType,
+} from "@/lib/types";
 import { currentUser } from "@clerk/nextjs/server";
+import { ShippingRate } from "@prisma/client";
+import { Store } from "@prisma/client";
 
 //Upsert store details for seller
 //Parameter: Partial type for store
 //Return: Updated or newly created store
-export const upsertStore = async (store: Partital<Store>) => {
+export const upsertStore = async (store: Partial<Store>) => {
   try {
     if (!store) throw new Error("Store details are required");
 
@@ -158,5 +163,116 @@ export const updateStoreDefaultShippingDetails = async (
   } catch (error) {
     console.log(error);
     throw new Error("Failed to update store default shipping details");
+  }
+};
+
+//Function: getStoreShippingRates
+// Description: Retrieves all countries and their shipping rates for a specific store.
+//              If a country does not have a shipping rate, it is still included in the result with a null shippingRate.
+// Permission Level: Public
+//Returns: Array of objects where each object contains a country and its associated shippingRate, sorted by country name.
+export const getStoreShippingRates = async (storeUrl: string) => {
+  try {
+    const user = await currentUser();
+
+    if (!user) throw new Error("Unauthenticated");
+
+    if (user.privateMetadata.role !== "SELLER")
+      throw new Error("Unauthorized. Seller only can update store details");
+
+    if (!storeUrl) throw new Error("Store URL is required");
+
+    const store = await db.store.findUnique({
+      where: {
+        url: storeUrl,
+        userId: user.id,
+      },
+    });
+
+    if (!store) {
+      throw new Error("Unauthorized. Permission or ownership denied");
+    }
+
+    //Retrieve all countries
+    const countries = await db.country.findMany({
+      orderBy: {
+        name: "asc",
+      },
+    });
+
+    //Retrieve all shipping rates for the store
+    const shippingRates = await db.shippingRate.findMany({
+      where: {
+        storeId: store.id,
+      },
+    });
+
+    //Create a map of shipping rates by country ID
+    const rateMap = new Map();
+    shippingRates.forEach((rate) => {
+      rateMap.set(rate.countryId, rate);
+    });
+
+    //Map countries to their shipping rates
+    const result = countries.map((country) => ({
+      countryId: country.id,
+      countryName: country.name,
+      shippingRate: rateMap.get(country.id) || null,
+    }));
+
+    return result;
+  } catch (error) {
+    console.log(error);
+    throw new Error("Failed to get store shipping rates");
+  }
+};
+
+//Function: upsertStoreShippingRate
+//Description: Upserts a shipping rate for a store
+//Permission Level: Seller
+//Parameters:
+//  - storeUrl: The URL of the store to update
+//  - shippingRate: The shipping rate to update
+//Returns: The updated shipping rate
+export const upsertStoreShippingRate = async (
+  storeUrl: string,
+  shippingRate: ShippingRate
+) => {
+  try {
+    const user = await currentUser();
+
+    if (!user) throw new Error("Unauthenticated");
+
+    if (user.privateMetadata.role !== "SELLER")
+      throw new Error("Unauthorized. Seller only can update store details");
+
+    if (!shippingRate) throw new Error("No shipping rate provided");
+
+    if (!shippingRate.countryId) throw new Error("Country ID is required");
+
+    const store = await db.store.findUnique({
+      where: {
+        url: storeUrl,
+        userId: user.id,
+      },
+    });
+
+    if (!store) {
+      throw new Error("Unauthorized. Permission or ownership denied");
+    }
+
+    //Upsert shipping rate
+    const shippingRateDetails = await db.shippingRate.upsert({
+      where: {
+        id: shippingRate.id,
+      },
+      update: { ...shippingRate, storeId: store.id },
+      create: { ...shippingRate, storeId: store.id },
+    });
+
+    return shippingRateDetails;
+  } catch (error) {
+    console.log(error);
+    throw new Error("Failed to upsert store shipping rate");
   }
 };
