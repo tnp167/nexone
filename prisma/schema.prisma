@@ -73,21 +73,25 @@ enum StoreStatus {
 }
 
 model Store {
-  id                     String      @id @default(uuid())
-  name                   String
-  description            String      @db.Text
-  email                  String      @unique
-  phone                  String
-  url                    String      @unique
-  logo                   String
-  cover                  String
-  status                 StoreStatus @default(PENDING)
-  averageRating          Float       @default(0)
-  featured               Boolean     @default(false)
-  defaultShippingService String?
-  defaultShippingPrice   Int         @default(0)
-  defaultDeliveryMin     Int?
-  defaultDeliveryTimeMax Int?
+  id                                   String      @id @default(uuid())
+  name                                 String
+  description                          String      @db.Text
+  email                                String      @unique
+  phone                                String
+  url                                  String      @unique
+  logo                                 String
+  cover                                String
+  status                               StoreStatus @default(PENDING)
+  averageRating                        Float       @default(0)
+  featured                             Boolean     @default(false)
+  returnPolicy                         String?     @default("Returns within 30 days of purchase.")
+  defaultShippingService               String?     @default("International Delivery")
+  defaultShippingFeesPerItem           Float?      @default(0)
+  defaultShippingFeesForAdditionalItem Float?      @default(0)
+  defaultShippingFeePerKg              Float?      @default(0)
+  defaultShippingFeeFixed              Float?      @default(0)
+  defaultDeliveryTimeMin               Int?        @default(7)
+  defaultDeliveryTimeMax               Int?        @default(31)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -119,8 +123,6 @@ model Product {
 
   subCategoryId String
   subCategory   SubCategory @relation("SubCategoryToProduct", fields: [subCategoryId], references: [id])
-
-  offerTagsId String
 
   variants  ProductVariant[] @relation("ProductToProductVariant")
   specs     Spec[]           @relation("ProductToSpec")

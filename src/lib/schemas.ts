@@ -303,3 +303,21 @@ export const ProductFormSchema = z.object({
       }
     ),
 });
+
+//Store shipping details
+export const StoreShippingFormSchema = z.object({
+  defaultShippingService: z
+    .string({
+      required_error: "Default shipping service is required",
+      invalid_type_error: "Default shipping service must be a string",
+    })
+    .min(2, { message: "Shipping service must be at least 2 characters" })
+    .max(50, { message: "Shipping service must be less than 50 characters" }),
+  defaultShippingFeesPerItem: z.number(),
+  defaultShippingFeeFixed: z.number(),
+  defaultShippingFeesForAdditionalItem: z.number(),
+  defaultShippingFeePerKg: z.number(),
+  defaultDeliveryTimeMin: z.number(),
+  defaultDeliveryTimeMax: z.number(),
+  returnPolicy: z.string(),
+});

@@ -24,11 +24,7 @@ const SellerProductPage = async ({
         </>
       }
       modalChildren={
-        <ProductDetails
-          categories={categories}
-          storeUrl={storeUrl}
-          //offerTags={}
-        />
+        <ProductDetails categories={categories} storeUrl={storeUrl} />
       }
       newTabLink={`/dashboard/seller/stores/${storeUrl}/products/new`}
       filterValue="name"
