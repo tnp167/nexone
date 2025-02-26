@@ -55,3 +55,14 @@ export type CountryWithShippingRatesType = {
   countryName: string;
   shippingRate: ShippingRate;
 };
+
+export interface Country {
+  name: string;
+  code: string;
+  city: string;
+  region: string;
+}
+
+import countries from "@/data/countries.json";
+
+export type SelectMenuOption = (typeof countries)[number];
