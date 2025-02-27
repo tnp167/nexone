@@ -1,7 +1,11 @@
 "use server";
 
 import { db } from "@/lib/db";
-import { ProductWithVariantType } from "@/lib/types";
+import {
+  ProductWithVariantType,
+  variantImage,
+  VariantSimplified,
+} from "@/lib/types";
 import { generateUniqueSlug } from "@/lib/utils";
 import { currentUser } from "@clerk/nextjs/server";
 import slugify from "slugify";
@@ -234,4 +238,85 @@ export const deleteProduct = async (productId: string) => {
     },
   });
   return response;
+};
+
+// Function: getProducts
+// Description: Retrieves products based on various filters and returns only variants that match the filters. Supports pagination.
+// Access Level: Public
+// Parameters:
+//   - filters: An object containing filter options (category, subCategory, offerTag, size, onSale, onDiscount, brand, color).
+//   - sortBy: Sort the filtered results (Most popular, New Arivals, Top Rated...).
+//   - page: The current page number for pagination (default = 1).
+//   - pageSize: The number of products per page (default = 10).
+// Returns: An object containing paginated products, filtered variants, and pagination metadata (totalPages, currentPage, pageSize, totalCount)
+export const getProducts = async (
+  filters: any = {},
+  sortBy: string = "",
+  page: number = 1,
+  pageSize: number = 10
+) => {
+  //Default values
+  const currentPage = page;
+  const limit = pageSize;
+  const skip = (currentPage - 1) * limit;
+
+  const whereClause = {
+    AND: [],
+  };
+
+  //Get all filtered, sorted products
+  const products = await db.product.findMany({
+    where: whereClause,
+    skip: skip,
+    take: limit,
+    include: {
+      variants: {
+        include: {
+          sizes: true,
+          images: true,
+          colors: true,
+        },
+      },
+    },
+  });
+
+  const productWithFiltereVarints = products.map((product) => {
+    const filteredVariants = product.variants;
+
+    const variants: VariantSimplified[] = filteredVariants.map((variant) => ({
+      variantId: variant.id,
+      variantName: variant.variantName,
+      variantSlug: variant.slug,
+      images: variant.images,
+      sizes: variant.sizes,
+    }));
+
+    //Get variant images for the product
+    const variantImages: variantImage[] = filteredVariants.map((variant) => ({
+      url: `/product/${product.slug}/${variant.slug}`,
+      image: variant.variantImage ? variant.variantImage : "",
+    }));
+
+    return {
+      id: product.id,
+      slug: product.slug,
+      name: product.name,
+      rating: product.rating,
+      sales: product.sales,
+      variants,
+      variantImages,
+    };
+  });
+
+  const totalCount = products.length;
+
+  const totalPages = Math.ceil(totalCount / pageSize);
+
+  return {
+    products: productWithFiltereVarints,
+    totalPages,
+    currentPage,
+    pageSize,
+    totalCount,
+  };
 };
