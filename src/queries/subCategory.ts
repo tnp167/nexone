@@ -96,3 +96,46 @@ export const deleteSubCategory = async (subCategoryId: string) => {
 
   return result;
 };
+
+// Function: getSubCategory
+// Description: Retrieves a specific SubCategory from the database.
+// Access Level: Public
+// Parameters:
+//   - SubCategoryId: The ID of the SubCategory to be retrieved.
+// Returns: Details of the requested SubCategory.
+export const getSubcategories = async (
+  limit: number | null,
+  random: boolean = false
+): Promise<SubCategory[]> => {
+  enum SortOrder {
+    asc = "asc",
+    desc = "desc",
+  }
+
+  try {
+    const queryOptions = {
+      take: limit || undefined,
+      orderBy: random
+        ? {
+            createdAt: SortOrder.desc,
+          }
+        : undefined,
+    };
+
+    //If random is true, return random sub categories
+    if (random) {
+      const subCategories = await db.$queryRaw<SubCategory[]>`
+        SELECT * FROM SubCategory ORDER BY RAND() LIMIT ${limit || 10}
+      `;
+      return subCategories;
+    }
+    //If random is false, return sub categories in descending order of creation date
+    else {
+      const subCategories = await db.subCategory.findMany(queryOptions);
+      return subCategories;
+    }
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
