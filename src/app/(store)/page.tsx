@@ -4,7 +4,6 @@ import { getProducts } from "@/queries/product";
 import ProductList from "@/components/store/shared/ProductList";
 export default async function Home() {
   const { products } = await getProducts();
-  console.log(products);
   return (
     <>
       <div className="p-6">

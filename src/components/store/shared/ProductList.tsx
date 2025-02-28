@@ -12,7 +12,6 @@ interface Props {
 }
 
 const ProductList: FC<Props> = ({ products, title, link, arrow }) => {
-  console.log(products);
   const Title = () => {
     if (link) {
       <link href={link} className="h-12">
