@@ -2,6 +2,7 @@ import { ProductType } from "@/lib/types";
 import { FC } from "react";
 import { ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
+import ProductCard from "../cards/product/ProductCard";
 
 interface Props {
   products: ProductType[];
@@ -11,6 +12,7 @@ interface Props {
 }
 
 const ProductList: FC<Props> = ({ products, title, link, arrow }) => {
+  console.log(products);
   const Title = () => {
     if (link) {
       <link href={link} className="h-12">
@@ -40,7 +42,7 @@ const ProductList: FC<Props> = ({ products, title, link, arrow }) => {
           )}
         >
           {products.map((product) => (
-            <h1 key={product.id}>{product.name}</h1>
+            <ProductCard key={product.id} product={product} />
           ))}
         </div>
       ) : (

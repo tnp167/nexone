@@ -3,7 +3,7 @@
 import { db } from "@/lib/db";
 import {
   ProductWithVariantType,
-  variantImage,
+  variantImageType,
   VariantSimplified,
 } from "@/lib/types";
 import { generateUniqueSlug } from "@/lib/utils";
@@ -292,10 +292,12 @@ export const getProducts = async (
     }));
 
     //Get variant images for the product
-    const variantImages: variantImage[] = filteredVariants.map((variant) => ({
-      url: `/product/${product.slug}/${variant.slug}`,
-      image: variant.variantImage ? variant.variantImage : "",
-    }));
+    const variantImages: variantImageType[] = filteredVariants.map(
+      (variant) => ({
+        url: `/product/${product.slug}/${variant.slug}`,
+        image: variant.variantImage ? variant.variantImage : "",
+      })
+    );
 
     return {
       id: product.id,

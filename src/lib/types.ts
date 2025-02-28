@@ -84,7 +84,7 @@ export type VariantSimplified = {
   sizes: Size[];
 };
 
-export type variantImage = {
+export type variantImageType = {
   url: string;
   image: string;
 };
