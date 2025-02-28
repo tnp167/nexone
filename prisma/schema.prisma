@@ -126,6 +126,9 @@ model Product {
   subCategoryId String
   subCategory   SubCategory @relation("SubCategoryToProduct", fields: [subCategoryId], references: [id])
 
+  offerTagId String?
+  offerTag   OfferTag? @relation("OfferTagToProduct", fields: [offerTagId], references: [id])
+
   variants  ProductVariant[] @relation("ProductToProductVariant")
   specs     Spec[]           @relation("ProductToSpec")
   questions Question[]       @relation("ProductToQuestion")
@@ -198,6 +201,17 @@ model Color {
   updatedAt DateTime @default(now()) @updatedAt
 
   @@index([productVariantId])
+}
+
+model OfferTag{
+  id String @id @default(uuid())
+  name String
+  url String @unique
+
+  products Product[] @relation("OfferTagToProduct")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
 }
 
 model Spec {

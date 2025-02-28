@@ -304,7 +304,6 @@ export const ProductFormSchema = z.object({
     ),
 });
 
-//Store shipping details
 export const StoreShippingFormSchema = z.object({
   defaultShippingService: z
     .string({
@@ -341,4 +340,29 @@ export const ShippingRateFormSchema = z.object({
   deliveryTimeMin: z.number(),
   deliveryTimeMax: z.number(),
   returnPolicy: z.string().min(1, "Return policy is required."),
+});
+
+export const OfferTagFormSchema = z.object({
+  name: z
+    .string({
+      required_error: "Offer tag name is required",
+      invalid_type_error: "Offer tag name must be a string",
+    })
+    .min(2, { message: "Offer tag name must be at least 2 characters" })
+    .max(50, { message: "Offer tag name must be less than 50 characters" })
+    .regex(/^(?!.*(?:[-_ ]){2,})[a-zA-Z0-9_ -]+$/, {
+      message:
+        "Offer tag name may only contain letters, numbers, spaces, hyphens, and underscores, without consecutive special characters.",
+    }),
+  url: z
+    .string({
+      required_error: "Offer tag url is required",
+      invalid_type_error: "Offer tag url must be a string",
+    })
+    .min(2, { message: "Offer tag url must be at least 2 characters" })
+    .max(50, { message: "Offer tag url must be less than 50 characters" })
+    .regex(/^(?!.*(?:[-_ ]){2,})[a-zA-Z0-9_ -]+$/, {
+      message:
+        "Offer tag url may only contain letters, numbers, spaces, hyphens, and underscores, without consecutive special characters.",
+    }),
 });
