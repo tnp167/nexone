@@ -281,7 +281,7 @@ export const getProducts = async (
     },
   });
 
-  const productWithFiltereVarints = products.map((product) => {
+  const productWithFilteredVariants = products.map((product) => {
     const filteredVariants = product.variants;
 
     const variants: VariantSimplified[] = filteredVariants.map((variant) => ({
@@ -316,7 +316,7 @@ export const getProducts = async (
   const totalPages = Math.ceil(totalCount / pageSize);
 
   return {
-    products: productWithFiltereVarints,
+    products: productWithFilteredVariants,
     totalPages,
     currentPage,
     pageSize,
@@ -384,6 +384,7 @@ const formatProductResponse = (product: ProductPageType) => {
     description: product.description,
     variantName: variant.variantName,
     variantDescription: variant.variantDescription,
+    variantImages: variant.variantImage,
     images: variant.images,
     category: product.category,
     subCategory: product.subCategory,
