@@ -1,4 +1,4 @@
-import ProductPageContainer from "@/components/store/product-page/container";
+import ProductPageContainer from "@/components/store/product-page/Container";
 import { getProductPageData } from "@/queries/product";
 import { Separator } from "@radix-ui/react-separator";
 import { notFound, redirect } from "next/navigation";
