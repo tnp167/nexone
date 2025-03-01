@@ -9,6 +9,9 @@ import toast from "react-hot-toast";
 import ReactStars from "react-rating-stars-component";
 import ProductPrice from "./ProductPrice";
 import Countdown from "../../shared/Countdown";
+import { Separator } from "@/components/ui/separator";
+import ColorWheel from "@/components/shared/color-wheel";
+import ProductVariantSelector from "./VariantSelector";
 
 interface ProductInfoProps {
   productData: ProductPageDataType;
@@ -108,6 +111,22 @@ const ProductInfo: FC<ProductInfoProps> = ({
           <div className="mt-4 pb-2">
             <Countdown targetDate={saleEndDate} />
           </div>
+        )}
+      </div>
+      <Separator className="my-3" />
+      {/* Color wheel and variant selector */}
+      <div className="mt-4 space-y-2">
+        <div className="relative flex items-center justify-between text-main-primary font-bold">
+          <span className="flex items-center gap-x-2">
+            {colors.length > 1 ? "Colors" : "Color"}
+            <ColorWheel colors={colors} size={25} />
+          </span>
+        </div>
+        {variantImages.length > 0 && (
+          <ProductVariantSelector
+            variants={variantImages}
+            slug={productData.variantSlug}
+          />
         )}
       </div>
     </div>
