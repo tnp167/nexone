@@ -8,6 +8,7 @@ import ProductCardImageSwiper from "./Swiper";
 import VariantSwitcher from "./VariantSwitcher";
 import { Button } from "@/components/store/ui/button";
 import { HeartIcon } from "lucide-react";
+import ProductPrice from "../../product-page/product-info/ProductPrice";
 const ProductCard = ({ product }: { product: ProductType }) => {
   const { name, slug, rating, sales, variantImages, variants } = product;
 
@@ -44,6 +45,8 @@ const ProductCard = ({ product }: { product: ProductType }) => {
               </div>
             )}
           </Link>
+          {/* Product Price */}
+          <ProductPrice sizes={sizes} isCard={true} />
         </div>
         <div className="hidden group-hover:block absolute -left-[1px] bg-white border border-t-transparent w-[calc(100%+2px)] shadow-xl rounded-b-3xl px-4 pb-4 z-10 space-y-2">
           {/* Variant Switcher */}

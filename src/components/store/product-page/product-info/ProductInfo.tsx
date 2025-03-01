@@ -7,6 +7,7 @@ import React, { FC } from "react";
 import { CopyIcon } from "../../icons";
 import toast from "react-hot-toast";
 import ReactStars from "react-rating-stars-component";
+import ProductPrice from "./ProductPrice";
 
 interface ProductInfoProps {
   productData: ProductPageDataType;
@@ -99,6 +100,9 @@ const ProductInfo: FC<ProductInfoProps> = ({
               : `${numReviews} reviews`}
           </Link>
         </div>
+      </div>
+      <div className="my-2 relative flex flex-col sm:flex-row justify-between">
+        <ProductPrice sizeId={sizeId} sizes={sizes} isCard={false} />
       </div>
     </div>
   );
