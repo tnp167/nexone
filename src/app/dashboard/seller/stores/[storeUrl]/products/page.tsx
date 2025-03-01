@@ -3,7 +3,7 @@ import { getAllStoreProducts } from "@/queries/product";
 import React from "react";
 import { columns } from "./columns";
 import { Plus } from "lucide-react";
-import ProductDetails from "@/components/dashboard/Forms/ProductDetails";
+import ProductDetails from "@/components/dashboard/forms/ProductDetails";
 import { getAllCategories } from "@/queries/category";
 
 const SellerProductPage = async ({

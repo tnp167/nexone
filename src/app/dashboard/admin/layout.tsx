@@ -1,8 +1,8 @@
 import React from "react";
 import { currentUser } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
-import Header from "@/components/dashboard/Header/Header/Header";
-import Sidebar from "@/components/dashboard/Sidebar/Sidebar";
+import Header from "@/components/dashboard/header/Header";
+import Sidebar from "@/components/dashboard/sidebar/Sidebar";
 const AdminDashboardLayout = async ({
   children,
 }: {

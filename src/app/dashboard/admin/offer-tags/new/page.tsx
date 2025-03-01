@@ -1,4 +1,4 @@
-import OfferTagDetails from "@/components/dashboard/Forms/OfferTagDetails";
+import OfferTagDetails from "@/components/dashboard/forms/OfferTagDetails";
 import React from "react";
 
 const AdminNewOfferTagPage = () => {

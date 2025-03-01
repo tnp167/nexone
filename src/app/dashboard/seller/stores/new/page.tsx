@@ -1,4 +1,4 @@
-import StoreDetails from "@/components/dashboard/Forms/StoreDetails";
+import StoreDetails from "@/components/dashboard/forms/StoreDetails";
 
 const SellerStoreNewPage = () => {
   return (

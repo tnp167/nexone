@@ -11,7 +11,7 @@ const Search = () => {
         />
         <button
           type="submit"
-          className=" rounded-[20px] w-[56px] h-8 mt-1 mr-1 mb-0 ml-0 bg-gradient-to-r from-blue-500 to-purple-500 grid place-items-center cursor-pointer"
+          className=" rounded-[20px] w-[56px] h-8 mt-1 mr-1 mb-0 ml-0 bg-gradient-to-r from-slate-500 to-slate-500 grid place-items-center cursor-pointer"
         >
           <SearchIcon />
         </button>

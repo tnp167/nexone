@@ -12,7 +12,7 @@ import {
   CouponIcon,
   ShippingIcon,
   OfferIcon,
-} from "@/components/dashboard/Icons";
+} from "@/components/dashboard/icons";
 
 export const icons = [
   {

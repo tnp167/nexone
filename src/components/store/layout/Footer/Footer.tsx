@@ -10,7 +10,7 @@ const Footer = async () => {
       <Newsletter />
       <div className="max-w-[1430px] mx-auto">
         <div className="p-5">
-          <div className="grid md:grid-cols-2 md:gap-x-5">
+          <div className="grid md:grid-cols-2 md:gap-x-5 !text-black">
             <Contact />
             <Links subs={subs} />
           </div>

@@ -56,7 +56,7 @@ const ImageUpload: FC<ImageUploadProps> = ({
               <>
                 <button
                   type="button"
-                  className="z-20 absolute right-0 bottom-6 flex items-center font-medium text-[17px] h-14 w-14 justify-center  text-white bg-gradient-to-t from-blue-primary to-blue-300 border-none shadow-lg rounded-full hover:shadow-md active:shadow-sm"
+                  className="z-20 absolute right-0 bottom-6 flex items-center font-medium text-[17px] h-14 w-14 justify-center  text-white bg-gradient-to-t from-slate-primary to-blue-300 border-none shadow-lg rounded-full hover:shadow-md active:shadow-sm"
                   disabled={disabled}
                   onClick={onClick}
                 >
@@ -100,7 +100,7 @@ const ImageUpload: FC<ImageUploadProps> = ({
               <>
                 <button
                   type="button"
-                  className="absolute bottom-4 right-4 flex items-center font-medium text-[16px] py-3 px-6 text-white bg-gradient-to-t from-blue-primary to-blue-300 border-none shadow-lg rounded-full hover:shadow-md active:shadow-sm"
+                  className="absolute bottom-4 right-4 flex items-center font-medium text-[16px] py-3 px-6 text-white bg-gradient-to-t from-slate-primary to-blue-300 border-none shadow-lg rounded-full hover:shadow-md active:shadow-sm"
                   disabled={disabled}
                   onClick={onClick}
                 >
@@ -163,7 +163,7 @@ const ImageUpload: FC<ImageUploadProps> = ({
               <>
                 <button
                   type="button"
-                  className="flex items-center font-medium text-[17px] py-3 px-6 text-white bg-gradient-to-t from-blue-primary to-blue-300 border-none shadow-lg rounded-full hover:shadow-md active:shadow-sm"
+                  className="flex items-center font-medium text-[17px] py-3 px-6 text-white bg-gradient-to-t from-slate-primary to-blue-300 border-none shadow-lg rounded-full hover:shadow-md active:shadow-sm"
                   disabled={disabled}
                   onClick={onClick}
                 >

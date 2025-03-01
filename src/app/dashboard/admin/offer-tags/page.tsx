@@ -2,7 +2,7 @@ import DataTable from "@/components/ui/data-table";
 import React from "react";
 import { columns } from "./columns";
 import { Plus } from "lucide-react";
-import OfferTagDetails from "@/components/dashboard/Forms/OfferTagDetails";
+import OfferTagDetails from "@/components/dashboard/forms/OfferTagDetails";
 import { getAllOfferTags } from "@/queries/offer-tag";
 const page = async () => {
   const offerTags = await getAllOfferTags();

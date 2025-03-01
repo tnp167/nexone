@@ -2,7 +2,7 @@ import { getAllCategories } from "@/queries/category";
 import React from "react";
 import DataTable from "@/components/ui/data-table";
 import { Plus } from "lucide-react";
-import CategoryDetails from "@/components/dashboard/Forms/CategoryDetails";
+import CategoryDetails from "@/components/dashboard/forms/CategoryDetails";
 import { columns } from "./columns";
 const AdminCategoriesPage = async () => {
   const categories = await getAllCategories();

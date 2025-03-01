@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import CustomModal from "@/components/dashboard/Shared/CustomModal";
+import CustomModal from "@/components/dashboard/shared/CustomModal";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -40,7 +40,7 @@ import { Category } from "@prisma/client";
 import { ColumnDef } from "@tanstack/react-table";
 import { SubCategoryWithCategoryType } from "@/lib/types";
 import { deleteSubCategory, getSubCategory } from "@/queries/subCategory";
-import SubCategoryDetails from "@/components/dashboard/Forms/SubCategoryDetails";
+import SubCategoryDetails from "@/components/dashboard/forms/SubCategoryDetails";
 
 export const columns: ColumnDef<SubCategoryWithCategoryType>[] = [
   {

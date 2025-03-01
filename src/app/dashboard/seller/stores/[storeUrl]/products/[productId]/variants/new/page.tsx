@@ -1,5 +1,5 @@
 import React from "react";
-import ProductDetails from "@/components/dashboard/Forms/ProductDetails";
+import ProductDetails from "@/components/dashboard/forms/ProductDetails";
 import { getAllCategories } from "@/queries/category";
 import { getProductMainInfo } from "@/queries/product";
 

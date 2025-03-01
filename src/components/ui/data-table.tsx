@@ -3,7 +3,7 @@
 // Custom components
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import CustomModal from "@/components/dashboard/Shared/CustomModal";
+import CustomModal from "@/components/dashboard/shared/CustomModal";
 
 import {
   Table,

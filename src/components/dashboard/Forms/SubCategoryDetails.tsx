@@ -27,7 +27,7 @@ import {
   CardDescription,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import ImageUpload from "../Shared/ImageUpload";
+import ImageUpload from "../shared/ImageUpload";
 import { v4 as uuidv4 } from "uuid";
 import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";

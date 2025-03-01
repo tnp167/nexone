@@ -3,7 +3,7 @@ import { SendIcon } from "@/components/store/icons";
 
 const Newsletter = () => {
   return (
-    <div className="bg-gradient-to-r from-purple-500 to-blue-500 p-5">
+    <div className="bg-gradient-to-r from-slate-500 to-slate-800 p-5">
       <div className="max-w-[1430px] mx-auto">
         <div className="flex flex-col gap-y-4 xl:flex-row items-center text-white">
           {/* left */}

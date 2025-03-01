@@ -2,7 +2,7 @@
 
 import { FC, useState } from "react";
 import { useRouter } from "next/navigation";
-import CustomModal from "@/components/dashboard/Shared/CustomModal";
+import CustomModal from "@/components/dashboard/shared/CustomModal";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -31,7 +31,7 @@ import { Edit, MoreHorizontal, Trash } from "lucide-react";
 import { getOfferTag } from "@/queries/offer-tag";
 import { ColumnDef } from "@tanstack/react-table";
 import { OfferTag } from "@prisma/client";
-import OfferTagDetails from "@/components/dashboard/Forms/OfferTagDetails";
+import OfferTagDetails from "@/components/dashboard/forms/OfferTagDetails";
 import { deleteOfferTag } from "@/queries/offer-tag";
 
 export const columns: ColumnDef<OfferTag>[] = [

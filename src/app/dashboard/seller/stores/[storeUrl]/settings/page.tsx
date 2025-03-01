@@ -1,4 +1,4 @@
-import StoreDetails from "@/components/dashboard/Forms/StoreDetails";
+import StoreDetails from "@/components/dashboard/forms/StoreDetails";
 import { db } from "@/lib/db";
 import { redirect } from "next/navigation";
 import React from "react";

@@ -1,5 +1,5 @@
 import React from "react";
-import SubCategoryDetails from "@/components/dashboard/Forms/SubCategoryDetails";
+import SubCategoryDetails from "@/components/dashboard/forms/SubCategoryDetails";
 import { getAllCategories } from "@/queries/category";
 
 const AdminNewSubCategoryPage = async () => {

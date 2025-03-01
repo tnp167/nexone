@@ -37,14 +37,14 @@ import {
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
-import ImageUpload from "../Shared/ImageUpload";
+import ImageUpload from "../shared/ImageUpload";
 import { v4 as uuidv4 } from "uuid";
 import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
 import { Textarea } from "@/components/ui/textarea";
 import { upsertProduct } from "@/queries/product";
 import { ProductWithVariantType } from "@/lib/types";
-import ImagePreviewGrid from "../Shared/ImagesPreviewGrid";
+import ImagePreviewGrid from "../shared/ImagesPreviewGrid";
 import ClickToAddInputs from "./ClickToAddInputs";
 import { getAllCategoriesForCategory } from "@/queries/category";
 import { WithOutContext as ReactTags } from "react-tag-input";

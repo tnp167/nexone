@@ -1,9 +1,9 @@
 import Link from "next/link";
 import React from "react";
-import UserMenu from "./UserMenu/UserMenu";
+import UserMenu from "./user-menu/UserMenu";
 import Cart from "./Cart";
 import DownloadApp from "./DownloadApp";
-import Search from "./Search/Search";
+import Search from "./search/Search";
 import { Country } from "@/lib/types";
 import { cookies } from "next/headers";
 import CountryLanguageCurrencySelector from "./CountryLangCurSelector";
@@ -23,7 +23,7 @@ const Header = async () => {
     userCountry = JSON.parse(userCountryCookie.value) as Country;
   }
   return (
-    <div className="bg-gradient-to-r from-blue-500 to-purple-500">
+    <div className="bg-gradient-to-r from-slate-500 to-slate-500">
       <div className="w-full h-full lg:flex text-white px-4 lg:px-12">
         <div className="flex lg:w-full lg:flex-1 flex-col lg:flex-row gap-3 py-3">
           <div className="flex items-center justify-between">

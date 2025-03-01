@@ -1,4 +1,4 @@
-import StoreDefaultShippingDetails from "@/components/dashboard/Forms/StoreDefaultShippingDetails";
+import StoreDefaultShippingDetails from "@/components/dashboard/forms/StoreDefaultShippingDetails";
 import DataTable from "@/components/ui/data-table";
 import {
   getStoreDefaultShippingDetails,

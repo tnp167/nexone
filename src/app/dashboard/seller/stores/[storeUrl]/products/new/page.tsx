@@ -1,4 +1,4 @@
-import ProductDetails from "@/components/dashboard/Forms/ProductDetails";
+import ProductDetails from "@/components/dashboard/forms/ProductDetails";
 import { getAllCategories } from "@/queries/category";
 
 export default async function SellerNewProductPage({

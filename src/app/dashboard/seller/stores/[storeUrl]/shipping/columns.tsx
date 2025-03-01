@@ -27,8 +27,8 @@ import { ColumnDef } from "@tanstack/react-table";
 
 // Types
 import { CountryWithShippingRatesType } from "@/lib/types";
-import CustomModal from "@/components/dashboard/Shared/CustomModal";
-import ShippingRateDetails from "@/components/dashboard/Forms/ShippingRateDetails";
+import CustomModal from "@/components/dashboard/shared/CustomModal";
+import ShippingRateDetails from "@/components/dashboard/forms/ShippingRateDetails";
 
 export const columns: ColumnDef<CountryWithShippingRatesType>[] = [
   {

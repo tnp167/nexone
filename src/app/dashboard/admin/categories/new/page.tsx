@@ -1,4 +1,4 @@
-import CategoryDetails from "@/components/dashboard/Forms/CategoryDetails";
+import CategoryDetails from "@/components/dashboard/forms/CategoryDetails";
 import React from "react";
 
 const AdminNewCategoryPage = () => {
