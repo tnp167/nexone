@@ -12,6 +12,8 @@ import Countdown from "../../shared/Countdown";
 import { Separator } from "@/components/ui/separator";
 import ColorWheel from "@/components/shared/color-wheel";
 import ProductVariantSelector from "./VariantSelector";
+import SizeSelector from "./SizeSelector";
+import ProductAssurancePolicy from "./AssurancePolicy";
 
 interface ProductInfoProps {
   productData: ProductPageDataType;
@@ -105,6 +107,7 @@ const ProductInfo: FC<ProductInfoProps> = ({
           </Link>
         </div>
       </div>
+      {/* Price - Sale countdown */}
       <div className="my-2 relative flex flex-col sm:flex-row justify-between">
         <ProductPrice sizeId={sizeId} sizes={sizes} isCard={false} />
         {isSale && saleEndDate && (
@@ -122,13 +125,25 @@ const ProductInfo: FC<ProductInfoProps> = ({
             <ColorWheel colors={colors} size={25} />
           </span>
         </div>
-        {variantImages.length > 0 && (
-          <ProductVariantSelector
-            variants={variantImages}
-            slug={productData.variantSlug}
-          />
-        )}
+        <div className="mt-2">
+          {variantImages.length > 0 && (
+            <ProductVariantSelector
+              variants={variantImages}
+              slug={productData.variantSlug}
+            />
+          )}
+        </div>
       </div>
+      {/* Size selector */}
+      <div className="space-y-2 mt-2 pb-2">
+        <div>
+          <h1 className="text-main-primary font-bold">Size</h1>
+        </div>
+        <SizeSelector sizes={sizes} sizeId={sizeId} />
+      </div>
+      {/* Product Assurance */}
+      <Separator className="mt-3" />
+      <ProductAssurancePolicy />
     </div>
   );
 };
