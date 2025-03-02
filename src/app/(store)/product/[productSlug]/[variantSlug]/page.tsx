@@ -31,7 +31,6 @@ const ProductVariantPage = async ({ params, searchParams }: PageProps) => {
 
   const relatedProducts = { products: [] };
   const { specs, questions, shippingDetails } = productData;
-  console.log(shippingDetails);
   return (
     <div>
       <div className="max-w-[1650px] mx-auto p-4 overflwo overflwo-x-hidden">

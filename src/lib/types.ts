@@ -8,6 +8,8 @@ import {
 import { getStoreDefaultShippingDetails } from "@/queries/store";
 import { getAllSubCategories } from "@/queries/subCategory";
 import {
+  FreeShipping,
+  FreeShippingCountry,
   Prisma,
   ProductVariantImage,
   ShippingRate,
@@ -41,6 +43,7 @@ export type ProductWithVariantType = {
   saleEndDate?: string;
   brand: string;
   sku: string;
+  weight: number;
   colors: { color: string }[];
   sizes: { size: string; quantity: number; price: number; discount: number }[];
   product_specs: { name: string; value: string }[];
@@ -106,3 +109,7 @@ export type ProductPageDataType = Prisma.PromiseReturnType<
 export type ProductShippingDetailsType = Prisma.PromiseReturnType<
   typeof getShippingDetails
 >;
+
+export type FreeShippingWithCountriesType = FreeShipping & {
+  eligibleCountries: FreeShippingCountry[];
+};

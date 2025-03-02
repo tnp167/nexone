@@ -56,6 +56,7 @@ import "react-calendar/dist/Calendar.css";
 import "react-clock/dist/Clock.css";
 
 import JoditEditor from "jodit-react";
+import { NumberInput } from "@tremor/react";
 
 interface ProductDetailsProps {
   data?: Partial<ProductWithVariantType>;
@@ -119,6 +120,7 @@ const ProductDetails: FC<ProductDetailsProps> = ({
       keywords: data?.keywords || [],
       questions: data?.questions || [],
       isSale: data?.isSale,
+      weight: data?.weight,
       saleEndDate:
         data?.saleEndDate || format(new Date(), "yyyy-MM-dd'T'HH:mm:ss"),
     },
@@ -161,6 +163,7 @@ const ProductDetails: FC<ProductDetailsProps> = ({
           saleEndDate: values.saleEndDate,
           brand: values.brand,
           sku: values.sku,
+          weight: values.weight,
           colors: values.colors || [],
           sizes: values.sizes || [],
           product_specs: values.product_specs,
@@ -464,7 +467,7 @@ const ProductDetails: FC<ProductDetailsProps> = ({
                   />
                 )}
               </div>
-              {/* Brand, Sku */}
+              {/* Brand, Sku, Weight */}
               <div className="flex flex-col lg:flex-row gap-4">
                 <FormField
                   control={form.control}
@@ -487,6 +490,26 @@ const ProductDetails: FC<ProductDetailsProps> = ({
                       <FormLabel>Product Sku</FormLabel>
                       <FormControl>
                         <Input placeholder="Sku" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="weight"
+                  render={({ field }) => (
+                    <FormItem className="flex-1">
+                      <FormLabel>Product Weight</FormLabel>
+                      <FormControl>
+                        <NumberInput
+                          defaultValue={field.value}
+                          onValueChange={field.onChange}
+                          placeholder="Weight"
+                          min={0.01}
+                          step={0.01}
+                          className="!shadow-none rounded-md text-sm"
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>

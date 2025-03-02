@@ -121,6 +121,8 @@ model Product {
   sales             Int               @default(0)
   shippingFeeMethod ShippingFeeMethod @default(ITEM)
 
+  freeShipping FreeShipping? @relation("ProductToFreeShipping")
+
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
 
@@ -155,6 +157,8 @@ model ProductVariant {
   saleEndDate        String?
   keywords           String
   sku                String
+  sales              Int     @default(0)
+  weight             Float?
 
   productId String
   product   Product @relation("ProductToProductVariant", fields: [productId], references: [id])
@@ -258,7 +262,8 @@ model Country {
   name String @unique
   code String @unique
 
-  shippingRates ShippingRate[] @relation("CountryToShippingRate")
+  shippingRates         ShippingRate[]        @relation("CountryToShippingRate")
+  freeShippingCountries FreeShippingCountry[] @relation("FreeShippingToCountry")
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
@@ -285,5 +290,29 @@ model ShippingRate {
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
 
+  @@index([countryId])
+}
+
+model FreeShipping {
+  id        String  @id @default(uuid())
+  productId String  @unique
+  product   Product @relation("ProductToFreeShipping", fields: [productId], references: [id])
+
+  eligibleCountries FreeShippingCountry[] @relation("FreeShippingCountry")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+}
+
+model FreeShippingCountry {
+  id String @id @default(uuid())
+
+  freeShippingId String
+  freeShipping   FreeShipping @relation("FreeShippingCountry", fields: [freeShippingId], references: [id])
+
+  countryId String
+  country   Country @relation("FreeShippingToCountry", fields: [countryId], references: [id])
+
+  @@index([freeShippingId])
   @@index([countryId])
 }

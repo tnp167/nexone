@@ -2,6 +2,7 @@
 
 import { db } from "@/lib/db";
 import {
+  FreeShippingWithCountriesType,
   ProductPageType,
   ProductShippingDetailsType,
   ProductWithVariantType,
@@ -100,6 +101,7 @@ export const upsertProduct = async (
       isSale: product.isSale,
       saleEndDate: product.isSale ? product.saleEndDate : "",
       sku: product.sku,
+      weight: product.weight,
       keywords: product.keywords.join(","),
       specs: {
         create: product.variant_specs.map((spec) => ({
@@ -338,8 +340,24 @@ export const getProducts = async (
 export const getShippingDetails = async (
   shippingFeeMethod: ShippingFeeMethod,
   userCountry: { name: string; code: string; city: string; region: string },
-  store: Store
+  store: Store,
+  freeShipping: FreeShippingWithCountriesType | null | undefined
 ) => {
+  let shippingDetails = {
+    shippingFeeMethod,
+    shippingService: "",
+    shippingFee: 0,
+    extraShippingFee: 0,
+    deliveryTimeMin: 0,
+    deliveryTimeMax: 0,
+    returnPolicy: "",
+    countryCode: userCountry.code,
+    countryName: userCountry.name,
+    city: userCountry.city,
+    region: userCountry.region,
+    isFreeShipping: false,
+  };
+
   const country = await db.country.findUnique({
     where: {
       name: userCountry.name,
@@ -372,7 +390,17 @@ export const getShippingDetails = async (
     const deliveryTimeMax =
       shippingRate?.deliveryTimeMax || store.defaultDeliveryTimeMax;
 
-    const shippingDetails = {
+    //Check for free shipping
+    if (freeShipping) {
+      const freeShippingCountry = freeShipping.eligibleCountries;
+      const checkFreeShippingCountry = freeShippingCountry.find(
+        (c) => c.countryId === country?.id
+      );
+      if (checkFreeShippingCountry) {
+        shippingDetails.isFreeShipping = true;
+      }
+    }
+    shippingDetails = {
       shippingFeeMethod,
       shippingService: shippingService,
       shippingFee: 0,
@@ -384,25 +412,28 @@ export const getShippingDetails = async (
       countryName: country.name,
       city: userCountry.city,
       region: userCountry.region,
+      isFreeShipping: shippingDetails.isFreeShipping,
     };
 
+    const { isFreeShipping } = shippingDetails;
     switch (shippingFeeMethod) {
       case "ITEM":
-        shippingDetails.shippingFee = shippingFeePerItem;
-        shippingDetails.extraShippingFee = shippingFeeForAdditionalItem;
+        shippingDetails.shippingFee = isFreeShipping ? 0 : shippingFeePerItem;
+        shippingDetails.extraShippingFee = isFreeShipping
+          ? 0
+          : shippingFeeForAdditionalItem;
         break;
       case "WEIGHT":
-        shippingDetails.shippingFee = shippingFeePerKg;
+        shippingDetails.shippingFee = isFreeShipping ? 0 : shippingFeePerKg;
         break;
       case "FIXED":
-        shippingDetails.shippingFee = shippingFeeFixed;
+        shippingDetails.shippingFee = isFreeShipping ? 0 : shippingFeeFixed;
         break;
       default:
         break;
     }
     return shippingDetails;
   }
-
   return false;
 };
 
@@ -427,7 +458,8 @@ export const getProductPageData = async (
   const productShippingDetails = await getShippingDetails(
     product.shippingFeeMethod || "ITEM",
     userCountry,
-    product.store
+    product.store,
+    product.freeShipping
   );
 
   return formatProductResponse(product, productShippingDetails);
@@ -448,6 +480,11 @@ export const retrieveProductDetails = async (
       store: true,
       specs: true,
       questions: true,
+      freeShipping: {
+        include: {
+          eligibleCountries: true,
+        },
+      },
       variants: {
         where: {
           slug: variantSlug,
@@ -532,6 +569,7 @@ const formatProductResponse = (
     saleEndDate: variant.saleEndDate,
     brand: product.brand,
     sku: variant.sku,
+    weight: variant.weight,
     colors: variant.colors,
     sizes: variant.sizes,
     product_specs: product.specs,

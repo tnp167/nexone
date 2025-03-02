@@ -41,7 +41,7 @@ const ProductPageContainer: FC<ProductPageContainerProps> = ({
                       <ShippingDetails
                         shippingDetails={shippingDetails}
                         quantity={1}
-                        weight={1}
+                        weight={productData.weight}
                       />
                     </div>
                   </>
