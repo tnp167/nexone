@@ -3,6 +3,7 @@ import { FC } from "react";
 import ProductSwiper from "./ProductSwiper";
 import ProductInfo from "./product-info/ProductInfo";
 import ShipTo from "./shipping/ShipTo";
+import ShippingDetails from "./shipping/ShippingDetails";
 
 interface ProductPageContainerProps {
   productData: ProductPageDataType;
@@ -30,11 +31,20 @@ const ProductPageContainer: FC<ProductPageContainerProps> = ({
               <div className="bg-white border rounded-md overflow-hidden overflow-y-auto p-4 pb-0">
                 {/* Ship to */}
                 {typeof shippingDetails !== "boolean" && (
-                  <ShipTo
-                    countryName={shippingDetails.countryName}
-                    countryCode={shippingDetails.countryCode}
-                    city={shippingDetails.city}
-                  />
+                  <>
+                    <ShipTo
+                      countryName={shippingDetails.countryName}
+                      countryCode={shippingDetails.countryCode}
+                      city={shippingDetails.city}
+                    />
+                    <div className="mt-3 space-y-3">
+                      <ShippingDetails
+                        shippingDetails={shippingDetails}
+                        quantity={1}
+                        weight={1}
+                      />
+                    </div>
+                  </>
                 )}
               </div>
             </div>

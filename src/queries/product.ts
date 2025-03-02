@@ -430,7 +430,6 @@ export const getProductPageData = async (
     product.store
   );
 
-  console.log(productShippingDetails);
   return formatProductResponse(product, productShippingDetails);
 };
 

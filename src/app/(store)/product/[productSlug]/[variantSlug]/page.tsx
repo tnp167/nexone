@@ -17,7 +17,6 @@ const ProductVariantPage = async ({ params, searchParams }: PageProps) => {
 
   const { sizes } = productData;
 
-  console.log(sizes.length);
   //If the size is provided, check if it is valid
   if (sizeId) {
     const isValidSize = sizes.some((s) => s.id === sizeId);
@@ -31,7 +30,8 @@ const ProductVariantPage = async ({ params, searchParams }: PageProps) => {
   }
 
   const relatedProducts = { products: [] };
-  const { specs, questions } = productData;
+  const { specs, questions, shippingDetails } = productData;
+  console.log(shippingDetails);
   return (
     <div>
       <div className="max-w-[1650px] mx-auto p-4 overflwo overflwo-x-hidden">
