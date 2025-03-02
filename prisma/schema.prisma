@@ -99,21 +99,28 @@ model Store {
   userId String
   user   User   @relation("UserStores", fields: [userId], references: [id])
 
-  products Product[] @relation("StoreToProduct")
+  products      Product[]      @relation("StoreToProduct")
   shippingRates ShippingRate[] @relation("StoreToShippingRate")
 
   @@index([userId])
 }
 
+enum ShippingFeeMethod {
+  ITEM
+  WEIGHT
+  FIXED
+}
+
 model Product {
-  id          String @id @default(uuid())
-  name        String
-  description String @db.LongText
-  slug        String @unique
-  brand       String
-  rating      Float  @default(0)
-  sales       Int    @default(0)
-  
+  id                String            @id @default(uuid())
+  name              String
+  description       String            @db.LongText
+  slug              String            @unique
+  brand             String
+  rating            Float             @default(0)
+  sales             Int               @default(0)
+  shippingFeeMethod ShippingFeeMethod @default(ITEM)
+
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
 
@@ -203,10 +210,10 @@ model Color {
   @@index([productVariantId])
 }
 
-model OfferTag{
-  id String @id @default(uuid())
+model OfferTag {
+  id   String @id @default(uuid())
   name String
-  url String @unique
+  url  String @unique
 
   products Product[] @relation("OfferTagToProduct")
 
@@ -260,20 +267,20 @@ model Country {
 model ShippingRate {
   id String @id @default(uuid())
 
-  shippingService               String      
-  shippingFeePerItem           Float      
-  shippingFeeForAdditionalItem Float       
-  shippingFeePerKg              Float       
-  shippingFeeFixed              Float       
-  deliveryTimeMin               Int         
-  deliveryTimeMax               Int
-  returnPolicy                  String      
+  shippingService              String
+  shippingFeePerItem           Float
+  shippingFeeForAdditionalItem Float
+  shippingFeePerKg             Float
+  shippingFeeFixed             Float
+  deliveryTimeMin              Int
+  deliveryTimeMax              Int
+  returnPolicy                 String
 
   countryId String
   country   Country @relation("CountryToShippingRate", fields: [countryId], references: [id])
 
   storeId String
-  store   Store @relation("StoreToShippingRate", fields: [storeId], references: [id])
+  store   Store  @relation("StoreToShippingRate", fields: [storeId], references: [id])
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt

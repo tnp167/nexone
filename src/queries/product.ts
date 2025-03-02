@@ -3,6 +3,7 @@
 import { db } from "@/lib/db";
 import {
   ProductPageType,
+  ProductShippingDetailsType,
   ProductWithVariantType,
   variantImageType,
   VariantSimplified,
@@ -10,7 +11,9 @@ import {
 import { generateUniqueSlug } from "@/lib/utils";
 import { currentUser } from "@clerk/nextjs/server";
 import slugify from "slugify";
-
+import { getCookie } from "cookies-next";
+import { cookies } from "next/headers";
+import { ShippingFeeMethod, Store } from "@prisma/client";
 // Function: upsertProduct
 // Description: Upserts a product and its variant into the database, ensuring proper association with the store.
 // Access Level: Seller Only
@@ -324,6 +327,85 @@ export const getProducts = async (
   };
 };
 
+// Function: getShippingDetails
+// Description: Retrieves and calculates shipping details based on user country and product.
+// Access Level: Public
+// Parameters:
+//   - shippingFeeMethod: The shipping fee method of the product.
+//   - userCountry: The parsed user country object from cookies.
+//   - store :  store details.
+// Returns: Calculated shipping details.
+export const getShippingDetails = async (
+  shippingFeeMethod: ShippingFeeMethod,
+  userCountry: { name: string; code: string; city: string; region: string },
+  store: Store
+) => {
+  const country = await db.country.findUnique({
+    where: {
+      name: userCountry.name,
+      code: userCountry.code,
+    },
+  });
+
+  if (country) {
+    const shippingRate = await db.shippingRate.findFirst({
+      where: {
+        countryId: country.id,
+        storeId: store.id,
+      },
+    });
+
+    const returnPolicy = shippingRate?.returnPolicy || store.returnPolicy;
+    const shippingService =
+      shippingRate?.shippingService || store.defaultShippingService;
+    const shippingFeePerItem =
+      shippingRate?.shippingFeePerItem || store.defaultShippingFeesPerItem;
+    const shippingFeeForAdditionalItem =
+      shippingRate?.shippingFeeForAdditionalItem ||
+      store.defaultShippingFeesForAdditionalItem;
+    const shippingFeePerKg =
+      shippingRate?.shippingFeePerKg || store.defaultShippingFeePerKg;
+    const shippingFeeFixed =
+      shippingRate?.shippingFeeFixed || store.defaultShippingFeeFixed;
+    const deliveryTimeMin =
+      shippingRate?.deliveryTimeMin || store.defaultDeliveryTimeMin;
+    const deliveryTimeMax =
+      shippingRate?.deliveryTimeMax || store.defaultDeliveryTimeMax;
+
+    const shippingDetails = {
+      shippingFeeMethod,
+      shippingService: shippingService,
+      shippingFee: 0,
+      extraShippingFee: 0,
+      deliveryTimeMin,
+      deliveryTimeMax,
+      returnPolicy,
+      countryCode: country.code,
+      countryName: country.name,
+      city: userCountry.city,
+      region: userCountry.region,
+    };
+
+    switch (shippingFeeMethod) {
+      case "ITEM":
+        shippingDetails.shippingFee = shippingFeePerItem;
+        shippingDetails.extraShippingFee = shippingFeeForAdditionalItem;
+        break;
+      case "WEIGHT":
+        shippingDetails.shippingFee = shippingFeePerKg;
+        break;
+      case "FIXED":
+        shippingDetails.shippingFee = shippingFeeFixed;
+        break;
+      default:
+        break;
+    }
+    return shippingDetails;
+  }
+
+  return false;
+};
+
 // Function: getProductPageData
 // Description: Retrieves details of a specific product variant from the database.
 // Access Level: Public
@@ -336,9 +418,20 @@ export const getProductPageData = async (
   variantSlug: string
 ) => {
   const product = await retrieveProductDetails(productSlug, variantSlug);
-  if (!product) return;
+  if (!product || !product.store) return;
 
-  return formatProductResponse(product);
+  // Retrieve user country
+  const userCountry = await getUserCountry();
+
+  //Calculate and retrieve the shipping details
+  const productShippingDetails = await getShippingDetails(
+    product.shippingFeeMethod || "ITEM",
+    userCountry,
+    product.store
+  );
+
+  console.log(productShippingDetails);
+  return formatProductResponse(product, productShippingDetails);
 };
 
 export const retrieveProductDetails = async (
@@ -389,7 +482,34 @@ export const retrieveProductDetails = async (
   };
 };
 
-const formatProductResponse = (product: ProductPageType) => {
+const getUserCountry = async () => {
+  const userCountryCookie = await getCookie("userCountry", { cookies });
+  const defaultCountry = { name: "United Kingdom", code: "GB" };
+
+  if (!userCountryCookie) return defaultCountry;
+
+  try {
+    const parsedCountry = JSON.parse(userCountryCookie.toString());
+
+    if (
+      parsedCountry &&
+      typeof parsedCountry === "object" &&
+      "name" in parsedCountry &&
+      "code" in parsedCountry
+    ) {
+      return parsedCountry;
+    }
+    return defaultCountry;
+  } catch (error) {
+    console.error("Failed to parse user country cookie", error);
+  }
+  return defaultCountry;
+};
+
+const formatProductResponse = (
+  product: ProductPageType,
+  shippingDetails: ProductShippingDetailsType
+) => {
   if (!product) return;
   const variant = product?.variants[0];
 
@@ -436,7 +556,7 @@ const formatProductResponse = (product: ProductPageType) => {
       ratingStatistics: [],
       reviewsWithImagesCount: 5,
     },
-    shippingDetails: {},
+    shippingDetails,
     relatedProducts: [],
   };
 };
