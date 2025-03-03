@@ -1,8 +1,9 @@
 "use client";
 
-import { FC } from "react";
+import { FC, useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
+import { CartProductType } from "@/lib/types";
 
 interface SimplifiedSize {
   id: string;
@@ -16,9 +17,10 @@ interface Props {
   sizeId?: string | undefined;
   sizes: SimplifiedSize[];
   isCard?: boolean;
+  handleChange: (property: keyof CartProductType, value: any) => void;
 }
 
-const ProductPrice: FC<Props> = ({ sizeId, sizes, isCard }) => {
+const ProductPrice: FC<Props> = ({ sizeId, sizes, isCard, handleChange }) => {
   if (!sizes || sizes.length === 0) return;
 
   //Scenario 1: No sizeId passed, calculate range of prices and total quantity
@@ -80,6 +82,11 @@ const ProductPrice: FC<Props> = ({ sizeId, sizes, isCard }) => {
 
   const discountedPrice =
     selectedSize.price * (1 - selectedSize.discount / 100);
+
+  useEffect(() => {
+    handleChange("price", discountedPrice);
+    handleChange("stock", selectedSize.quantity);
+  }, [sizeId]);
 
   return (
     <div>

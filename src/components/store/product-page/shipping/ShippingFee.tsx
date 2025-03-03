@@ -5,7 +5,7 @@ interface Props {
   method: string;
   fee: number;
   extraFee: number;
-  weight: number;
+  weight: number | null;
   quantity: number;
 }
 
@@ -105,9 +105,92 @@ const ProductShippingFee: FC<Props> = ({
       );
       break;
     case "WEIGHT":
-      return <div>ShippingFee</div>;
+      return (
+        <div className="w-full pb-1">
+          <div className="w-full">
+            <span className="text-xs flex gap-x-1">
+              <Check className="min-w-3 max-w-3 stroke-green-400" />
+              <span className="mt-1">
+                This store calculates the delivery fee based on product weight
+              </span>
+            </span>
+            <table className="w-full mt-1.5">
+              <thead className="w-full">
+                <tr
+                  className="grid gap-x-1 text-xs px-4"
+                  style={{ gridTemplateColumns: `4fr 1fr` }}
+                >
+                  <td className="w-full bg-gray-50 px-2 py-0.5 rounded-sm">
+                    Fee per kg
+                  </td>
+                  <td className="w-full min-w-10 bg-gray-50 px-2 -y-0.5 rounded-sm">
+                    £{fee}
+                  </td>
+                </tr>
+              </thead>
+              <tbody>
+                <tr
+                  className="grid gap-x-1 text-xs px-4"
+                  style={{ gridTemplateColumns: `4fr 1fr` }}
+                >
+                  <td className="w-full bg-gray-50 px-2 py-0.5 ">Quantity</td>
+                  <td className="w-full bg-gray-50 px-2 py-0.5">x{quantity}</td>
+                </tr>
+                <tr className="flex gap-x-1 text-xs px-4 mt-1 text-center font-semibold">
+                  <td className="w-full bg-black text-white px-1 py-1">
+                    <span>
+                      £{fee} (fee) x {weight}kg (weight) x{quantity} (items) = £
+                      {fee * weight! * quantity}
+                    </span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      );
     case "FIXED":
-      return <div>ShippingFee</div>;
+      return (
+        <div className="w-full pb-1">
+          <div className="w-full">
+            <span className="text-xs flex gap-x-1">
+              <Check className="min-w-3 max-w-3 stroke-green-400" />
+              <span className="mt-1">
+                This store calculates the delivery fee on a fixed amount
+              </span>
+            </span>
+            <table className="w-full mt-1.5">
+              <thead className="w-full">
+                <tr
+                  className="grid gap-x-1 text-xs px-4"
+                  style={{ gridTemplateColumns: `4fr 1fr` }}
+                >
+                  <td className="w-full bg-gray-50 px-2 py-0.5 rounded-sm">
+                    Fee
+                  </td>
+                  <td className="w-full min-w-10 bg-gray-50 px-2 -y-0.5 rounded-sm">
+                    £{fee}
+                  </td>
+                </tr>
+              </thead>
+              <tbody>
+                <tr
+                  className="grid gap-x-1 text-xs px-4"
+                  style={{ gridTemplateColumns: `4fr 1fr` }}
+                >
+                  <td className="w-full bg-gray-50 px-2 py-0.5 ">Quantity</td>
+                  <td className="w-full bg-gray-50 px-2 py-0.5">x{quantity}</td>
+                </tr>
+                <tr className="flex gap-x-1 text-xs px-4 mt-1 text-center font-semibold">
+                  <td className="w-full bg-black text-white px-1 py-1">
+                    <span>£{fee}</span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      );
   }
   return <div>ShippingFee</div>;
 };

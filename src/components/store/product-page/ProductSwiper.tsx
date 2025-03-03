@@ -7,10 +7,10 @@ import React, { useState } from "react";
 import ImageZoom from "react-image-zooom";
 
 const ProductSwiper = ({ images }: { images: ProductVariantImage[] }) => {
-  if (!images) return null;
   const [activeImage, setActiveImage] = useState<ProductVariantImage>(
     images[0]
   );
+  if (!images) return null;
   return (
     <div className="relative">
       <div className="relative w-full flex flex-col-reverse xl:flex-row gap-2">

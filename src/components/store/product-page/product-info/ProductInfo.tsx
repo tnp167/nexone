@@ -1,6 +1,6 @@
 "use client";
 
-import { ProductPageDataType } from "@/lib/types";
+import { CartProductType, ProductPageDataType } from "@/lib/types";
 import Image from "next/image";
 import Link from "next/link";
 import React, { FC } from "react";
@@ -19,12 +19,14 @@ interface ProductInfoProps {
   productData: ProductPageDataType;
   quantity: number;
   sizeId: string | undefined;
+  handleChange: (property: keyof CartProductType, value: any) => void;
 }
 
 const ProductInfo: FC<ProductInfoProps> = ({
   productData,
   quantity,
   sizeId,
+  handleChange,
 }) => {
   if (!productData) return null;
   const {
@@ -109,7 +111,12 @@ const ProductInfo: FC<ProductInfoProps> = ({
       </div>
       {/* Price - Sale countdown */}
       <div className="my-2 relative flex flex-col sm:flex-row justify-between">
-        <ProductPrice sizeId={sizeId} sizes={sizes} isCard={false} />
+        <ProductPrice
+          sizeId={sizeId}
+          sizes={sizes}
+          isCard={false}
+          handleChange={handleChange}
+        />
         {isSale && saleEndDate && (
           <div className="mt-4 pb-2">
             <Countdown targetDate={saleEndDate} />
@@ -139,7 +146,11 @@ const ProductInfo: FC<ProductInfoProps> = ({
         <div>
           <h1 className="text-main-primary font-bold">Size</h1>
         </div>
-        <SizeSelector sizes={sizes} sizeId={sizeId} />
+        <SizeSelector
+          sizes={sizes}
+          sizeId={sizeId}
+          handleChange={handleChange}
+        />
       </div>
       {/* Product Assurance */}
       <Separator className="mt-3" />

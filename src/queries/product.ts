@@ -548,7 +548,6 @@ const formatProductResponse = (
 ) => {
   if (!product) return;
   const variant = product?.variants[0];
-
   return {
     productId: product.id,
     variantId: variant.id,
@@ -558,6 +557,7 @@ const formatProductResponse = (
     description: product.description,
     variantName: variant.variantName,
     variantDescription: variant.variantDescription,
+    variantImage: variant.variantImage,
     variantImages: product.variantImages,
     images: variant.images,
     category: product.category,

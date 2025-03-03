@@ -4,7 +4,7 @@ import ColorThief from "colorthief";
 import { PrismaClient } from "@prisma/client";
 import { db } from "./db";
 import countries from "@/data/countries.json";
-import { Country } from "./types";
+import { CartProductType, Country } from "./types";
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
@@ -109,3 +109,70 @@ export async function getUserCountry(): Promise<Country> {
   }
   return userCountry;
 }
+
+//Function to get the shipping rate range by adding the specified min and max
+export const getShippingDatesRange = (minDays: number, maxDays: number) => {
+  const currentDate = new Date();
+
+  //Calculate minDate by adding minDays to currentDate
+  const minDate = new Date(currentDate);
+  minDate.setDate(currentDate.getDate() + minDays);
+
+  //Calculate maxDate by adding maxDays to currentDate
+  const maxDate = new Date(currentDate);
+  maxDate.setDate(currentDate.getDate() + maxDays);
+
+  return { minDate: minDate.toDateString(), maxDate: maxDate.toDateString() };
+};
+
+//Function to validate the product data before adding to cart
+export const isProductValidToAdd = (product: CartProductType): boolean => {
+  // Check that all required fields are filled
+  const {
+    productId,
+    variantId,
+    productSlug,
+    variantSlug,
+    name,
+    variantName,
+    image,
+    quantity,
+    price,
+    sizeId,
+    size,
+    stock,
+    shippingFee,
+    extraShippingFee,
+    shippingMethod,
+    shippingService,
+    variantImage,
+    weight,
+    deliveryTimeMin,
+    deliveryTimeMax,
+  } = product;
+
+  // Ensure that all necessary fields have values
+  if (
+    !productId ||
+    !variantId ||
+    !productSlug ||
+    !variantSlug ||
+    !name ||
+    !variantName ||
+    !image ||
+    quantity <= 0 ||
+    price <= 0 ||
+    !sizeId ||
+    !size ||
+    stock <= 0 ||
+    weight <= 0 ||
+    !shippingMethod ||
+    !variantImage ||
+    deliveryTimeMin < 0 ||
+    deliveryTimeMax < deliveryTimeMin
+  ) {
+    return false; // Validation failed
+  }
+
+  return true; // Product is valid
+};
