@@ -6,6 +6,7 @@ import { getProductPageData, getProducts } from "@/queries/product";
 import { Separator } from "@/components/ui/separator";
 import { notFound, redirect } from "next/navigation";
 import ProductQuestions from "@/components/store/product-page/ProductQuestions";
+import StoreCard from "@/components/store/cards/StoreCard";
 
 interface PageProps {
   params: Promise<{ productSlug: string; variantSlug: string }>;
@@ -73,8 +74,9 @@ const ProductVariantPage = async ({ params, searchParams }: PageProps) => {
               <ProductQuestions questions={productData.questions} />
             </>
           )}
-          <Separator className="mt-6" />
+          <Separator className="my-6" />
           {/* Store Card */}
+          <StoreCard store={productData.store} />
           {/* Store products */}
         </ProductPageContainer>
       </div>

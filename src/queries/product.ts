@@ -479,6 +479,8 @@ export const getProductPageData = async (
   productSlug: string,
   variantSlug: string
 ) => {
+  const user = await currentUser();
+
   const product = await retrieveProductDetails(productSlug, variantSlug);
   if (!product || !product.store) return;
 
@@ -493,7 +495,19 @@ export const getProductPageData = async (
     product.freeShipping
   );
 
-  return formatProductResponse(product, productShippingDetails);
+  const storeFollowersCount = await getStoreFollowersCount(product.store.id);
+
+  const isUserFollowingStore = await checkIfUserIsFollowingStore(
+    product.store.id,
+    user?.id || ""
+  );
+
+  return formatProductResponse(
+    product,
+    productShippingDetails,
+    storeFollowersCount,
+    isUserFollowingStore
+  );
 };
 
 export const retrieveProductDetails = async (
@@ -575,10 +589,13 @@ const getUserCountry = async () => {
 
 const formatProductResponse = (
   product: ProductPageType,
-  shippingDetails: ProductShippingDetailsType
+  shippingDetails: ProductShippingDetailsType,
+  storeFollowersCount: number,
+  isUserFollowingStore: boolean
 ) => {
   if (!product) return;
   const variant = product?.variants[0];
+
   return {
     productId: product.id,
     variantId: variant.id,
@@ -614,8 +631,8 @@ const formatProductResponse = (
       url: product?.store?.url,
       name: product?.store?.name,
       logo: product?.store?.logo,
-      followersCount: 10,
-      isUserFollowing: true,
+      followersCount: storeFollowersCount,
+      isUserFollowingStore,
     },
     questions: product.questions,
     rating: product.rating,
@@ -627,4 +644,48 @@ const formatProductResponse = (
     shippingDetails,
     relatedProducts: [],
   };
+};
+
+const getStoreFollowersCount = async (storeId: string) => {
+  const storeFollowersCount = await db.store.findUnique({
+    where: {
+      id: storeId,
+    },
+    select: {
+      _count: {
+        select: {
+          followers: true,
+        },
+      },
+    },
+  });
+  return storeFollowersCount?._count.followers || 0;
+};
+
+const checkIfUserIsFollowingStore = async (
+  storeId: string,
+  userId: string | undefined
+) => {
+  let isFollowing = false;
+  if (userId) {
+    const storeFollowersInfo = await db.store.findUnique({
+      where: {
+        id: userId,
+      },
+      select: {
+        followers: {
+          where: {
+            id: storeId,
+          },
+          select: {
+            id: true,
+          },
+        },
+      },
+    });
+    if (storeFollowersInfo && storeFollowersInfo?.followers.length > 0) {
+      isFollowing = true;
+    }
+  }
+  return isFollowing;
 };

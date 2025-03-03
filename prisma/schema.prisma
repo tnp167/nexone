@@ -29,7 +29,8 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  stores Store[] @relation("UserStores")
+  stores    Store[] @relation("UserStores")
+  following Store[] @relation("UserFollowingStore")
 }
 
 model Category {
@@ -101,6 +102,7 @@ model Store {
 
   products      Product[]      @relation("StoreToProduct")
   shippingRates ShippingRate[] @relation("StoreToShippingRate")
+  followers     User[]         @relation("UserFollowingStore")
 
   @@index([userId])
 }
