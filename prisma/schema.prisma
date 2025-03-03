@@ -36,7 +36,7 @@ model Category {
   id       String  @id @default(uuid())
   name     String
   image    String
-  url      String
+  url      String  @unique
   featured Boolean @default(false)
 
   subCategories SubCategory[] @relation("CategoryToSubcategory")
@@ -51,7 +51,7 @@ model SubCategory {
   id       String  @id @default(uuid())
   name     String
   image    String
-  url      String
+  url      String  @unique
   featured Boolean @default(false)
 
   categoryId String

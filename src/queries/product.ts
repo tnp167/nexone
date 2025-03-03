@@ -15,6 +15,7 @@ import slugify from "slugify";
 import { getCookie } from "cookies-next";
 import { cookies } from "next/headers";
 import { ShippingFeeMethod, Store } from "@prisma/client";
+
 // Function: upsertProduct
 // Description: Upserts a product and its variant into the database, ensuring proper association with the store.
 // Access Level: Seller Only
@@ -266,9 +267,39 @@ export const getProducts = async (
   const limit = pageSize;
   const skip = (currentPage - 1) * limit;
 
-  const whereClause = {
+  const whereClause: any = {
     AND: [],
   };
+
+  //Apply category filter (using category url)
+  if (filters.category) {
+    const category = await db.category.findUnique({
+      where: {
+        url: filters.category,
+      },
+      select: {
+        id: true,
+      },
+    });
+    if (category) {
+      whereClause.AND.push({ categoryId: category.id });
+    }
+  }
+
+  //Apply subcategory filter (using subcategory url)
+  if (filters.subCategory) {
+    const subCategory = await db.subCategory.findUnique({
+      where: {
+        url: filters.subCategory,
+      },
+      select: {
+        id: true,
+      },
+    });
+    if (subCategory) {
+      whereClause.AND.push({ subCategoryId: subCategory.id });
+    }
+  }
 
   //Get all filtered, sorted products
   const products = await db.product.findMany({
