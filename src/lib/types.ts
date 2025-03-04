@@ -4,6 +4,7 @@ import {
   getProducts,
   getShippingDetails,
   retrieveProductDetails,
+  getRatingStatistics,
 } from "@/queries/product";
 import { getStoreDefaultShippingDetails } from "@/queries/store";
 import { getAllSubCategories } from "@/queries/subCategory";
@@ -108,6 +109,10 @@ export type ProductPageDataType = Prisma.PromiseReturnType<
 
 export type ProductShippingDetailsType = Prisma.PromiseReturnType<
   typeof getShippingDetails
+>;
+
+export type RatingStatisticsType = Prisma.PromiseReturnType<
+  typeof getRatingStatistics
 >;
 
 export type FreeShippingWithCountriesType = FreeShipping & {

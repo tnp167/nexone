@@ -40,9 +40,11 @@ const ProductInfo: FC<ProductInfoProps> = ({
     saleEndDate,
     variantName,
     store,
-    numReviews,
+    reviewStatistics,
     rating,
   } = productData;
+
+  const { totalReviews } = reviewStatistics;
 
   const copySkuToClipboard = async () => {
     try {
@@ -101,11 +103,11 @@ const ProductInfo: FC<ProductInfoProps> = ({
             char="★"
           />
           <Link href="#reviews" className="text-[#ffd700] hover:underline">
-            {numReviews === 0
+            {totalReviews === 0
               ? "No review yet"
-              : numReviews === 1
+              : totalReviews === 1
               ? "1 review"
-              : `${numReviews} reviews`}
+              : `${totalReviews} reviews`}
           </Link>
         </div>
       </div>

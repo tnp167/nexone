@@ -7,6 +7,8 @@ import { Separator } from "@/components/ui/separator";
 import { notFound, redirect } from "next/navigation";
 import ProductQuestions from "@/components/store/product-page/ProductQuestions";
 import StoreCard from "@/components/store/cards/StoreCard";
+import StoreProducts from "@/components/store/product-page/StoreProducts";
+import ProductReviews from "@/components/store/product-page/reviews/ProductReviews";
 
 interface PageProps {
   params: Promise<{ productSlug: string; variantSlug: string }>;
@@ -34,7 +36,15 @@ const ProductVariantPage = async ({ params, searchParams }: PageProps) => {
     );
   }
 
-  const { specs, questions, shippingDetails, category } = productData;
+  const {
+    specs,
+    questions,
+    shippingDetails,
+    category,
+    subCategory,
+    store,
+    reviewStatistics,
+  } = productData;
 
   const relatedProducts = await getProducts(
     { categories: category!.url },
@@ -53,6 +63,12 @@ const ProductVariantPage = async ({ params, searchParams }: PageProps) => {
               <RelatedProducts products={relatedProducts.products} />
             </>
           )}
+          <Separator className="mt-6" />
+          <ProductReviews
+            productId={productData.productId}
+            rating={productData.rating}
+            statistics={productData.reviewStatistics}
+          />
           <>
             <Separator className="mt-6" />
             {/* Product description */}
@@ -78,6 +94,11 @@ const ProductVariantPage = async ({ params, searchParams }: PageProps) => {
           {/* Store Card */}
           <StoreCard store={productData.store} />
           {/* Store products */}
+          <StoreProducts
+            storeUrl={productData.store.url}
+            storeName={productData.store.name}
+            count={5}
+          />
         </ProductPageContainer>
       </div>
     </div>
