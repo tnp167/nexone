@@ -1,5 +1,7 @@
 import { RatingStatisticsType } from "@/lib/types";
 import React, { FC } from "react";
+import ProductRatingCard from "../../cards/ProductRating";
+import RatingStatisticsCard from "../../cards/RatingStatistics";
 
 interface Props {
   productId: string | undefined;
@@ -8,7 +10,7 @@ interface Props {
 }
 
 const ProductReviews: FC<Props> = ({ productId, rating, statistics }) => {
-  const { totalReviews } = statistics || {};
+  const { totalReviews, ratingStatistics } = statistics || {};
   return (
     <div id="reviews" className="pt-6">
       {/* Title */}
@@ -20,9 +22,8 @@ const ProductReviews: FC<Props> = ({ productId, rating, statistics }) => {
       {/* Statistics */}
       <div className="w-full">
         <div className="flex items-ceter gap-4">
-          {/* Rating Card  */}
-
-          {/* Rating stats card */}
+          <ProductRatingCard rating={rating || 0} />
+          <RatingStatisticsCard statistics={ratingStatistics} />
         </div>
       </div>
       {totalReviews! > 0 && (
@@ -30,6 +31,10 @@ const ProductReviews: FC<Props> = ({ productId, rating, statistics }) => {
           <div className="space-y-6">
             {/* Review filters */}
             {/* Review sort */}
+          </div>
+          {/* Reviews */}
+          <div className="mt-10 min-h-72 grid grid-cols-2 gap-6">
+            {/* Pagination */}
           </div>
         </>
       )}
