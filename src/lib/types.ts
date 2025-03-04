@@ -13,8 +13,11 @@ import {
   FreeShippingCountry,
   Prisma,
   ProductVariantImage,
+  Review,
+  ReviewImage,
   ShippingRate,
   Size,
+  User,
 } from "@prisma/client";
 
 export interface DashboardSidebarMenuInterface {
@@ -121,6 +124,11 @@ export type StatisticsCardType = Prisma.PromiseReturnType<
 
 export type FreeShippingWithCountriesType = FreeShipping & {
   eligibleCountries: FreeShippingCountry[];
+};
+
+export type ReviewWithImageType = Review & {
+  images: ReviewImage[];
+  user: User;
 };
 
 export type CartProductType = {

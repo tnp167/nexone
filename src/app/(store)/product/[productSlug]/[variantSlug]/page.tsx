@@ -22,7 +22,17 @@ const ProductVariantPage = async ({ params, searchParams }: PageProps) => {
   const productData = await getProductPageData(productSlug, variantSlug);
   if (!productData) return notFound();
 
-  const { sizes } = productData;
+  const {
+    specs,
+    questions,
+    shippingDetails,
+    category,
+    subCategory,
+    store,
+    reviewStatistics,
+    reviews,
+    sizes,
+  } = productData;
 
   //If the size is provided, check if it is valid
   if (sizeId) {
@@ -35,16 +45,6 @@ const ProductVariantPage = async ({ params, searchParams }: PageProps) => {
       `/product/${productSlug}/${variantSlug}/?size=${sizes[0].id}`
     );
   }
-
-  const {
-    specs,
-    questions,
-    shippingDetails,
-    category,
-    subCategory,
-    store,
-    reviewStatistics,
-  } = productData;
 
   const relatedProducts = await getProducts(
     { categories: category!.url },
@@ -68,6 +68,7 @@ const ProductVariantPage = async ({ params, searchParams }: PageProps) => {
             productId={productData.productId}
             rating={productData.rating}
             statistics={productData.reviewStatistics}
+            reviews={reviews || []}
           />
           <>
             <Separator className="mt-6" />

@@ -176,3 +176,35 @@ export const isProductValidToAdd = (product: CartProductType): boolean => {
 
   return true; // Product is valid
 };
+
+type CensorReturn = {
+  firstName: string;
+  lastName: string;
+  fullName: string;
+};
+
+export function censorName(
+  firstNameInput: string,
+  lastNameInput: string
+): CensorReturn {
+  const censor = (name: string): string => {
+    if (name.length <= 2) return name;
+
+    const firstChar = name[0];
+    const lastChar = name[name.length - 1];
+
+    const middleLength = name.length - 2;
+
+    return `${firstChar}${"*".repeat(middleLength)}${lastChar}`;
+  };
+
+  const censoredFullName = `${firstNameInput[0]}***${
+    lastNameInput[lastNameInput.length - 1]
+  }`;
+
+  return {
+    firstName: censor(firstNameInput),
+    lastName: censor(lastNameInput),
+    fullName: censoredFullName,
+  };
+}

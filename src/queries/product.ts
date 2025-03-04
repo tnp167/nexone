@@ -544,7 +544,12 @@ export const retrieveProductDetails = async (
       store: true,
       specs: true,
       questions: true,
-      reviews: true,
+      reviews: {
+        include: {
+          images: true,
+          user: true,
+        },
+      },
       freeShipping: {
         include: {
           eligibleCountries: true,
