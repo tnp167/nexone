@@ -7,6 +7,7 @@ import {
   ProductShippingDetailsType,
   ProductWithVariantType,
   RatingStatisticsType,
+  SortOrder,
   variantImageType,
   VariantSimplified,
 } from "@/lib/types";
@@ -750,3 +751,67 @@ export const getRatingStatistics = async (productId: string) => {
     totalReviews,
   };
 };
+
+// Function: getProductFilteredReviews
+// Description: Retrieves filtered and sorted reviews for a product from the database, based on rating, presence of images, and sorting options.
+// Access Level: Public
+// Parameters:
+//   - productId: The ID of the product for which reviews are being fetched.
+//   - filters: An object containing the filter options such as rating and whether reviews include images.
+//   - sort: An object defining the sort order, such as latest, oldest, or highest rating.
+//   - page: The page number for pagination (1-based index).
+//   - pageSize: The number of reviews to retrieve per page.
+// Returns: A paginated list of reviews that match the filter and sort criteria.
+export const getProductFilteredReviews = async (
+  productId: string,
+  filters: { rating?: number; hasImages?: boolean },
+  sort: { orderBy: "latest" | "oldest" | "highest" } | undefined,
+  page: number = 1,
+  pageSize: number = 10
+) => {
+  const reviewFilter: any = {
+    productId,
+  };
+
+  //Filter by rating
+  if (filters.rating) {
+    const rating = filters.rating;
+    reviewFilter.rating = {
+      in: [rating, rating + 0.5],
+    };
+  }
+
+  //Filter by images
+  if (filters.hasImages) {
+    reviewFilter.images = {
+      some: {},
+    };
+  }
+
+  //Set sort order using the local SortOrder type
+  const sortOrder: { createdAt?: SortOrder; rating?: SortOrder } =
+    sort && sort.orderBy === "latest"
+      ? { createdAt: "desc" }
+      : sort && sort.orderBy === "oldest"
+      ? { createdAt: "asc" }
+      : { rating: "desc" };
+
+  //Pagination parameters
+  const skip = (page - 1) * pageSize;
+  const take = pageSize;
+
+  const reviews = await db.review.findMany({
+    where: reviewFilter,
+    include: {
+      images: true,
+      user: true,
+    },
+    orderBy: sortOrder,
+    skip,
+    take,
+  });
+
+  return reviews;
+};
+
+//

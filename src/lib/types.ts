@@ -154,3 +154,16 @@ export type CartProductType = {
   deliveryTimeMax: number;
   isFreeShipping: boolean;
 };
+
+export type SortOrder = "asc" | "desc";
+
+export type ReviewsFiltersType = {
+  rating?: number;
+  hasImages?: boolean;
+};
+
+export type SortType = "latest" | "oldest" | "highest";
+
+export type ReviewsOrderType = {
+  orderBy: SortType;
+};
