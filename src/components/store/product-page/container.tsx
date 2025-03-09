@@ -10,6 +10,7 @@ import ShippingDetails from "./shipping/ShippingDetails";
 import ReturnsPrivacySecurityCard from "./product-info/ReturnsPrivacySecurityCard";
 import QuantitySelector from "./QuantitySelector";
 import SocialShare from "../shared/SocialShare";
+import { ProductVariantImage } from "@prisma/client";
 
 interface ProductPageContainerProps {
   productData: ProductPageDataType;
@@ -27,6 +28,15 @@ const ProductPageContainer: FC<ProductPageContainerProps> = ({
   }
 
   const { images, shippingDetails, sizes } = productData;
+
+  //Manage the active image being displayed, initialize to the first image
+  const [activeImage, setActiveImage] = useState<ProductVariantImage | null>(
+    images[0]
+  );
+
+  //State for temporary product images
+  const [variantImages, setVariantImages] =
+    useState<ProductVariantImage[]>(images);
 
   const data: CartProductType = {
     productId: productData.productId || "",
@@ -69,7 +79,11 @@ const ProductPageContainer: FC<ProductPageContainerProps> = ({
   return (
     <div className="relative">
       <div className="w-full xl:flex xl:gap-4">
-        <ProductSwiper images={images} />
+        <ProductSwiper
+          images={variantImages.length > 0 ? variantImages : images}
+          activeImage={activeImage || images[0]}
+          setActiveImage={setActiveImage}
+        />
         <div className="w-full mt-4 md:mt-0 flex flex-col gap-4 md:flex-row">
           {/* Product main info */}
           <ProductInfo
@@ -77,6 +91,8 @@ const ProductPageContainer: FC<ProductPageContainerProps> = ({
             quantity={1}
             sizeId={sizeId}
             handleChange={handleChange}
+            setVariantImages={setVariantImages}
+            setActiveImage={setActiveImage}
           />
           {/* Shipping details */}
           <div className="w-[390px]">

@@ -9,6 +9,7 @@ import ProductQuestions from "@/components/store/product-page/ProductQuestions";
 import StoreCard from "@/components/store/cards/StoreCard";
 import StoreProducts from "@/components/store/product-page/StoreProducts";
 import ProductReviews from "@/components/store/product-page/reviews/ProductReviews";
+import AddReview from "@/components/store/product-page/reviews/AddReview";
 
 interface PageProps {
   params: Promise<{ productSlug: string; variantSlug: string }>;
@@ -23,6 +24,7 @@ const ProductVariantPage = async ({ params, searchParams }: PageProps) => {
   if (!productData) return notFound();
 
   const {
+    productId,
     specs,
     questions,
     shippingDetails,
@@ -32,6 +34,7 @@ const ProductVariantPage = async ({ params, searchParams }: PageProps) => {
     reviewStatistics,
     reviews,
     sizes,
+    variantInfo,
   } = productData;
 
   //If the size is provided, check if it is valid
@@ -69,6 +72,7 @@ const ProductVariantPage = async ({ params, searchParams }: PageProps) => {
             rating={productData.rating}
             statistics={productData.reviewStatistics}
             reviews={reviews || []}
+            variantInfo={variantInfo}
           />
           <>
             <Separator className="mt-6" />

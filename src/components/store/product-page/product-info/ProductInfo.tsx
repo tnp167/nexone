@@ -3,7 +3,7 @@
 import { CartProductType, ProductPageDataType } from "@/lib/types";
 import Image from "next/image";
 import Link from "next/link";
-import React, { FC } from "react";
+import React, { Dispatch, FC, SetStateAction } from "react";
 import { CopyIcon } from "../../icons";
 import toast from "react-hot-toast";
 import ReactStars from "react-rating-stars-component";
@@ -14,12 +14,15 @@ import ColorWheel from "@/components/shared/color-wheel";
 import ProductVariantSelector from "./VariantSelector";
 import SizeSelector from "./SizeSelector";
 import ProductAssurancePolicy from "./AssurancePolicy";
+import { ProductVariantImage } from "@prisma/client";
 
 interface ProductInfoProps {
   productData: ProductPageDataType;
   quantity: number;
   sizeId: string | undefined;
   handleChange: (property: keyof CartProductType, value: any) => void;
+  setVariantImages: Dispatch<SetStateAction<ProductVariantImage[]>>;
+  setActiveImage: Dispatch<SetStateAction<ProductVariantImage | null>>;
 }
 
 const ProductInfo: FC<ProductInfoProps> = ({
@@ -27,6 +30,8 @@ const ProductInfo: FC<ProductInfoProps> = ({
   quantity,
   sizeId,
   handleChange,
+  setVariantImages,
+  setActiveImage,
 }) => {
   if (!productData) return null;
   const {
@@ -34,7 +39,7 @@ const ProductInfo: FC<ProductInfoProps> = ({
     name,
     sku,
     colors,
-    variantImages,
+    variantInfo,
     sizes,
     isSale,
     saleEndDate,
@@ -135,10 +140,12 @@ const ProductInfo: FC<ProductInfoProps> = ({
           </span>
         </div>
         <div className="mt-2">
-          {variantImages.length > 0 && (
+          {variantInfo.length > 0 && (
             <ProductVariantSelector
-              variants={variantImages}
+              variants={variantInfo}
               slug={productData.variantSlug}
+              setVariantImages={setVariantImages}
+              setActiveImage={setActiveImage}
             />
           )}
         </div>

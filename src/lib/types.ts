@@ -9,6 +9,7 @@ import {
 import { getStoreDefaultShippingDetails } from "@/queries/store";
 import { getAllSubCategories } from "@/queries/subCategory";
 import {
+  Color,
   FreeShipping,
   FreeShippingCountry,
   Prisma,
@@ -97,7 +98,7 @@ export type VariantSimplified = {
   sizes: Size[];
 };
 
-export type variantImageType = {
+export type VariantImageType = {
   url: string;
   image: string;
 };
@@ -166,4 +167,24 @@ export type SortType = "latest" | "oldest" | "highest";
 
 export type ReviewsOrderType = {
   orderBy: SortType;
+};
+export type ReviewDetailsType = {
+  id: string;
+  review: string;
+  rating: number;
+  images: { url: string }[];
+  size: string;
+  quantity: string;
+  variant: string;
+  color: string;
+};
+
+export type VariantInfoType = {
+  variantName: string;
+  variantUrl: string;
+  variantSlug: string;
+  variantImage: string;
+  images: ProductVariantImage[];
+  sizes: Size[];
+  colors: Partial<Color>[];
 };

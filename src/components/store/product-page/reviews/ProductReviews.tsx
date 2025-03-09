@@ -7,6 +7,7 @@ import {
   ReviewFiltersType,
   SortOrder,
   ReviewsOrderType,
+  VariantInfoType,
 } from "@/lib/types";
 import React, { FC, useEffect, useState } from "react";
 import ProductRatingCard from "../../cards/ProductRating";
@@ -15,12 +16,14 @@ import ReviewCard from "../../cards/Review";
 import { getProductFilteredReviews } from "@/queries/product";
 import ReviewsFilters from "./Filters";
 import ReviewsSort from "./Sort";
-
+import Pagination from "../../shared/Pagination";
+import ReviewDetails from "../../forms/ReviewDetails";
 interface Props {
   productId: string | undefined;
   rating: number | undefined;
   statistics: RatingStatisticsType;
   reviews: ReviewWithImageType[];
+  variantInfo: VariantInfoType[];
 }
 
 const ProductReviews: FC<Props> = ({
@@ -28,6 +31,7 @@ const ProductReviews: FC<Props> = ({
   rating,
   statistics,
   reviews,
+  variantInfo,
 }) => {
   const [data, setData] = useState<ReviewWithImageType[]>(reviews);
   const { totalReviews, ratingStatistics } = statistics || {};
@@ -48,7 +52,7 @@ const ProductReviews: FC<Props> = ({
 
   //Pagination
   const [page, setPage] = useState<number>(1);
-  const [pageSize, setPageSize] = useState<number>(2);
+  const [pageSize, setPageSize] = useState<number>(4);
 
   const handleGetReviews = async () => {
     const response = await getProductFilteredReviews(
@@ -89,8 +93,6 @@ const ProductReviews: FC<Props> = ({
       {totalReviews! > 0 && (
         <>
           <div className="space-y-6">
-            {/* Review filters */}
-
             <ReviewsFilters
               filters={filters}
               setFilters={setFilters}
@@ -98,11 +100,10 @@ const ProductReviews: FC<Props> = ({
               setSort={setSort}
             />
             <ReviewsSort sort={sort} setSort={setSort} />
-            {/* Review sort */}
           </div>
           {/* Reviews */}
-          <div className="mt-6 min-h-72 grid grid-cols-2 gap-3">
-            {data.length > 0 && (
+          <div className="mt-6 grid grid-cols-2 gap-3">
+            {data.length > 0 ? (
               <>
                 <div className="flex flex-col gap-3">
                   {data.slice(0, half).map((review) => (
@@ -115,11 +116,31 @@ const ProductReviews: FC<Props> = ({
                   ))}
                 </div>
               </>
+            ) : (
+              <div>No reviews found</div>
             )}
-            {/* Pagination */}
           </div>
+          {data.length > pageSize && (
+            <Pagination
+              page={page}
+              totalPages={
+                filters.rating || filters.hasImage
+                  ? data.length / pageSize
+                  : totalReviews / pageSize
+              }
+              setPage={setPage}
+            />
+          )}
         </>
       )}
+      <div className="mt-5">
+        <ReviewDetails
+          productId={productId || ""}
+          variantsInfo={variantInfo}
+          setReviews={setData}
+          reviews={data}
+        />
+      </div>
     </div>
   );
 };

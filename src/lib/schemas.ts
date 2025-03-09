@@ -366,3 +366,16 @@ export const OfferTagFormSchema = z.object({
         "Offer tag url may only contain letters, numbers, spaces, hyphens, and underscores, without consecutive special characters.",
     }),
 });
+
+export const AddReviewSchema = z.object({
+  variantName: z.string().min(1, "Variant name is required"),
+  rating: z.number().min(1, "Rating is required"),
+  size: z.string().min(1, "Size is required"),
+  review: z.string().min(5, "Review must be at least 5 characters long"),
+  quantity: z.string().default("1"),
+  images: z
+    .object({ url: z.string() })
+    .array()
+    .max(3, "You can upload up to 3 images"),
+  color: z.string({ required_error: "Color is required" }),
+});

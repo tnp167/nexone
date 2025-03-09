@@ -262,7 +262,7 @@ export const getProducts = async (
   filters: any = {},
   sortBy: string = "",
   page: number = 1,
-  pageSize: number = 10
+  pageSize: number = 4
 ) => {
   //Default values
   const currentPage = page;
@@ -550,6 +550,7 @@ export const retrieveProductDetails = async (
           images: true,
           user: true,
         },
+        take: 4,
       },
       freeShipping: {
         include: {
@@ -570,21 +571,37 @@ export const retrieveProductDetails = async (
     },
   });
 
-  const variantImages = await db.productVariant.findMany({
+  if (!product) return;
+
+  //Get variant info
+  const variantsInfo = await db.productVariant.findMany({
     where: {
       productId: product?.id,
     },
-    select: {
-      variantImage: true,
-      slug: true,
+    include: {
+      images: true,
+      sizes: true,
+      colors: true,
+      product: {
+        select: {
+          slug: true,
+        },
+      },
     },
   });
   return {
     ...product,
-    variantImages: variantImages.map((variant) => ({
-      url: `/product/${productSlug}/${variant.slug}`,
-      image: variant.variantImage,
-      slug: variant.slug,
+    variantInfo: variantsInfo.map((variant) => ({
+      variantName: variant.variantName,
+      variantSlug: variant.slug,
+      variantUrl: `/product/${productSlug}/${variant.slug}`,
+      variantImage: variant.variantImage,
+      images: variant.images,
+      sizes: variant.sizes,
+      colors: variant.colors,
+      // product: {
+      //   slug: variant.product.slug,
+      // },
     })),
   };
 };
@@ -667,6 +684,7 @@ const formatProductResponse = (
     reviewStatistics: ratingStatistics,
     shippingDetails,
     relatedProducts: [],
+    variantInfo: product.variantInfo,
   };
 };
 
