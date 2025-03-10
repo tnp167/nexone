@@ -1,7 +1,12 @@
 "use client";
 
-import { Category, SubCategory, OfferTag } from "@prisma/client";
-import { FC, useEffect, useRef, useState } from "react";
+import {
+  Category,
+  SubCategory,
+  OfferTag,
+  ShippingFeeMethod,
+} from "@prisma/client";
+import { FC, useEffect, useMemo, useRef, useState } from "react";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { ProductFormSchema } from "@/lib/schemas";
@@ -58,12 +63,30 @@ import JoditEditor from "jodit-react";
 import { NumberInput } from "@tremor/react";
 import InputFieldSet from "../shared/InputFieldSet";
 import { ArrowRight, CalendarIcon, Dot, XIcon } from "lucide-react";
+import { MultiSelect } from "react-multi-select-component";
+import { useTheme } from "next-themes";
 
+const shippingFeeMethods = [
+  {
+    value: ShippingFeeMethod.ITEM,
+    description: "ITEM (Fees calculated based on number of products",
+  },
+  {
+    value: ShippingFeeMethod.WEIGHT,
+    description: "WEIGHT (Fees calculated bas d on number of products",
+  },
+
+  {
+    value: ShippingFeeMethod.FIXED,
+    description: "FIXED (Fees calculated based on a fixed fee)",
+  },
+];
 interface ProductDetailsProps {
   data?: Partial<ProductWithVariantType>;
   categories: Category[];
   storeUrl: string;
   offerTags: OfferTag[];
+  countries: Country[];
 }
 
 const ProductDetails: FC<ProductDetailsProps> = ({
@@ -71,12 +94,24 @@ const ProductDetails: FC<ProductDetailsProps> = ({
   categories,
   storeUrl,
   offerTags,
+  countries,
 }) => {
   const { toast } = useToast();
   const router = useRouter();
 
+  //Jodit editor refs
   const productDescEditor = useRef(null);
   const variantDescEditor = useRef(null);
+
+  //Joditconfiguration
+  const { theme } = useTheme();
+
+  const config = useMemo(
+    () => ({
+      theme: theme === "dark" ? "dark" : "default",
+    }),
+    [theme]
+  );
 
   const [subCategories, setSubCategories] = useState<SubCategory[]>([]);
 
@@ -116,22 +151,18 @@ const ProductDetails: FC<ProductDetailsProps> = ({
       subCategoryId: data?.subCategoryId,
       brand: data?.brand,
       sku: data?.sku,
-      colors: data?.colors || [{ color: "" }],
+      colors: data?.colors,
       sizes: data?.sizes,
       product_specs: data?.product_specs,
       variant_specs: data?.variant_specs,
       keywords: data?.keywords || [],
       questions: data?.questions || [],
-      isSale: data?.isSale,
+      isSale: data?.isSale || false,
       weight: data?.weight,
       saleEndDate:
         data?.saleEndDate || format(new Date(), "yyyy-MM-dd'T'HH:mm:ss"),
       freeShippingForAllCountries: data?.freeShippingForAllCountries,
-      freeShippingCountriesIds: Array.isArray(data?.freeShippingCountriesIds)
-        ? data?.freeShippingCountriesIds
-        : data?.freeShippingCountriesIds
-        ? [data?.freeShippingCountriesIds]
-        : [],
+      freeShippingCountriesIds: data?.freeShippingCountriesIds || [],
       shippingFeeMethod: data?.shippingFeeMethod,
       offerTagId: data?.offerTagId,
     },
@@ -193,6 +224,10 @@ const ProductDetails: FC<ProductDetailsProps> = ({
           variant_specs: values.variant_specs,
           keywords: values.keywords || [],
           questions: values.questions || [],
+          shippingFeeMethod: values.shippingFeeMethod,
+          freeShippingForAllCountries: values.freeShippingForAllCountries,
+          freeShippingCountriesIds: values.freeShippingCountriesIds || [],
+          offerTagId: values.offerTagId || "",
           createdAt: new Date(),
           updatedAt: new Date(),
         },
@@ -251,10 +286,26 @@ const ProductDetails: FC<ProductDetailsProps> = ({
     form.setValue("keywords", keywords);
     form.setValue("product_specs", productSpecs);
     form.setValue("variant_specs", variantSpecs);
-  }, [colors, sizes, keywords, productSpecs, variantSpecs, data]);
+    form.setValue("questions", questions);
+    console.log(form.getValues());
+  }, [colors, sizes, keywords, productSpecs, variantSpecs, questions, data]);
 
-  console.log("productSpecs", productSpecs);
-  console.log("variantSpecs", variantSpecs);
+  //Countrie options
+  type CountryOption = {
+    label: string;
+    value: string;
+  };
+
+  const countryOptions: CountryOption[] = countries.map((country) => ({
+    label: country.name,
+    value: country.id,
+  }));
+
+  const handleDeleteCountryFreeShipping = (index: number) => {
+    const currentValues = form.getValues().freeShippingCountriesIds;
+    const updatedValues = currentValues.filter((_, i) => i !== index);
+    form.setValue("freeShippingCountriesIds", updatedValues);
+  };
   return (
     <AlertDialog>
       <Card className="w-full">
@@ -390,6 +441,7 @@ const ProductDetails: FC<ProductDetailsProps> = ({
                             <JoditEditor
                               ref={productDescEditor}
                               value={form.getValues().description}
+                              config={config}
                               onChange={(content) => {
                                 form.setValue("description", content);
                               }}
@@ -406,13 +458,13 @@ const ProductDetails: FC<ProductDetailsProps> = ({
                       name="variantDescription"
                       render={({ field }) => (
                         <FormItem className="flex-1">
-                          <FormLabel>Variant Description</FormLabel>
                           <FormControl>
                             <JoditEditor
                               ref={variantDescEditor}
-                              value={form.getValues().description}
+                              config={config}
+                              value={form.getValues().variantDescription || ""}
                               onChange={(content) => {
-                                form.setValue("description", content);
+                                form.setValue("variantDescription", content);
                               }}
                             />
                           </FormControl>
@@ -541,54 +593,56 @@ const ProductDetails: FC<ProductDetailsProps> = ({
                 </div>
               </InputFieldSet>
               {/* Brand, Sku, Weight */}
-              <div className="flex flex-col lg:flex-row gap-4">
-                <FormField
-                  control={form.control}
-                  name="brand"
-                  render={({ field }) => (
-                    <FormItem className="flex-1">
-                      <FormLabel>Product Brand</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Brand" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="sku"
-                  render={({ field }) => (
-                    <FormItem className="flex-1">
-                      <FormLabel>Product Sku</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Sku" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="weight"
-                  render={({ field }) => (
-                    <FormItem className="flex-1">
-                      <FormLabel>Product Weight</FormLabel>
-                      <FormControl>
-                        <NumberInput
-                          defaultValue={field.value}
-                          onValueChange={field.onChange}
-                          placeholder="Weight"
-                          min={0.01}
-                          step={0.01}
-                          className="!shadow-none rounded-md text-sm"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
+              <InputFieldSet label="Brand, Sku, Weight">
+                <div className="flex flex-col lg:flex-row gap-4">
+                  <FormField
+                    control={form.control}
+                    name="brand"
+                    render={({ field }) => (
+                      <FormItem className="flex-1">
+                        <FormLabel>Product Brand</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Brand" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="sku"
+                    render={({ field }) => (
+                      <FormItem className="flex-1">
+                        <FormLabel>Product Sku</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Sku" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="weight"
+                    render={({ field }) => (
+                      <FormItem className="flex-1">
+                        <FormLabel>Product Weight</FormLabel>
+                        <FormControl>
+                          <NumberInput
+                            defaultValue={field.value}
+                            onValueChange={field.onChange}
+                            placeholder="Weight"
+                            min={0.01}
+                            step={0.01}
+                            className="!shadow-none rounded-md text-sm"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              </InputFieldSet>
               {/* Variant Image - Keywords */}
               <div className="flex items-center gap-10 py-14">
                 {/* Variant Image */}
@@ -662,86 +716,102 @@ const ProductDetails: FC<ProductDetailsProps> = ({
                 </div>
               </div>
               {/* Sizes */}
-              <div className="w-full flex flex-col gap-y-3">
-                <ClickToAddInputs
-                  details={sizes}
-                  setDetails={setSizes}
-                  initialDetail={{
-                    size: "",
-                    quantity: 1,
-                    price: 0.01,
-                    discount: 0,
-                  }}
-                  header="Sizes, Quantity, Price, Discount"
-                />
-                {errors.sizes && (
-                  <span className="text-sm font-medium text-destructive">
-                    {errors.sizes.message}
-                  </span>
-                )}
-              </div>
+              <InputFieldSet label="Sizes, Quantities, Prices, Discounts">
+                <div className="w-full flex flex-col gap-y-3">
+                  <ClickToAddInputs
+                    details={sizes}
+                    setDetails={setSizes}
+                    initialDetail={{
+                      size: "",
+                      quantity: 1,
+                      price: 0.01,
+                      discount: 0,
+                    }}
+                    header="Sizes, Quantity, Price, Discount"
+                    containerClassName="flex-1"
+                    inputClassName="w-full"
+                  />
+                  {errors.sizes && (
+                    <span className="text-sm font-medium text-destructive">
+                      {errors.sizes.message}
+                    </span>
+                  )}
+                </div>
+              </InputFieldSet>
               {/* Product and variant specs */}
-              <Tabs defaultValue="productSpecs" className="w-full">
-                <TabsList className="w-full grid grid-cols-2">
-                  <TabsTrigger value="productSpecs">
-                    Product Specification
-                  </TabsTrigger>
-                  <TabsTrigger value="variantSpecs">
-                    Variant Specification
-                  </TabsTrigger>
-                </TabsList>
-                <TabsContent value="productSpecs">
-                  <div className="w-full flex flex-col gap-y-3">
-                    <ClickToAddInputs
-                      details={productSpecs}
-                      setDetails={setProductSpecs}
-                      initialDetail={{
-                        name: "",
-                        value: "",
-                      }}
-                    />
-                    {errors.product_specs && (
-                      <span className="text-sm font-medium text-destructive">
-                        {errors.product_specs.message}
-                      </span>
-                    )}
-                  </div>
-                </TabsContent>
-                <TabsContent value="variantSpecs">
-                  <div className="w-full flex flex-col gap-y-3">
-                    <ClickToAddInputs
-                      details={variantSpecs}
-                      setDetails={setVariantSpecs}
-                      initialDetail={{
-                        name: "",
-                        value: "",
-                      }}
-                    />
-                    {errors.variant_specs && (
-                      <span className="text-sm font-medium text-destructive">
-                        {errors.variant_specs.message}
-                      </span>
-                    )}
-                  </div>
-                </TabsContent>
-              </Tabs>
+              <InputFieldSet
+                label="Specifications"
+                description="Note: The product descriptions are the main specs for the product. You can add exta specs specific for this variant using the variant specs tab."
+              >
+                <Tabs defaultValue="productSpecs" className="w-full">
+                  <TabsList className="w-full grid grid-cols-2">
+                    <TabsTrigger value="productSpecs">
+                      Product Specification
+                    </TabsTrigger>
+                    <TabsTrigger value="variantSpecs">
+                      Variant Specification
+                    </TabsTrigger>
+                  </TabsList>
+                  <TabsContent value="productSpecs">
+                    <div className="w-full flex flex-col gap-y-3">
+                      <ClickToAddInputs
+                        details={productSpecs}
+                        setDetails={setProductSpecs}
+                        initialDetail={{
+                          name: "",
+                          value: "",
+                        }}
+                        containerClassName="flex-1"
+                        inputClassName="w-full"
+                      />
+                      {errors.product_specs && (
+                        <span className="text-sm font-medium text-destructive">
+                          {errors.product_specs.message}
+                        </span>
+                      )}
+                    </div>
+                  </TabsContent>
+                  <TabsContent value="variantSpecs">
+                    <div className="w-full flex flex-col gap-y-3">
+                      <ClickToAddInputs
+                        details={variantSpecs}
+                        setDetails={setVariantSpecs}
+                        initialDetail={{
+                          name: "",
+                          value: "",
+                        }}
+                        containerClassName="flex-1"
+                        inputClassName="w-full"
+                      />
+                      {errors.variant_specs && (
+                        <span className="text-sm font-medium text-destructive">
+                          {errors.variant_specs.message}
+                        </span>
+                      )}
+                    </div>
+                  </TabsContent>
+                </Tabs>
+              </InputFieldSet>
               {/* Questions */}
-              <div className="w-full flex flex-col gap-y-3">
-                <ClickToAddInputs
-                  details={questions}
-                  setDetails={setQuestions}
-                  initialDetail={{
-                    question: "",
-                    answer: "",
-                  }}
-                  header="Questions and Answers"
-                />
-                {errors.questions && (
-                  <span className="text-sm font-medium text-destructive">
-                    {errors.questions.message}
-                  </span>
-                )}
-              </div>
+              <InputFieldSet label="Questions and Answers">
+                <div className="w-full flex flex-col gap-y-3">
+                  <ClickToAddInputs
+                    details={questions}
+                    setDetails={setQuestions}
+                    initialDetail={{
+                      question: "",
+                      answer: "",
+                    }}
+                    containerClassName="flex-1"
+                    inputClassName="w-full"
+                  />
+                  {errors.questions && (
+                    <span className="text-sm font-medium text-destructive">
+                      {errors.questions.message}
+                    </span>
+                  )}
+                </div>
+              </InputFieldSet>
               {/* Is On Sale */}
               <InputFieldSet
                 label="Sale"
@@ -819,6 +889,141 @@ const ProductDetails: FC<ProductDetailsProps> = ({
                         />
                         <ArrowRight className="w-4 text-[#1087ff]" />
                         <span>{formattedDate}</span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </InputFieldSet>
+              {/* Shipping Fee Method */}
+              <InputFieldSet label="Product shipping fee method">
+                <FormField
+                  control={form.control}
+                  name="shippingFeeMethod"
+                  render={({ field }) => (
+                    <FormItem className="flex-1">
+                      <FormControl>
+                        <Select
+                          disabled={isLoading}
+                          onValueChange={field.onChange}
+                          value={field.value}
+                          defaultValue={field.value}
+                        >
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue
+                                defaultValue={field.value}
+                                placeholder="Select Shipping Fee Calculation Method"
+                              />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {shippingFeeMethods.map((method) => (
+                              <SelectItem
+                                key={method.value}
+                                value={method.value}
+                              >
+                                {method.description}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </InputFieldSet>
+              {/* Fee Shipping */}
+              <InputFieldSet
+                label="Free Shipping (Optional)"
+                description="Free Shipping Worldwide ?"
+              >
+                <div>
+                  <label
+                    htmlFor="freeShippingForAll"
+                    className="ml-5 flex items-center gap-x-2 cursor-pointer"
+                  >
+                    <FormField
+                      control={form.control}
+                      name="freeShippingForAllCountries"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormControl>
+                            <>
+                              <input
+                                type="checkbox"
+                                id="yes"
+                                checked={field.value}
+                                onChange={field.onChange}
+                                hidden
+                              />
+                              <Checkbox
+                                checked={field.value}
+                                onCheckedChange={field.onChange}
+                              />
+                            </>
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+                    <span>Yes</span>
+                  </label>
+                </div>
+                <p className="mt-3 text-sm text-main-secondary dark:text-gray-400 pb-3 flex">
+                  <Dot className="-me-1" />
+                  If not, selected the countries you want to offer free shipping
+                  to
+                </p>
+                <div>
+                  {!form.getValues().freeShippingForAllCountries && (
+                    <div className="space-y-4">
+                      <FormField
+                        control={form.control}
+                        name="freeShippingCountriesIds"
+                        render={({ field }) => (
+                          <FormItem className="ml-4">
+                            <FormControl>
+                              <MultiSelect
+                                className="!max-w-[800px]"
+                                options={countryOptions}
+                                value={field.value}
+                                onChange={(selected: CountryOption[]) =>
+                                  field.onChange(selected)
+                                }
+                                labelledBy="Select"
+                              />
+                            </FormControl>
+                          </FormItem>
+                        )}
+                      />
+                      <p className="text-sm text-main-secondary dark:text-gray-400 pb-3 flex">
+                        <Dot className="-me-1" />
+                        List of countries you offer free shipping: &nbsp;
+                        {form.getValues().freeShippingCountriesIds &&
+                          form.getValues().freeShippingCountriesIds.length ===
+                            0 &&
+                          "None"}
+                      </p>
+                      {/* List of free shipping countries */}
+                      <div className="flex flex-wrap gap-1">
+                        {form
+                          .getValues()
+                          .freeShippingCountriesIds?.map((country, index) => (
+                            <div
+                              key={country.id}
+                              className="text-xs inline-flex items-center px-3 py-1 bg-blue-200 text-blue-primary rounded-md gap-x-2"
+                            >
+                              <span>{country.label}</span>
+                              <span
+                                className="cursor-pointer hover:text-red-500"
+                                onClick={() =>
+                                  handleDeleteCountryFreeShipping(index)
+                                }
+                              >
+                                x
+                              </span>
+                            </div>
+                          ))}
                       </div>
                     </div>
                   )}

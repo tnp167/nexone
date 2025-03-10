@@ -4,6 +4,7 @@ import { Dispatch, FC, SetStateAction, useState } from "react";
 import { Plus, Minus, PaintBucket } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { SketchPicker } from "react-color";
+import { cn } from "@/lib/utils";
 
 //The interface for each detail object
 export interface Detail<T = { [key: string]: string | number | undefined }> {
@@ -16,6 +17,8 @@ export interface ClickToAddInputProps<T extends Detail> {
   initialDetail?: T;
   header?: string;
   colorPicker?: boolean;
+  containerClassName?: string;
+  inputClassName?: string;
 }
 
 const ClickToAddInputs = <T extends Detail>({
@@ -24,6 +27,8 @@ const ClickToAddInputs = <T extends Detail>({
   initialDetail = {} as T,
   header,
   colorPicker,
+  containerClassName,
+  inputClassName,
 }: ClickToAddInputProps<T>) => {
   const [colorPickerIndex, setColorPickerIndex] = useState<number | null>(null);
 
@@ -108,7 +113,14 @@ const ClickToAddInputs = <T extends Detail>({
       {details.map((detail, idx) => (
         <div key={idx} className="flex items-center gap-x-4">
           {Object.keys(detail).map((property, propIndex) => (
-            <div key={propIndex} className="flex items-center gap-x-2">
+            <div
+              key={propIndex}
+              className={cn(
+                containerClassName,
+                "flex items-center gap-x-2",
+                containerClassName
+              )}
+            >
               {/* Color picker toggle*/}
               {property === "color" && colorPicker && (
                 <div className="flex gap-x-4">
@@ -138,7 +150,7 @@ const ClickToAddInputs = <T extends Detail>({
                 />
               )}
               <Input
-                className="w-28"
+                className={cn("w-28 placeholder:capitalize", inputClassName)}
                 type={typeof detail[property] === "number" ? "number" : "text"}
                 name={property}
                 placeholder={property}

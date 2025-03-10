@@ -62,7 +62,7 @@ export type ProductWithVariantType = {
   variant_specs: { id?: string; name: string; value: string }[];
   keywords: string[];
   questions: { id?: string; question: string; answer: string }[];
-  freeShippingCountriesIds: { id?: string; label: string; value: string };
+  freeShippingCountriesIds: { id?: string; label: string; value: string }[];
   shippingFeeMethod: ShippingFeeMethod;
   freeShippingForAllCountries: boolean;
   createdAt: Date;
