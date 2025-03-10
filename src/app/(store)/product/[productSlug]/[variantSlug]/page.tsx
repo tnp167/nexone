@@ -9,7 +9,6 @@ import ProductQuestions from "@/components/store/product-page/ProductQuestions";
 import StoreCard from "@/components/store/cards/StoreCard";
 import StoreProducts from "@/components/store/product-page/StoreProducts";
 import ProductReviews from "@/components/store/product-page/reviews/ProductReviews";
-import AddReview from "@/components/store/product-page/reviews/AddReview";
 
 interface PageProps {
   params: Promise<{ productSlug: string; variantSlug: string }>;

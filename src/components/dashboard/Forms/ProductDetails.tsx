@@ -1,6 +1,6 @@
 "use client";
 
-import { Category, SubCategory } from "@prisma/client";
+import { Category, SubCategory, OfferTag } from "@prisma/client";
 import { FC, useEffect, useRef, useState } from "react";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
@@ -41,7 +41,6 @@ import ImageUpload from "../shared/ImageUpload";
 import { v4 as uuidv4 } from "uuid";
 import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
-import { Textarea } from "@/components/ui/textarea";
 import { upsertProduct } from "@/queries/product";
 import { ProductWithVariantType } from "@/lib/types";
 import ImagePreviewGrid from "../shared/ImagesPreviewGrid";
@@ -57,17 +56,21 @@ import "react-clock/dist/Clock.css";
 
 import JoditEditor from "jodit-react";
 import { NumberInput } from "@tremor/react";
+import InputFieldSet from "../shared/InputFieldSet";
+import { ArrowRight, CalendarIcon, Dot, XIcon } from "lucide-react";
 
 interface ProductDetailsProps {
   data?: Partial<ProductWithVariantType>;
   categories: Category[];
   storeUrl: string;
+  offerTags: OfferTag[];
 }
 
 const ProductDetails: FC<ProductDetailsProps> = ({
   data,
   categories,
   storeUrl,
+  offerTags,
 }) => {
   const { toast } = useToast();
   const router = useRouter();
@@ -123,7 +126,27 @@ const ProductDetails: FC<ProductDetailsProps> = ({
       weight: data?.weight,
       saleEndDate:
         data?.saleEndDate || format(new Date(), "yyyy-MM-dd'T'HH:mm:ss"),
+      freeShippingForAllCountries: data?.freeShippingForAllCountries,
+      freeShippingCountriesIds: Array.isArray(data?.freeShippingCountriesIds)
+        ? data?.freeShippingCountriesIds
+        : data?.freeShippingCountriesIds
+        ? [data?.freeShippingCountriesIds]
+        : [],
+      shippingFeeMethod: data?.shippingFeeMethod,
+      offerTagId: data?.offerTagId,
     },
+  });
+
+  const saleEndDate = form.getValues().saleEndDate || new Date().toISOString();
+  const formattedDate = new Date(saleEndDate).toLocaleDateString("en-GB", {
+    weekday: "short",
+    month: "long",
+    day: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: false,
   });
 
   const errors = form.formState.errors;
@@ -313,127 +336,101 @@ const ProductDetails: FC<ProductDetailsProps> = ({
                 </div>
               </div>
               {/* Name */}
-              <div className="flex flex-col gap-4 lg:flex-row">
-                <FormField
-                  control={form.control}
-                  name="name"
-                  render={({ field }) => (
-                    <FormItem className="flex-1">
-                      <FormLabel>Product Name</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Name" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="variantName"
-                  render={({ field }) => (
-                    <FormItem className="flex-1">
-                      <FormLabel>Variant Name</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Name" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
+              <InputFieldSet label="Name">
+                <div className="flex flex-col gap-4 lg:flex-row">
+                  <FormField
+                    control={form.control}
+                    name="name"
+                    render={({ field }) => (
+                      <FormItem className="flex-1">
+                        <FormControl>
+                          <Input placeholder="Product Name" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="variantName"
+                    render={({ field }) => (
+                      <FormItem className="flex-1">
+                        <FormControl>
+                          <Input placeholder="Variant Name" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              </InputFieldSet>
 
               {/* Product and variant description editors (tabs) */}
-              <Tabs defaultValue="product" className="w-full">
-                <TabsList className="w-full grid grid-cols-2">
-                  <TabsTrigger value="product">Product description</TabsTrigger>
-                  <TabsTrigger value="variant">Variant description</TabsTrigger>
-                </TabsList>
-                <TabsContent value="product">
-                  <FormField
-                    control={form.control}
-                    name="description"
-                    render={({ field }) => (
-                      <FormItem className="flex-1">
-                        <FormLabel>Product Description</FormLabel>
-                        <FormControl>
-                          <JoditEditor
-                            ref={productDescEditor}
-                            value={form.getValues().description}
-                            onChange={(content) => {
-                              form.setValue("description", content);
-                            }}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </TabsContent>
-                <TabsContent value="variant">
-                  <FormField
-                    control={form.control}
-                    name="variantDescription"
-                    render={({ field }) => (
-                      <FormItem className="flex-1">
-                        <FormLabel>Variant Description</FormLabel>
-                        <FormControl>
-                          <JoditEditor
-                            ref={variantDescEditor}
-                            value={form.getValues().description}
-                            onChange={(content) => {
-                              form.setValue("description", content);
-                            }}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </TabsContent>
-              </Tabs>
-              {/* Category - Sub Category */}
-              <div className="flex gap-4">
-                <FormField
-                  control={form.control}
-                  name="categoryId"
-                  render={({ field }) => (
-                    <FormItem className="flex-1">
-                      <FormLabel>Product Category</FormLabel>
-                      <FormControl>
-                        <Select
-                          disabled={isLoading || categories?.length === 0}
-                          onValueChange={field.onChange}
-                          value={field.value}
-                          defaultValue={field.value}
-                        >
+              <InputFieldSet
+                label="Description"
+                description="This product description is the main description for the product. You can add an extra description specific to this variant using Variant Description tab"
+              >
+                <Tabs defaultValue="product" className="w-full">
+                  <TabsList className="w-full grid grid-cols-2">
+                    <TabsTrigger value="product">
+                      Product description
+                    </TabsTrigger>
+                    <TabsTrigger value="variant">
+                      Variant description
+                    </TabsTrigger>
+                  </TabsList>
+                  <TabsContent value="product">
+                    <FormField
+                      control={form.control}
+                      name="description"
+                      render={({ field }) => (
+                        <FormItem className="flex-1">
+                          <FormLabel>Product Description</FormLabel>
                           <FormControl>
-                            <SelectTrigger>
-                              <SelectValue
-                                defaultValue={field.value}
-                                placeholder="Select a category"
-                              />
-                            </SelectTrigger>
+                            <JoditEditor
+                              ref={productDescEditor}
+                              value={form.getValues().description}
+                              onChange={(content) => {
+                                form.setValue("description", content);
+                              }}
+                            />
                           </FormControl>
-                          <SelectContent>
-                            {categories?.map((category) => (
-                              <SelectItem key={category.id} value={category.id}>
-                                {category.name}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                {form.watch().categoryId && (
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </TabsContent>
+                  <TabsContent value="variant">
+                    <FormField
+                      control={form.control}
+                      name="variantDescription"
+                      render={({ field }) => (
+                        <FormItem className="flex-1">
+                          <FormLabel>Variant Description</FormLabel>
+                          <FormControl>
+                            <JoditEditor
+                              ref={variantDescEditor}
+                              value={form.getValues().description}
+                              onChange={(content) => {
+                                form.setValue("description", content);
+                              }}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </TabsContent>
+                </Tabs>
+              </InputFieldSet>
+              {/* Category - Sub Category - Offer Tag */}
+              <InputFieldSet label="Category">
+                <div className="flex gap-4">
                   <FormField
                     control={form.control}
-                    name="subCategoryId"
+                    name="categoryId"
                     render={({ field }) => (
                       <FormItem className="flex-1">
-                        <FormLabel>Product Sub Category</FormLabel>
                         <FormControl>
                           <Select
                             disabled={isLoading || categories?.length === 0}
@@ -446,6 +443,47 @@ const ProductDetails: FC<ProductDetailsProps> = ({
                                 <SelectValue
                                   defaultValue={field.value}
                                   placeholder="Select a category"
+                                />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              {categories?.map((category) => (
+                                <SelectItem
+                                  key={category.id}
+                                  value={category.id}
+                                >
+                                  {category.name}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="subCategoryId"
+                    render={({ field }) => (
+                      <FormItem className="flex-1">
+                        <FormControl>
+                          <Select
+                            disabled={
+                              isLoading ||
+                              categories?.length === 0 ||
+                              !form.getValues().categoryId
+                            }
+                            onValueChange={field.onChange}
+                            value={field.value}
+                            defaultValue={field.value}
+                          >
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue
+                                  defaultValue={field.value}
+                                  placeholder="Select a sub category"
                                 />
                               </SelectTrigger>
                             </FormControl>
@@ -465,8 +503,43 @@ const ProductDetails: FC<ProductDetailsProps> = ({
                       </FormItem>
                     )}
                   />
-                )}
-              </div>
+
+                  {/* Offer Tag */}
+                  <FormField
+                    disabled={isLoading}
+                    control={form.control}
+                    name="offerTagId"
+                    render={({ field }) => (
+                      <FormItem className="flex-1">
+                        <Select
+                          disabled={isLoading || categories.length == 0}
+                          onValueChange={field.onChange}
+                          value={field.value}
+                          defaultValue={field.value}
+                        >
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue
+                                defaultValue={field.value}
+                                placeholder="Select an offer"
+                              />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {offerTags &&
+                              offerTags.map((offer) => (
+                                <SelectItem key={offer.id} value={offer.id}>
+                                  {offer.name}
+                                </SelectItem>
+                              ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              </InputFieldSet>
               {/* Brand, Sku, Weight */}
               <div className="flex flex-col lg:flex-row gap-4">
                 <FormField
@@ -640,10 +713,8 @@ const ProductDetails: FC<ProductDetailsProps> = ({
                       details={variantSpecs}
                       setDetails={setVariantSpecs}
                       initialDetail={{
-                        size: "",
-                        quantity: 1,
-                        price: 0.01,
-                        discount: 0,
+                        name: "",
+                        value: "",
                       }}
                     />
                     {errors.variant_specs && (
@@ -672,50 +743,87 @@ const ProductDetails: FC<ProductDetailsProps> = ({
                 )}
               </div>
               {/* Is On Sale */}
-              <div className="flex border rounded-md">
-                <FormField
-                  control={form.control}
-                  name="isSale"
-                  render={({ field }) => (
-                    <FormItem className="flex flex-row p-4 items-start space-x-2 rounded-md ">
-                      <FormControl>
-                        <Checkbox
-                          checked={field.value}
-                          onCheckedChange={field.onChange}
+              <InputFieldSet
+                label="Sale"
+                description="Is your product on sale?"
+              >
+                <div>
+                  <label
+                    htmlFor="yes"
+                    className="ml-5 flex items-center gap-x-2 cursor-pointer"
+                  >
+                    <FormField
+                      control={form.control}
+                      name="isSale"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormControl>
+                            <>
+                              <input
+                                type="checkbox"
+                                id="yes"
+                                checked={field.value}
+                                onChange={field.onChange}
+                                hidden
+                              />
+                              <Checkbox
+                                checked={field.value}
+                                onCheckedChange={field.onChange}
+                              />
+                            </>
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+                    <span>Yes</span>
+                  </label>
+                  {form.getValues().isSale && (
+                    <div className="mt-5">
+                      <p className="text-sm text-main-secondary dark:text-gray-400 pb-3 flex">
+                        <Dot className="-me-1" />
+                        When sale does end?
+                      </p>
+                      <div className="flex items-center gap-x-5">
+                        <FormField
+                          control={form.control}
+                          name="saleEndDate"
+                          render={({ field }) => (
+                            <FormItem className="ml-4">
+                              <FormControl>
+                                <DateTimePicker
+                                  className="inline-flex items-center gap-2 p-2 border rounded-md shadow-sm"
+                                  calendarIcon={
+                                    <span className="text-gray-500 hover:text-gray-600">
+                                      <CalendarIcon />
+                                    </span>
+                                  }
+                                  clearIcon={
+                                    <span className="text-gray-500 hover:text-gray-600">
+                                      <XIcon />
+                                    </span>
+                                  }
+                                  onChange={(date) => {
+                                    field.onChange(
+                                      date
+                                        ? format(date, "yyyy-MM-dd'T'HH:mm:ss")
+                                        : ""
+                                    );
+                                  }}
+                                  value={
+                                    field.value ? new Date(field.value) : null
+                                  }
+                                />
+                              </FormControl>
+                            </FormItem>
+                          )}
                         />
-                      </FormControl>
-                      <div className="space-y-1 leading-none">
-                        <FormLabel>On Sale</FormLabel>
-                        <FormDescription>
-                          Is this product on sale?
-                        </FormDescription>
+                        <ArrowRight className="w-4 text-[#1087ff]" />
+                        <span>{formattedDate}</span>
                       </div>
-                    </FormItem>
+                    </div>
                   )}
-                />
-                {form.getValues().isSale && (
-                  <FormField
-                    control={form.control}
-                    name="saleEndDate"
-                    render={({ field }) => (
-                      <FormItem className="flex flex-row p-4 items-start space-x-2 rounded-md ">
-                        <FormControl>
-                          <DateTimePicker
-                            onChange={(date) => {
-                              field.onChange(
-                                date
-                                  ? format(date, "yyyy-MM-dd'T'HH:mm:ss")
-                                  : ""
-                              );
-                            }}
-                            value={field.value ? new Date(field.value) : null}
-                          />
-                        </FormControl>
-                      </FormItem>
-                    )}
-                  />
-                )}
-              </div>
+                </div>
+              </InputFieldSet>
               <Button type="submit" disabled={isLoading}>
                 {isLoading
                   ? "Saving..."

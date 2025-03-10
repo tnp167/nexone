@@ -1,3 +1,4 @@
+import { ShippingFeeMethod } from "@prisma/client";
 import { z } from "zod";
 
 export const CategoryFormSchema = z.object({
@@ -186,13 +187,13 @@ export const ProductFormSchema = z.object({
     })
     .uuid(),
   isSale: z.boolean().default(false),
-  // offerTagId: z
-  //   .string({
-  //     required_error: "Product offer tag ID is mandatory.",
-  //     invalid_type_error: "Product offer tag ID must be a valid UUID.",
-  //   })
-  //   .uuid()
-  //   .optional(),
+  offerTagId: z
+    .string({
+      required_error: "Product offer tag ID is mandatory.",
+      invalid_type_error: "Product offer tag ID must be a valid UUID.",
+    })
+    .uuid()
+    .optional(),
   brand: z
     .string({
       required_error: "Product brand is mandatory.",
@@ -302,6 +303,17 @@ export const ProductFormSchema = z.object({
         message: "All product question inputs must be filled correctly.",
       }
     ),
+  freeShippingForAllCountries: z.boolean().default(false),
+  freeShippingCountriesIds: z
+    .object({ id: z.string().optional(), label: z.string(), value: z.string() })
+    .array()
+    .optional()
+    .refine(
+      (ids) => ids?.every((item) => item.label && item.value),
+      "Each country must have a valid name and ID"
+    )
+    .default([]),
+  shippingFeeMethod: z.nativeEnum(ShippingFeeMethod),
 });
 
 export const StoreShippingFormSchema = z.object({

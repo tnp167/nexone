@@ -5,25 +5,26 @@ import { Plus, Minus, PaintBucket } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { SketchPicker } from "react-color";
 
-export interface Detail {
-  [key: string]: string | number | boolean | undefined;
+//The interface for each detail object
+export interface Detail<T = { [key: string]: string | number | undefined }> {
+  [key: string]: T[keyof T];
 }
 
-export interface ClickToAddProps {
-  details: Detail[];
-  setDetails: Dispatch<SetStateAction<Detail[]>>;
-  initialDetail?: Detail;
+export interface ClickToAddInputProps<T extends Detail> {
+  details: T[];
+  setDetails: Dispatch<SetStateAction<T[]>>;
+  initialDetail?: T;
   header?: string;
   colorPicker?: boolean;
 }
 
-const ClickToAddInputs: FC<ClickToAddProps> = ({
+const ClickToAddInputs = <T extends Detail>({
   details,
   setDetails,
-  initialDetail = {},
+  initialDetail = {} as T,
   header,
   colorPicker,
-}) => {
+}: ClickToAddInputProps<T>) => {
   const [colorPickerIndex, setColorPickerIndex] = useState<number | null>(null);
 
   const handleDetailsChange = (

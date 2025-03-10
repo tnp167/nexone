@@ -16,6 +16,7 @@ import {
   ProductVariantImage,
   Review,
   ReviewImage,
+  ShippingFeeMethod,
   ShippingRate,
   Size,
   User,
@@ -41,7 +42,7 @@ export type ProductWithVariantType = {
   variantName: string;
   variantDescription: string;
   variantImage: string;
-  images: { url: string }[];
+  images: { id?: string; url: string }[];
   categoryId: string;
   subCategoryId: string;
   isSale: boolean;
@@ -49,14 +50,24 @@ export type ProductWithVariantType = {
   brand: string;
   sku: string;
   weight: number;
-  colors: { color: string }[];
-  sizes: { size: string; quantity: number; price: number; discount: number }[];
-  product_specs: { name: string; value: string }[];
-  variant_specs: { name: string; value: string }[];
+  colors: { id?: string; color: string }[];
+  sizes: {
+    id?: string;
+    size: string;
+    quantity: number;
+    price: number;
+    discount: number;
+  }[];
+  product_specs: { id?: string; name: string; value: string }[];
+  variant_specs: { id?: string; name: string; value: string }[];
   keywords: string[];
-  questions: { question: string; answer: string }[];
+  questions: { id?: string; question: string; answer: string }[];
+  freeShippingCountriesIds: { id?: string; label: string; value: string };
+  shippingFeeMethod: ShippingFeeMethod;
+  freeShippingForAllCountries: boolean;
   createdAt: Date;
   updatedAt: Date;
+  offerTagId: string;
 };
 
 //Store product
