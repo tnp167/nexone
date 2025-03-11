@@ -64,6 +64,7 @@ export const upsertProduct = async (
         //Update variant and product
       } else {
         //Create new variant
+        await handleCreateVariant(product);
       }
     } else {
       //Create new product and variant
@@ -191,6 +192,59 @@ const handleProductCreate = async (
   }
 };
 
+const handleCreateVariant = async (product: ProductWithVariantType) => {
+  const variantSlug = await generateUniqueSlug(
+    slugify(product.variantName, {
+      replacement: "-",
+      lower: true,
+      trim: true,
+    }),
+    "productVariant"
+  );
+
+  const variantData = {
+    id: product.variantId,
+    productId: product.productId,
+    variantName: product.variantName,
+    variantDescription: product.variantDescription,
+    slug: variantSlug,
+    isSale: product.isSale,
+    saleEndDate: product.isSale ? product.saleEndDate : "",
+    sku: product.sku,
+    keywords: product.keywords.join(","),
+    weight: product.weight,
+    variantImage: product.variantImage,
+    images: {
+      create: product.images.map((img) => ({
+        url: img.url,
+      })),
+    },
+    colors: {
+      create: product.colors.map((color) => ({
+        name: color.color,
+      })),
+    },
+    sizes: {
+      create: product.sizes.map((size) => ({
+        size: size.size,
+        price: size.price,
+        quantity: size.quantity,
+        discount: size.discount,
+      })),
+    },
+    specs: {
+      create: product.variant_specs.map((spec) => ({
+        name: spec.name,
+        value: spec.value,
+      })),
+    },
+  };
+
+  const newVariant = await db.productVariant.create({ data: variantData });
+
+  return newVariant;
+};
+
 // Function: getProductMainInfo
 // Description: Retrieves the main information of a specific product from the database.
 // Access Level: Public
@@ -203,6 +257,10 @@ export const getProductMainInfo = async (productId: string) => {
     where: {
       id: productId,
     },
+    include: {
+      questions: true,
+      specs: true,
+    },
   });
 
   if (!product) return null;
@@ -214,7 +272,17 @@ export const getProductMainInfo = async (productId: string) => {
     brand: product.brand,
     categoryId: product.categoryId,
     subCategoryId: product.subCategoryId,
+    offerTagId: product.offerTagId || undefined,
     storeId: product.storeId,
+    shippingFeeMethod: product.shippingFeeMethod,
+    questions: product.questions.map((q) => ({
+      question: q.question,
+      answer: q.answer,
+    })),
+    product_specs: product.specs.map((spec) => ({
+      name: spec.name,
+      value: spec.value,
+    })),
   };
 };
 
@@ -236,6 +304,7 @@ export const getAllStoreProducts = async (storeUrl: string) => {
     include: {
       category: true,
       subCategory: true,
+      offerTag: true,
       variants: {
         include: {
           images: true,

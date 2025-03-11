@@ -5,6 +5,8 @@ import { columns } from "./columns";
 import { Plus } from "lucide-react";
 import ProductDetails from "@/components/dashboard/forms/ProductDetails";
 import { getAllCategories } from "@/queries/category";
+import { getAllOfferTags } from "@/queries/offer-tag";
+import { db } from "@/lib/db";
 
 const SellerProductPage = async ({
   params,
@@ -14,6 +16,12 @@ const SellerProductPage = async ({
   const { storeUrl } = await params;
   const categories = await getAllCategories();
   const products = await getAllStoreProducts(storeUrl);
+  const offerTags = await getAllOfferTags();
+  const countries = await db.country.findMany({
+    orderBy: {
+      name: "asc",
+    },
+  });
 
   return (
     <DataTable
@@ -24,11 +32,16 @@ const SellerProductPage = async ({
         </>
       }
       modalChildren={
-        <ProductDetails categories={categories} storeUrl={storeUrl} />
+        <ProductDetails
+          categories={categories}
+          storeUrl={storeUrl}
+          offerTags={offerTags}
+          countries={countries}
+        />
       }
       newTabLink={`/dashboard/seller/stores/${storeUrl}/products/new`}
-      filterValue="name"
-      data={products}
+      filterValue="image"
+      data={products || []}
       columns={columns}
       searchPlaceholder="Seach product name"
     />

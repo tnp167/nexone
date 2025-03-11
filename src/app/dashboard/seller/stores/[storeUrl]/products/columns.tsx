@@ -62,12 +62,12 @@ export const columns: ColumnDef<StoreProductType>[] = [
                     alt={`${variant.variantName} image`}
                     width={1000}
                     height={1000}
-                    className="max-w-72 h-72 rounded-md object-cover shadow-sm"
+                    className="max-w-64 h-72 rounded-md object-cover shadow-sm"
                   />
                   <Link
                     href={`/dashboard/seller/stores/${row.original.store.url}/products/${row.original.id}/variants/${variant.id}`}
                   >
-                    <div className="w-full h-full absolute inset-0 z-0 rounded-sm bg-black/50 transition-all duration-300 hidden group-hover:block">
+                    <div className="w-[304px] h-full absolute inset-0 z-0 rounded-sm bg-black/50 transition-all duration-300 hidden group-hover:block">
                       <FilePenLine className="absolute w-6 h-6 text-white top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
                     </div>
                   </Link>
@@ -108,6 +108,9 @@ export const columns: ColumnDef<StoreProductType>[] = [
         </div>
       );
     },
+    filterFn: (row, id, value) => {
+      return row.original.name.toLowerCase().includes(value.toLowerCase());
+    },
   },
   {
     accessorKey: "category",
@@ -116,12 +119,19 @@ export const columns: ColumnDef<StoreProductType>[] = [
       return <span>{row.original.category.name}</span>;
     },
   },
-
   {
     accessorKey: "subCategory",
     header: "Sub Category",
     cell: ({ row }) => {
       return <span>{row.original.subCategory.name}</span>;
+    },
+  },
+  {
+    accessorKey: "offerTag",
+    header: "Offer Tag",
+    cell: ({ row }) => {
+      const offerTag = row.original.offerTag;
+      return <span>{offerTag ? offerTag.name : "-"}</span>;
     },
   },
   {
