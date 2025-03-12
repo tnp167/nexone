@@ -1,7 +1,9 @@
+import { useCartStore } from "@/cart-store/useCartStore";
+import useFormStore from "@/hooks/useFormStore";
 import { CartProductType } from "@/lib/types";
 import { Size } from "@prisma/client";
 import { Minus, Plus } from "lucide-react";
-import { FC, useEffect } from "react";
+import { FC, useEffect, useMemo } from "react";
 
 interface QuantitySelectorProps {
   productId: string;
@@ -25,12 +27,24 @@ const QuantitySelector: FC<QuantitySelectorProps> = ({
   //If no sizeId, return null
   if (!sizeId) return null;
 
+  const cart = useFormStore(useCartStore, (state) => state.cart);
+
   useEffect(() => {
     handleChange("quantity", 1);
   }, [sizeId]);
 
+  const maxQty = useMemo(() => {
+    const searchProduct = cart?.find(
+      (p) =>
+        p.productId === productId &&
+        p.variantId === variantId &&
+        p.sizeId === sizeId
+    );
+    return searchProduct ? searchProduct.stock - searchProduct.quantity : stock;
+  }, [cart, productId, variantId, sizeId, stock]);
+
   const handleIncrease = () => {
-    if (quantity < stock) {
+    if (quantity < maxQty) {
       handleChange("quantity", quantity + 1);
     }
   };
@@ -46,11 +60,16 @@ const QuantitySelector: FC<QuantitySelectorProps> = ({
       <div className="w-full flex justify-between items-center gap-x-5">
         <div className="grow">
           <span className="block text-xs text-gray-500">Select Quantity</span>
+          <span className="block text-xs text-gray-500">
+            {maxQty !== stock &&
+              `You already have ${stock - maxQty} in your cart`}
+          </span>
           <input
             type="number"
             className="w-full p-0 bg-transparent border-0 focus:outline0 text-gray-800"
             min={1}
-            value={quantity}
+            value={maxQty <= 0 ? 0 : quantity}
+            max={maxQty}
             readOnly
           />
         </div>

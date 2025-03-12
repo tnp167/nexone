@@ -2,7 +2,7 @@
 
 import { CartProductType, ProductPageDataType } from "@/lib/types";
 import { cn, isProductValidToAdd } from "@/lib/utils";
-import { FC, useEffect, useState } from "react";
+import { FC, useEffect, useMemo, useState } from "react";
 import ProductSwiper from "./ProductSwiper";
 import ProductInfo from "./product-info/ProductInfo";
 import ShipTo from "./shipping/ShipTo";
@@ -11,6 +11,9 @@ import ReturnsPrivacySecurityCard from "./product-info/ReturnsPrivacySecurityCar
 import QuantitySelector from "./QuantitySelector";
 import SocialShare from "../shared/SocialShare";
 import { ProductVariantImage } from "@prisma/client";
+import { useCartStore } from "@/cart-store/useCartStore";
+import { toast } from "react-hot-toast";
+import useFormStore from "@/hooks/useFormStore";
 
 interface ProductPageContainerProps {
   productData: ProductPageDataType;
@@ -27,7 +30,7 @@ const ProductPageContainer: FC<ProductPageContainerProps> = ({
     return null;
   }
 
-  const { images, shippingDetails, sizes } = productData;
+  const { productId, variantId, images, shippingDetails, sizes } = productData;
 
   //Manage the active image being displayed, initialize to the first image
   const [activeImage, setActiveImage] = useState<ProductVariantImage | null>(
@@ -65,6 +68,8 @@ const ProductPageContainer: FC<ProductPageContainerProps> = ({
   const [productToBeAddedToCart, setProductToBeAddedToCart] =
     useState<CartProductType>(data);
 
+  const { stock } = productToBeAddedToCart;
+
   const [isProductValid, setIsProductValid] = useState<boolean>(false);
 
   const handleChange = (property: keyof CartProductType, value: any) => {
@@ -75,6 +80,27 @@ const ProductPageContainer: FC<ProductPageContainerProps> = ({
     const check = isProductValidToAdd(productToBeAddedToCart);
     setIsProductValid(check);
   }, [productToBeAddedToCart]);
+
+  //Get the store action to add items to cart
+  const addToCart = useCartStore((state) => state.addToCart);
+
+  const cartItems = useFormStore(useCartStore, (state) => state.cart);
+
+  const handleAddToCart = () => {
+    if (maxQty <= 0) return;
+    addToCart(productToBeAddedToCart);
+    toast.success("Product added to cart successfully");
+  };
+
+  const maxQty = useMemo(() => {
+    const searchProduct = cartItems?.find(
+      (p) =>
+        p.productId === productId &&
+        p.variantId === variantId &&
+        p.sizeId === sizeId
+    );
+    return searchProduct ? searchProduct.stock - searchProduct.quantity : stock;
+  }, [cartItems, productId, variantId, sizeId, stock]);
 
   return (
     <div className="relative">
@@ -140,8 +166,9 @@ const ProductPageContainer: FC<ProductPageContainerProps> = ({
                     disabled={!isProductValid}
                     className={cn(
                       "relative w-full py-2.5 min-w-20 bg-orange-border hover:bg-[#e4cdce] text-orange-hover h-11 rounded-3xl leading-6 inline-block font-bold whitespace-nowrap border border-orange-border cursor-pointer select-none transition-all duration-300 ease-bezier-1 text-box",
-                      { "cursor-not-allowed": !isProductValid }
+                      { "cursor-not-allowed": !isProductValid || maxQty <= 0 }
                     )}
+                    onClick={() => handleAddToCart()}
                   >
                     <span>Add to cart</span>
                   </button>
