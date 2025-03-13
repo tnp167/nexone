@@ -4,6 +4,7 @@ import { useCartStore } from "@/cart-store/useCartStore";
 import CartProduct from "@/components/store/cards/CartProduct";
 import FastDelivery from "@/components/store/cards/FastDelivery";
 import CartHeader from "@/components/store/cart/CartHeader";
+import CartSummary from "@/components/store/cart/Summary";
 import { SecurityPrivacyCard } from "@/components/store/product-page/product-info/ReturnsPrivacySecurityCard";
 import useFormStore from "@/hooks/useFormStore";
 import { CartProductType } from "@/lib/types";
@@ -43,6 +44,7 @@ const CartPage = () => {
             {/* Cart side */}
             <div className="sticky top-4 ml-5 w-[380px] max-h-max">
               {/* Cart summary */}
+              <CartSummary cartItems={cartItems} shippingFees={totalShipping} />
               <div className="mt-2 bg-white px-5">
                 <FastDelivery />
               </div>

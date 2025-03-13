@@ -1,7 +1,11 @@
 "use server";
 
 import { db } from "@/lib/db";
+import { CartProductType } from "@/lib/types";
 import { currentUser } from "@clerk/nextjs/server";
+import { getCookie } from "cookies-next";
+import { cookies } from "next/headers";
+import { getShippingDetails } from "./product";
 
 /**
  * @name followStore
@@ -73,4 +77,187 @@ export const followStore = async (storeId: string) => {
     console.error("Failed to follow store", error);
     return false;
   }
+};
+
+/*
+ * Function: saveUserCart
+ * Description: Saves the user's cart by validating product data from the database and ensuring no frontend manipulation.
+ * Permission Level: User who owns the cart
+ * Parameters:
+ *   - cartProducts: An array of product objects from the frontend cart.
+ * Returns:
+ *   - An object containing the updated cart with recalculated total price and validated product data.
+ */
+export const saveUserCart = async (
+  cartProducts: CartProductType[]
+): Promise<boolean> => {
+  const user = await currentUser();
+  if (!user) throw new Error("Unauthenticated");
+
+  const userId = user.id;
+
+  // Search for exisiting user cart
+  const userCart = await db.cart.findFirst({
+    where: { userId },
+  });
+
+  //Delete any exisiting user cart
+  if (userCart) {
+    await db.cart.delete({
+      where: {
+        userId,
+      },
+    });
+  }
+
+  //Fetch product, variant, and size data from the database for validation
+  const validateCartItems = await Promise.all(
+    cartProducts.map(async (cartProduct) => {
+      const { productId, variantId, sizeId, quantity } = cartProduct;
+
+      //Fetch product, variant, and size data from the database
+      const product = await db.product.findUnique({
+        where: {
+          id: productId,
+        },
+        include: {
+          store: true,
+          freeShipping: {
+            include: {
+              eligibleCountries: true,
+            },
+          },
+          variants: {
+            where: {
+              id: variantId,
+            },
+            include: {
+              images: true,
+              sizes: {
+                where: {
+                  id: sizeId,
+                },
+              },
+            },
+          },
+        },
+      });
+
+      if (
+        !product ||
+        product.variants.length === 0 ||
+        product.variants[0].sizes.length === 0
+      )
+        throw new Error(
+          `Invalid product or variant/size for product ${productId}, variant ${variantId}, size ${sizeId}`
+        );
+
+      const variant = product.variants[0];
+      const size = variant.sizes[0];
+
+      //Validate stock and price
+      const validQuantity = Math.min(quantity, size.quantity);
+
+      const price = size.discount
+        ? size.price - size.price * (size.discount / 100)
+        : size.price;
+
+      //Calculate shipping details
+      const countryCookie = await getCookie("userCountry", { cookies });
+
+      let details = {
+        shippingFee: 0,
+        extraShippingFee: 0,
+        isFreeShipping: false,
+      };
+
+      if (countryCookie) {
+        const country = JSON.parse(countryCookie);
+        const tempDetails = await getShippingDetails(
+          product.shippingFeeMethod,
+          country,
+          product.store,
+          product.freeShipping
+        );
+
+        if (typeof tempDetails !== "boolean") {
+          details = tempDetails;
+        }
+      }
+
+      let shippingFee = 0;
+      const { shippingFeeMethod } = product;
+      if (shippingFeeMethod === "ITEM") {
+        shippingFee =
+          quantity === 1
+            ? details.shippingFee
+            : details.shippingFee + details.extraShippingFee * (quantity - 1);
+      } else if (shippingFeeMethod === "WEIGHT") {
+        shippingFee = details.shippingFee * (variant.weight || 0) * quantity;
+      } else if (shippingFeeMethod === "FIXED") {
+        shippingFee = details.shippingFee;
+      }
+
+      const totalPrice = price * validQuantity + shippingFee;
+      return {
+        productId,
+        variantId,
+        productSlug: product.slug,
+        variantSlug: variant.slug,
+        sizeId,
+        storeId: product.storeId,
+        sku: variant.sku,
+        name: `${product.name} - ${variant.variantName}`,
+        image: variant.images[0].url,
+        size: size.size,
+        quantity: validQuantity,
+        price,
+        shippingFee,
+        totalPrice,
+      };
+    })
+  );
+
+  //Recalculate the cart's total price and shipping fee
+  const subTotal = validateCartItems.reduce(
+    (acc, item) => acc + item.price * item.quantity,
+    0
+  );
+
+  const shippingFees = validateCartItems.reduce(
+    (acc, item) => acc + item.shippingFee,
+    0
+  );
+
+  const total = subTotal + shippingFees;
+
+  const cart = await db.cart.create({
+    data: {
+      cartItems: {
+        create: validateCartItems.map((item) => ({
+          productId: item.productId,
+          variantId: item.variantId,
+          sizeId: item.sizeId,
+          productSlug: item.productSlug,
+          variantSlug: item.variantSlug,
+          storeId: item.storeId,
+          sku: item.sku,
+          name: item.name,
+          image: item.image,
+          quantity: item.quantity,
+          size: item.size,
+          price: item.price,
+          shippingFee: item.shippingFee,
+          totalPrice: item.totalPrice,
+        })),
+      },
+      shippingFees,
+      subTotal,
+      total,
+      userId,
+    },
+  });
+
+  if (cart) return true;
+  return false;
 };
