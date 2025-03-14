@@ -3,7 +3,10 @@ import { NextResponse } from "next/server";
 import { getUserCountry } from "./lib/utils";
 
 export default clerkMiddleware(async (auth, req) => {
-  const protectedRoutes = createRouteMatcher(["/dashboard(.*)"]);
+  const protectedRoutes = createRouteMatcher([
+    "/dashboard(.*)",
+    "/checkout(.*)",
+  ]);
   if (protectedRoutes(req)) await auth.protect();
 
   //Country Detection

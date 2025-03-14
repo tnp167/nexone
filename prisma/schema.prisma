@@ -26,13 +26,14 @@ model User {
   picture String @db.Text
   role    Role   @default(USER)
 
-  stores    Store[]  @relation("UserStores")
-  following Store[]  @relation("UserFollowingStore")
-  reviews   Review[] @relation("ReviewToUser")
-  cart      Cart?    @relation("CartToUser")
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  stores            Store[]           @relation("UserStores")
+  following         Store[]           @relation("UserFollowingStore")
+  reviews           Review[]          @relation("ReviewToUser")
+  cart              Cart?             @relation("CartToUser")
+  shippingAddresses ShippingAddress[] @relation("ShippingAddressToUser")
+  
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
 }
 
 model Category {
@@ -272,6 +273,7 @@ model Country {
 
   shippingRates         ShippingRate[]        @relation("CountryToShippingRate")
   freeShippingCountries FreeShippingCountry[] @relation("FreeShippingToCountry")
+  shippingAddresses     ShippingAddress[]     @relation("ShippingAddressToCountry")
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
@@ -406,4 +408,29 @@ model CartItem {
 
   @@index([cartId])
   @@index([storeId])
+}
+
+model ShippingAddress {
+  id        String  @id @default(uuid())
+  firstName String
+  lastName  String
+  phone     String
+  address1  String
+  address2  String?
+  city      String
+  state     String
+  zip_code  String
+  default   Boolean @default(false)
+
+  userId String
+  user   User   @relation("ShippingAddressToUser", fields: [userId], references: [id])
+
+  countryId String
+  country   Country @relation("ShippingAddressToCountry", fields: [countryId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  @@index(countryId)
+  @@index(userId)
 }

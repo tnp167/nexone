@@ -261,3 +261,29 @@ export const saveUserCart = async (
   if (cart) return true;
   return false;
 };
+
+// Function: getUserShippingAddresses
+// Description: Retrieves all shipping addresses for a specific user.
+// Permission Level: User who owns the addresses
+// Parameters: None
+// Returns: List of shipping addresses for the user.
+export const getUserShippingAddresses = async () => {
+  try {
+    const user = await currentUser();
+    if (!user) throw new Error("Unauthenticated");
+
+    //Retrieve all shipping addresses for the specidfied user
+    const shippingAddresses = await db.shippingAddress.findMany({
+      where: {
+        userId: user.id,
+      },
+      include: {
+        country: true,
+      },
+    });
+    return shippingAddresses;
+  } catch (error) {
+    console.error("Failed to get user shipping addresses", error);
+    throw error;
+  }
+};
