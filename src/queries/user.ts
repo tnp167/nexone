@@ -6,6 +6,7 @@ import { currentUser } from "@clerk/nextjs/server";
 import { getCookie } from "cookies-next";
 import { cookies } from "next/headers";
 import { getShippingDetails } from "./product";
+import { ShippingAddress } from "@prisma/client";
 
 /**
  * @name followStore
@@ -285,5 +286,60 @@ export const getUserShippingAddresses = async () => {
   } catch (error) {
     console.error("Failed to get user shipping addresses", error);
     throw error;
+  }
+};
+
+// Function: getUserShippingAddresses
+// Description: Retrieves all shipping addresses for a specific user.
+// Permission Level: User who owns the addresses
+// Parameters: None
+// Returns: List of shipping addresses for the user.
+export const upsertShippingAddress = async (address: ShippingAddress) => {
+  try {
+    const user = await currentUser();
+    if (!user) throw new Error("Unauthenticated");
+    if (!address) throw new Error("Address is required");
+
+    // Making the rest of address default false when adding a new default address
+    if (address.default) {
+      const addressDB = await db.shippingAddress.findUnique({
+        where: { id: address.id },
+      });
+      if (addressDB) {
+        try {
+          await db.shippingAddress.updateMany({
+            where: {
+              userId: user.id,
+              default: true,
+            },
+            data: {
+              default: false,
+            },
+          });
+        } catch (error) {
+          console.error("Failed to update default shipping address", error);
+          throw new Error("Failed to update default shipping address");
+        }
+      }
+    }
+
+    const upsertedAddress = await db.shippingAddress.upsert({
+      where: {
+        id: address.id,
+      },
+      update: {
+        ...address,
+        userId: user.id,
+      },
+      create: {
+        ...address,
+        userId: user.id,
+      },
+    });
+
+    return upsertedAddress;
+  } catch (error) {
+    console.error("Failed to upsert shipping address", error);
+    throw new Error("Failed to upsert shipping address");
   }
 };

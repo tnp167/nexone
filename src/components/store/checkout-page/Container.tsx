@@ -19,7 +19,7 @@ const CheckoutContainer: FC<Props> = ({ cart, countries, addresses }) => {
         <UserShippingAddresses
           countries={countries}
           addresses={addresses}
-          selectedAddres={selectedAddress}
+          selectedAddress={selectedAddress}
           setSelectedAddress={setSelectedAddress}
         />
         <div className="w-full py-4 px-4 bg-white my-3">
