@@ -5,7 +5,10 @@ import { CartProductType } from "@/lib/types";
 import { currentUser } from "@clerk/nextjs/server";
 import { getCookie } from "cookies-next";
 import { cookies } from "next/headers";
-import { getShippingDetails } from "./product";
+import {
+  getDeliveryDetailsForStoreByCountry,
+  getShippingDetails,
+} from "./product";
 import { ShippingAddress } from "@prisma/client";
 
 /**
@@ -341,5 +344,264 @@ export const upsertShippingAddress = async (address: ShippingAddress) => {
   } catch (error) {
     console.error("Failed to upsert shipping address", error);
     throw new Error("Failed to upsert shipping address");
+  }
+};
+
+export const placeOrder = async (
+  shippingAddress: ShippingAddress,
+  cartId: string
+): Promise<{ orderId: string }> => {
+  const user = await currentUser();
+  if (!user) throw new Error("Unauthenticated");
+
+  const userId = user.id;
+
+  const cart = await db.cart.findUnique({
+    where: {
+      id: cartId,
+    },
+    include: {
+      cartItems: true,
+    },
+  });
+
+  if (!cart) throw new Error("Cart not found");
+
+  const cartItems = cart.cartItems;
+
+  const validatedCartItems = await Promise.all(
+    cartItems.map(async (cartItem) => {
+      const { productId, variantId, sizeId, quantity } = cartItem;
+
+      //Fetch product, variant, and size data from the database
+      const product = await db.product.findUnique({
+        where: {
+          id: productId,
+        },
+        include: {
+          store: true,
+          freeShipping: {
+            include: {
+              eligibleCountries: true,
+            },
+          },
+          variants: {
+            where: {
+              id: variantId,
+            },
+            include: {
+              images: true,
+              sizes: {
+                where: {
+                  id: sizeId,
+                },
+              },
+            },
+          },
+        },
+      });
+
+      if (
+        !product ||
+        product.variants.length === 0 ||
+        product.variants[0].sizes.length === 0
+      )
+        throw new Error(
+          `Invalid product or variant/size for product ${productId}, variant ${variantId}, size ${sizeId}`
+        );
+
+      const variant = product.variants[0];
+      const size = variant.sizes[0];
+
+      //Validate stock and price
+      const validQuantity = Math.min(quantity, size.quantity);
+
+      const price = size.discount
+        ? size.price - size.price * (size.discount / 100)
+        : size.price;
+
+      //Calculate shipping details
+      const countryId = shippingAddress.countryId;
+
+      const tempCountry = await db.country.findUnique({
+        where: {
+          id: countryId,
+        },
+      });
+
+      if (!tempCountry) throw new Error("Country not found");
+
+      const country = {
+        name: tempCountry.name,
+        code: tempCountry.code,
+        city: "",
+        region: "",
+      };
+
+      let details = {
+        shippingFee: 0,
+        extraShippingFee: 0,
+        isFreeShipping: false,
+      };
+
+      if (country) {
+        const tempDetails = await getShippingDetails(
+          product.shippingFeeMethod,
+          country,
+          product.store,
+          product.freeShipping
+        );
+
+        if (typeof tempDetails !== "boolean") {
+          details = tempDetails;
+        }
+      }
+
+      let shippingFee = 0;
+      const { shippingFeeMethod } = product;
+      if (shippingFeeMethod === "ITEM") {
+        shippingFee =
+          quantity === 1
+            ? details.shippingFee
+            : details.shippingFee + details.extraShippingFee * (quantity - 1);
+      } else if (shippingFeeMethod === "WEIGHT") {
+        shippingFee = details.shippingFee * (variant.weight || 0) * quantity;
+      } else if (shippingFeeMethod === "FIXED") {
+        shippingFee = details.shippingFee;
+      }
+
+      const totalPrice = price * validQuantity + shippingFee;
+      return {
+        productId,
+        variantId,
+        productSlug: product.slug,
+        variantSlug: variant.slug,
+        sizeId,
+        storeId: product.storeId,
+        sku: variant.sku,
+        name: `${product.name} - ${variant.variantName}`,
+        image: variant.images[0].url,
+        size: size.size,
+        quantity: validQuantity,
+        price,
+        shippingFee,
+        totalPrice,
+      };
+    })
+  );
+
+  //Define the type of grouped items by store
+  type GroupedItems = {
+    [storeId: string]: typeof validatedCartItems;
+  };
+
+  //Group validated items by store
+  const groupedItems = validatedCartItems.reduce<GroupedItems>((acc, item) => {
+    if (!acc[item.storeId]) acc[item.storeId] = [];
+    acc[item.storeId].push(item);
+    return acc;
+  }, {} as GroupedItems);
+
+  const order = await db.order.create({
+    data: {
+      userId: userId,
+      shippingAddressId: shippingAddress.id,
+      orderStatus: "Pending",
+      paymentStatus: "Pending",
+      subTotal: 0,
+      shippingFees: 0,
+      total: 0,
+    },
+  });
+
+  let orderTotalPrice = 0;
+  let orderShippingFee = 0;
+
+  for (const [storeId, items] of Object.entries(groupedItems)) {
+    const groupedTotalPrice = items.reduce(
+      (acc, item) => acc + item.totalPrice,
+      0
+    );
+
+    const groupShippingFee = items.reduce(
+      (acc, item) => acc + item.shippingFee,
+      0
+    );
+
+    const { shippingService, deliveryTimeMin, deliveryTimeMax } =
+      await getDeliveryDetailsForStoreByCountry(
+        storeId,
+        shippingAddress.countryId
+      );
+
+    const orderGroup = await db.orderGroup.create({
+      data: {
+        orderId: order.id,
+        storeId: storeId,
+        status: "Pending",
+        subTotal: groupedTotalPrice - groupShippingFee,
+        shippingFees: groupShippingFee,
+        total: groupedTotalPrice,
+        shippingService: shippingService || "International Delivery",
+        shippingDeliveryMin: deliveryTimeMin || 7,
+        shippingDeliveryMax: deliveryTimeMax || 30,
+      },
+    });
+
+    //Create order items
+    for (const item of items) {
+      await db.orderItem.create({
+        data: {
+          orderGroupId: orderGroup.id,
+          productId: item.productId,
+          variantId: item.variantId,
+          sizeId: item.sizeId,
+          productSlug: item.productSlug,
+          variantSlug: item.variantSlug,
+          sku: item.sku,
+          name: item.name,
+          image: item.image,
+          size: item.size,
+          price: item.price,
+          totalPrice: item.totalPrice,
+          quantity: item.quantity,
+          shippingFee: item.shippingFee,
+        },
+      });
+    }
+
+    //Update order totals
+    orderTotalPrice += groupedTotalPrice;
+    orderShippingFee += groupShippingFee;
+  }
+
+  //Update the main order with totals
+  await db.order.update({
+    where: { id: order.id },
+    data: {
+      subTotal: orderTotalPrice - orderShippingFee,
+      shippingFees: orderShippingFee,
+      total: orderTotalPrice,
+    },
+  });
+
+  return { orderId: order.id };
+};
+
+export const emptyUserCart = async () => {
+  try {
+    const user = await currentUser();
+    if (!user) throw new Error("Unauthenticated");
+
+    const userId = user.id;
+
+    const response = await db.cart.delete({
+      where: { userId },
+    });
+
+    if (response) return true;
+  } catch (error) {
+    console.error("Failed to empty user cart", error);
+    throw new Error("Failed to empty user cart");
   }
 };
