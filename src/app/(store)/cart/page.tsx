@@ -1,63 +1,29 @@
-"use client";
+import CartContainer from "@/components/store/cart/Container";
+import Header from "@/components/store/layout/header/Header";
+import { Country } from "@/lib/types";
+import { cookies } from "next/headers";
 
-import { useCartStore } from "@/cart-store/useCartStore";
-import CartProduct from "@/components/store/cards/CartProduct";
-import FastDelivery from "@/components/store/cards/FastDelivery";
-import CartHeader from "@/components/store/cart/CartHeader";
-import CartSummary from "@/components/store/cart/Summary";
-import { SecurityPrivacyCard } from "@/components/store/product-page/product-info/ReturnsPrivacySecurityCard";
-import useFormStore from "@/hooks/useFormStore";
-import { CartProductType } from "@/lib/types";
-import { useState } from "react";
+const CartPage = async () => {
+  //Get cookies from the store
+  const cookiesStore = await cookies();
+  const userCountryCookie = cookiesStore.get("userCountry");
 
-const CartPage = () => {
-  const cartItems = useFormStore(useCartStore, (state) => state.cart);
+  let userCountry: Country | null = {
+    name: "United Kingdom",
+    city: "",
+    code: "GB",
+    region: "",
+  };
 
-  const [selectedItems, setSelectedItems] = useState<CartProductType[]>([]);
-  const [totalShipping, setTotalShipping] = useState<number>(0);
+  if (userCountryCookie) {
+    userCountry = JSON.parse(userCountryCookie.value) as Country;
+  }
 
   return (
-    <div>
-      {cartItems && cartItems?.length > 0 ? (
-        <div className="bg-[#F5F5F5]">
-          <div className="max-w-[1200px] mx-auto py-6 flex">
-            <div className="min-w-0 flex-1">
-              {/* Cart Header */}
-              <CartHeader
-                cartItems={cartItems}
-                selectedItems={selectedItems}
-                setSelectedItems={setSelectedItems}
-              />
-              <div className="h-auto overflow-x-hidden overflow-auto mt-2">
-                {/* Cart items */}
-                {cartItems.map((product) => (
-                  <CartProduct
-                    key={product.productId}
-                    product={product}
-                    selectedItems={selectedItems}
-                    setSelectedItems={setSelectedItems}
-                    setTotalShipping={setTotalShipping}
-                  />
-                ))}
-              </div>
-            </div>
-            {/* Cart side */}
-            <div className="sticky top-4 ml-5 w-[380px] max-h-max">
-              {/* Cart summary */}
-              <CartSummary cartItems={cartItems} shippingFees={totalShipping} />
-              <div className="mt-2 bg-white px-5">
-                <FastDelivery />
-              </div>
-              <div className="mt-2 bg-white px-5">
-                <SecurityPrivacyCard />
-              </div>
-            </div>
-          </div>
-        </div>
-      ) : (
-        <div> No product </div>
-      )}
-    </div>
+    <>
+      <Header />
+      <CartContainer userCountry={userCountry} />
+    </>
   );
 };
 

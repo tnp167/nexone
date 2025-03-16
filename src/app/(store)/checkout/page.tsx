@@ -1,4 +1,5 @@
 import CheckoutContainer from "@/components/store/checkout-page/Container";
+import Header from "@/components/store/layout/header/Header";
 import { db } from "@/lib/db";
 import { getUserShippingAddresses } from "@/queries/user";
 import { currentUser } from "@clerk/nextjs/server";
@@ -27,15 +28,18 @@ const CheckoutPage = async () => {
     orderBy: { name: "desc" },
   });
   return (
-    <div className="bg-[#F4F4F4] min-h-screen">
-      <div className="max-w-container mx-auto py-4 px-2">
-        <CheckoutContainer
-          cart={cart}
-          countries={countries}
-          addresses={addresses}
-        />
+    <>
+      <Header />
+      <div className="bg-[#F4F4F4] min-h-[calc(100vh-65px)]">
+        <div className="max-w-container mx-auto py-4 px-2">
+          <CheckoutContainer
+            cart={cart}
+            countries={countries}
+            addresses={addresses}
+          />
+        </div>
       </div>
-    </div>
+    </>
   );
 };
 

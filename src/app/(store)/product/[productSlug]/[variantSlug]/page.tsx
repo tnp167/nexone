@@ -9,6 +9,8 @@ import ProductQuestions from "@/components/store/product-page/ProductQuestions";
 import StoreCard from "@/components/store/cards/StoreCard";
 import StoreProducts from "@/components/store/product-page/StoreProducts";
 import ProductReviews from "@/components/store/product-page/reviews/ProductReviews";
+import CategoriesHeader from "@/components/store/layout/categories-header/CategoriesHeader";
+import Header from "@/components/store/layout/header/Header";
 
 interface PageProps {
   params: Promise<{ productSlug: string; variantSlug: string }>;
@@ -56,6 +58,8 @@ const ProductVariantPage = async ({ params, searchParams }: PageProps) => {
   );
   return (
     <div>
+      <Header />
+      <CategoriesHeader />
       <div className="max-w-[1650px] mx-auto p-4 overflwo overflwo-x-hidden">
         <ProductPageContainer productData={productData} sizeId={sizeId}>
           {relatedProducts.products && (
