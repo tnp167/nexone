@@ -13,7 +13,7 @@ import SocialShare from "../shared/SocialShare";
 import { ProductVariantImage } from "@prisma/client";
 import { useCartStore } from "@/cart-store/useCartStore";
 import { toast } from "react-hot-toast";
-import useFormStore from "@/hooks/useFormStore";
+import useFormStore from "@/hooks/useFromStore";
 
 interface ProductPageContainerProps {
   productData: ProductPageDataType;
@@ -84,7 +84,41 @@ const ProductPageContainer: FC<ProductPageContainerProps> = ({
   //Get the store action to add items to cart
   const addToCart = useCartStore((state) => state.addToCart);
 
+  //Get the set cart action to update items in cart
+  const setCart = useCartStore((state) => state.setCart);
+
   const cartItems = useFormStore(useCartStore, (state) => state.cart);
+
+  //Keeping cart state updated
+  useEffect(() => {
+    const handleStorageChange = (event: StorageEvent) => {
+      //If the cart key was changed, update the cart state
+      if (event.key === "cart") {
+        try {
+          const parsedValue = event.newValue
+            ? JSON.parse(event.newValue)
+            : null;
+
+          //Check if parsedValue and state are valid then update the cart
+          if (
+            parsedValue &&
+            parsedValue.state &&
+            Array.isArray(parsedValue.state.cart)
+          ) {
+            setCart(parsedValue.state.cart);
+          }
+        } catch (error) {}
+      }
+    };
+
+    //Attach the event listener
+    window.addEventListener("storage", handleStorageChange);
+
+    //Clean up the event listener when the component unmounts
+    return () => {
+      window.removeEventListener("storage", handleStorageChange);
+    };
+  }, []);
 
   const handleAddToCart = () => {
     if (maxQty <= 0) return;

@@ -2,18 +2,30 @@
 
 import { ProductType, VariantSimplified } from "@/lib/types";
 import Link from "next/link";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import ReactStars from "react-rating-stars-component";
 import ProductCardImageSwiper from "./Swiper";
 import VariantSwitcher from "./VariantSwitcher";
 import { Button } from "@/components/store/ui/button";
 import { HeartIcon } from "lucide-react";
 import ProductPrice from "../../product-page/product-info/ProductPrice";
+import toast from "react-hot-toast";
+import { addToWishlist } from "@/queries/user";
 const ProductCard = ({ product }: { product: ProductType }) => {
-  const { name, slug, rating, sales, variantImages, variants } = product;
+  const { name, slug, rating, sales, variantImages, variants, id } = product;
 
   const [variant, setVariant] = useState<VariantSimplified>(variants[0]);
   const { variantSlug, variantName, images, sizes } = variant;
+
+  const handleaddToWishList = async () => {
+    try {
+      const response = await addToWishlist(id, variant.variantId);
+      if (response) toast.success("Added to wishlist");
+    } catch (error: any) {
+      toast.error(error.toString());
+    }
+  };
+
   return (
     <div>
       <div className="group w-48 sm:w-[220px] relative transition-all duration-75 p-4 rounded-t-3xl border border-transparent hover:shadow-xl hover:border-border bg-white ease-in-out">
@@ -46,7 +58,7 @@ const ProductCard = ({ product }: { product: ProductType }) => {
             )}
           </Link>
           {/* Product Price */}
-          <ProductPrice sizes={sizes} isCard={true} />
+          <ProductPrice sizes={sizes} isCard={true} handleChange={() => {}} />
         </div>
         <div className="hidden group-hover:block absolute -left-[1px] bg-white border border-t-transparent w-[calc(100%+2px)] shadow-xl rounded-b-3xl px-4 pb-4 z-10 space-y-2">
           {/* Variant Switcher */}
@@ -59,7 +71,11 @@ const ProductCard = ({ product }: { product: ProductType }) => {
           {/* Actions */}
           <div className="flex gap-x-1">
             <Button>Add to cart</Button>
-            <Button variant="black" size="icon">
+            <Button
+              variant="black"
+              size="icon"
+              onClick={() => handleaddToWishList()}
+            >
               <HeartIcon className="w-4" />
             </Button>
           </div>

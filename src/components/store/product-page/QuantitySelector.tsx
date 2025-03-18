@@ -1,5 +1,5 @@
 import { useCartStore } from "@/cart-store/useCartStore";
-import useFormStore from "@/hooks/useFormStore";
+import useFormStore from "@/hooks/useFromStore";
 import { CartProductType } from "@/lib/types";
 import { Size } from "@prisma/client";
 import { Minus, Plus } from "lucide-react";

@@ -15,6 +15,7 @@ interface Actions {
   removeMultipleFromCart: (products: CartProductType[]) => void;
   updateProductQuantity: (product: CartProductType, quantity: number) => void;
   emptyCart: () => void;
+  setCart: (cart: CartProductType[]) => void;
 }
 
 //Initialize the cart store
@@ -104,17 +105,54 @@ export const useCartStore = create(
           totalItems,
           totalPrice,
         }));
+
+        //Sync with local storage after removal
+        localStorage.setItem("cart", JSON.stringify(updatedCart));
       },
       removeMultipleFromCart: (products: CartProductType[]) => {
-        products.forEach((product) => {
-          get().removeFromCart(product);
-        });
+        const { cart } = get();
+        const updatedCart = cart.filter(
+          (item) =>
+            !products.some(
+              (p) =>
+                p.productId === item.productId &&
+                p.variantId === item.variantId &&
+                p.sizeId === item.sizeId
+            )
+        );
+        const totalItems = updatedCart.length;
+        const totalPrice = updatedCart.reduce((acc, item) => {
+          return acc + item.price * item.quantity;
+        }, 0);
+        set(() => ({
+          cart: updatedCart,
+          totalItems,
+          totalPrice,
+        }));
+
+        //Sync with local storage after removal
+        localStorage.setItem("cart", JSON.stringify(updatedCart));
       },
       emptyCart: () => {
         set(() => ({
           cart: [],
           totalItems: 0,
           totalPrice: 0,
+        }));
+
+        //Clear the cart from local storage
+        localStorage.removeItem("cart");
+      },
+      setCart: (newCart: CartProductType[]) => {
+        const totalItems = newCart.length;
+        const totalPrice = newCart.reduce(
+          (sum, item) => sum + item.price * item.quantity,
+          0
+        );
+        set(() => ({
+          cart: newCart,
+          totalItems,
+          totalPrice,
         }));
       },
     }),

@@ -605,3 +605,149 @@ export const emptyUserCart = async () => {
     throw new Error("Failed to empty user cart");
   }
 };
+
+/*
+ * Function: updateCartWithLatest
+ * Description: Keeps the cart updated with latest info (price,qty,shipping fee...).
+ * Permission Level: Public
+ * Parameters:
+ *   - cartProducts: An array of product objects from the frontend cart.
+ * Returns:
+ *   - An object containing the updated cart with recalculated total price and validated product data.
+ */
+export const updateCartWithLatest = async (
+  cartProducts: CartProductType[]
+): Promise<CartProductType[]> => {
+  //Fetch product, variant, and size data from the database
+  const validatedCartItems = await Promise.all(
+    cartProducts.map(async (cartProduct) => {
+      const { productId, variantId, sizeId, quantity } = cartProduct;
+
+      //Fetch product, variant, and size data from the database
+      const product = await db.product.findUnique({
+        where: { id: productId },
+        include: {
+          store: true,
+          freeShipping: {
+            include: {
+              eligibleCountries: true,
+            },
+          },
+          variants: {
+            where: { id: variantId },
+            include: {
+              sizes: {
+                where: { id: sizeId },
+              },
+              images: true,
+            },
+          },
+        },
+      });
+
+      if (
+        !product ||
+        product.variants.length === 0 ||
+        product.variants[0].sizes.length === 0
+      )
+        throw new Error("Invalid product or variant/size");
+
+      const variant = product.variants[0];
+      const size = variant.sizes[0];
+
+      //Calculate shipping details
+      const countryCookie = await getCookie("userCountry", { cookies });
+
+      let details = {
+        shippingService: product.store.defaultShippingService,
+        shippingFee: 0,
+        extraShippingFee: 0,
+        isFreeShipping: false,
+        deliveryTimeMin: 0,
+        deliveryTimeMax: 0,
+      };
+
+      if (countryCookie) {
+        const country = JSON.parse(countryCookie);
+        const tempDetails = await getShippingDetails(
+          product.shippingFeeMethod,
+          country,
+          product.store,
+          product.freeShipping
+        );
+
+        if (typeof tempDetails !== "boolean") {
+          details = tempDetails;
+        }
+      }
+
+      const price = size.discount
+        ? size.price - size.price * (size.discount / 100)
+        : size.price;
+
+      const validatedQuantity = Math.min(quantity, size.quantity);
+
+      return {
+        productId,
+        variantId,
+        productSlug: product.slug,
+        variantSlug: variant.slug,
+        sizeId,
+        name: product.name,
+        sku: variant.sku,
+        image: variant.images[0].url,
+        variantName: variant.variantName,
+        variantImage: variant.images[0].url,
+        stock: size.quantity,
+        weight: variant?.weight || 0,
+        shippingMethod: product.shippingFeeMethod,
+        size: size.size,
+        quantity: validatedQuantity,
+        price,
+        shippingFee: details.shippingFee,
+        extraShippingFee: details.extraShippingFee,
+        shippingService: details.shippingService,
+        deliveryTimeMin: details.deliveryTimeMin,
+        deliveryTimeMax: details.deliveryTimeMax,
+        isFreeShipping: details.isFreeShipping,
+      };
+    })
+  );
+
+  return validatedCartItems;
+};
+
+export const addToWishlist = async (
+  productId: string,
+  variantId: string,
+  sizeId?: string
+) => {
+  const user = await currentUser();
+  if (!user) throw new Error("Unauthenticated");
+
+  const userId = user.id;
+
+  try {
+    const existingWishlistItems = await db.wishlist.findFirst({
+      where: {
+        userId,
+        productId,
+        variantId,
+      },
+    });
+
+    if (existingWishlistItems) throw new Error("Product already in wishlist");
+
+    return await db.wishlist.create({
+      data: {
+        userId,
+        productId,
+        variantId,
+        sizeId,
+      },
+    });
+  } catch (error) {
+    console.error("Failed to add to wishlist", error);
+    throw new Error("Failed to add to wishlist");
+  }
+};

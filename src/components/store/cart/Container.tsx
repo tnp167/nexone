@@ -1,22 +1,52 @@
 "use client";
 
 import { useCartStore } from "@/cart-store/useCartStore";
-import useFormStore from "@/hooks/useFormStore";
+import useFromStore from "@/hooks/useFromStore";
 import { CartProductType, Country } from "@/lib/types";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { SecurityPrivacyCard } from "../product-page/product-info/ReturnsPrivacySecurityCard";
 import CartProduct from "../cards/CartProduct";
 import CartHeader from "./CartHeader";
 import CartSummary from "./Summary";
 import FastDelivery from "../cards/FastDelivery";
 import EmptyCart from "./EmptyCart";
+import { updateCartWithLatest } from "@/queries/user";
+import CountryNote from "./CountryNote";
 
 const CartContainer = ({ userCountry }: { userCountry: Country }) => {
-  const cartItems = useFormStore(useCartStore, (state) => state.cart);
+  const cartItems = useFromStore(useCartStore, (state) => state.cart);
+  const setCart = useCartStore((state) => state.setCart);
 
   const [loading, setLoading] = useState<boolean>(false);
+  const [isCartLoaded, setIsCartLoaded] = useState<boolean>(false);
+
   const [selectedItems, setSelectedItems] = useState<CartProductType[]>([]);
   const [totalShipping, setTotalShipping] = useState<number>(0);
+
+  useEffect(() => {
+    if (cartItems !== undefined) {
+      setIsCartLoaded(true); // Set the cart as loaded when the cart items are fetched
+    }
+  }, [cartItems]);
+
+  useEffect(() => {
+    const loadAndSyncCart = async () => {
+      if (cartItems?.length) {
+        try {
+          const updatedCart = await updateCartWithLatest(cartItems);
+          console.log("updatedCart", updatedCart);
+          setCart(updatedCart);
+          setLoading(false);
+        } catch (error) {
+          setLoading(false);
+          console.error("Error loading and syncing cart:", error);
+        }
+      }
+    };
+
+    loadAndSyncCart();
+  }, [isCartLoaded, userCountry]);
+
   return (
     <div>
       {cartItems && cartItems?.length > 0 ? (
@@ -31,6 +61,9 @@ const CartContainer = ({ userCountry }: { userCountry: Country }) => {
                   selectedItems={selectedItems}
                   setSelectedItems={setSelectedItems}
                 />
+                <div className="my-2">
+                  <CountryNote country={userCountry.name} />
+                </div>
                 <div className="h-auto overflow-x-hidden overflow-auto mt-2">
                   {/* Cart items */}
                   {cartItems.map((product) => (
@@ -40,6 +73,7 @@ const CartContainer = ({ userCountry }: { userCountry: Country }) => {
                       selectedItems={selectedItems}
                       setSelectedItems={setSelectedItems}
                       setTotalShipping={setTotalShipping}
+                      userCountry={userCountry}
                     />
                   ))}
                 </div>
