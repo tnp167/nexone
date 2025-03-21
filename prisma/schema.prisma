@@ -109,6 +109,7 @@ model Store {
   followers     User[]         @relation("UserFollowingStore")
   cartItems     CartItem[]     @relation("StoreToCartItem")
   orderGroups   OrderGroup[]   @relation("StoreToOrderGroup")
+  coupons       Coupon[]       @relation("StoreToCoupon")
 
   @@index([userId])
 }
@@ -380,10 +381,15 @@ model Cart {
   subTotal     Float
   total        Float
 
+  couponId String?
+  coupon   Coupon? @relation("CouponToCart", fields: [couponId], references: [id])
+
   cartItems CartItem[] @relation("CartToCartItem")
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
+
+  @@index([couponId])
 }
 
 model CartItem {
@@ -569,4 +575,22 @@ model Wishlist {
   @@index([productId])
   @@index([variantId])
   @@index([sizeId])
+}
+
+model Coupon {
+  id        String @id @default(uuid())
+  code      String @unique
+  startDate String
+  endDate   String
+  discount  Int
+
+  storeId String
+  store   Store  @relation("StoreToCoupon", fields: [storeId], references: [id])
+
+  carts Cart[] @relation("CouponToCart")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  @@index([storeId])
 }
