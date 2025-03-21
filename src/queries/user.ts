@@ -1,15 +1,17 @@
 "use server";
 
 import { db } from "@/lib/db";
-import { CartProductType } from "@/lib/types";
+import { CartProductType, CartWithCartItemsType, Country } from "@/lib/types";
 import { currentUser } from "@clerk/nextjs/server";
 import { getCookie } from "cookies-next";
 import { cookies } from "next/headers";
 import {
   getDeliveryDetailsForStoreByCountry,
+  getProductShippingFee,
   getShippingDetails,
 } from "./product";
-import { ShippingAddress } from "@prisma/client";
+import { CartItem, ShippingAddress } from "@prisma/client";
+import { Country as CountryDB } from "@prisma/client";
 
 /**
  * @name followStore
@@ -750,4 +752,142 @@ export const addToWishlist = async (
     console.error("Failed to add to wishlist", error);
     throw new Error("Failed to add to wishlist");
   }
+};
+
+/*
+ * Function: updateCheckoutProductstWithLatest
+ * Description: Keeps the cart updated with latest info (price,qty,shipping fee...).
+ * Permission Level: Public
+ * Parameters:
+ *   - cartProducts: An array of product objects from the frontend cart.
+ *   - address: Country.
+ * Returns:
+ *   - An object containing the updated cart with recalculated total price and validated product data.
+ */
+export const updateCheckoutProductsWithLatest = async (
+  cartProducts: CartItem[],
+  address: CountryDB | undefined
+): Promise<CartWithCartItemsType> => {
+  //Fetch product, variant, and size data from the database
+  const validatedCartItems = await Promise.all(
+    cartProducts.map(async (cartProduct) => {
+      const { productId, variantId, sizeId, quantity } = cartProduct;
+
+      //Fetch product, variant, and size data from the database
+      const product = await db.product.findUnique({
+        where: { id: productId },
+        include: {
+          store: true,
+          freeShipping: {
+            include: {
+              eligibleCountries: true,
+            },
+          },
+          variants: {
+            where: { id: variantId },
+            include: {
+              sizes: {
+                where: { id: sizeId },
+              },
+              images: true,
+            },
+          },
+        },
+      });
+
+      if (
+        !product ||
+        product.variants.length === 0 ||
+        product.variants[0].sizes.length === 0
+      )
+        throw new Error("Invalid product or variant/size");
+
+      const variant = product.variants[0];
+      const size = variant.sizes[0];
+
+      //Calculate shipping details
+      const countryCookie = await getCookie("userCountry", { cookies });
+
+      const country = address
+        ? address
+        : countryCookie
+        ? JSON.parse(countryCookie)
+        : null;
+
+      if (!country) throw new Error("Country not found");
+
+      let shippingFee = 0;
+
+      const { shippingFeeMethod, freeShipping, store } = product;
+
+      const fee = await getProductShippingFee(
+        shippingFeeMethod,
+        country,
+        store,
+        freeShipping,
+        variant.weight || 0,
+        quantity
+      );
+      if (fee) {
+        shippingFee = fee;
+      }
+
+      const price = size.discount
+        ? size.price - size.price * (size.discount / 100)
+        : size.price;
+
+      const validatedQuantity = Math.min(quantity, size.quantity);
+
+      const totalPrice = price * validatedQuantity + shippingFee;
+
+      try {
+        const newCartItem = await db.cartItem.update({
+          where: {
+            id: cartProduct.id,
+          },
+          data: {
+            name: `${product.name} · ${variant.variantName}`,
+            image: variant.images[0].url,
+            price,
+            quantity: validatedQuantity,
+            shippingFee,
+            totalPrice,
+          },
+        });
+        return newCartItem;
+      } catch (error) {
+        console.error("Failed to update cart item", error);
+        return cartProduct;
+      }
+    })
+  );
+
+  //Revalidate the cart's total price and shipping fee
+  const subTotal = validatedCartItems.reduce(
+    (acc, item) => acc + item.price * item.quantity,
+    0
+  );
+  const shippingFees = validatedCartItems.reduce(
+    (acc, item) => acc + item.shippingFee,
+    0
+  );
+  const total = subTotal + shippingFees;
+
+  const cart = await db.cart.update({
+    where: {
+      id: cartProducts[0].cartId,
+    },
+    data: {
+      subTotal,
+      shippingFees,
+      total,
+    },
+    include: {
+      cartItems: true,
+    },
+  });
+
+  if (!cart) throw new Error("Something went wrong");
+
+  return cart;
 };

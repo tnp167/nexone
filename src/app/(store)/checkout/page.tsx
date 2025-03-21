@@ -1,8 +1,10 @@
 import CheckoutContainer from "@/components/store/checkout-page/Container";
 import Header from "@/components/store/layout/header/Header";
 import { db } from "@/lib/db";
+import { Country } from "@/lib/types";
 import { getUserShippingAddresses } from "@/queries/user";
 import { currentUser } from "@clerk/nextjs/server";
+import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
 const CheckoutPage = async () => {
@@ -27,6 +29,20 @@ const CheckoutPage = async () => {
   const countries = await db.country.findMany({
     orderBy: { name: "desc" },
   });
+
+  const cookiesStore = await cookies();
+  const userCountryCookie = cookiesStore.get("userCountry");
+
+  let userCountry: Country | null = {
+    name: "United Kingdom",
+    city: "",
+    code: "GB",
+    region: "",
+  };
+
+  if (userCountryCookie) {
+    userCountry = JSON.parse(userCountryCookie.value) as Country;
+  }
   return (
     <>
       <Header />
@@ -36,6 +52,7 @@ const CheckoutPage = async () => {
             cart={cart}
             countries={countries}
             addresses={addresses}
+            userCountry={userCountry}
           />
         </div>
       </div>

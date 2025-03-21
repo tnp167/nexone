@@ -2,6 +2,7 @@
 
 import { db } from "@/lib/db";
 import {
+  Country,
   FreeShippingWithCountriesType,
   ProductPageType,
   ProductShippingDetailsType,
@@ -974,4 +975,83 @@ export const getDeliveryDetailsForStoreByCountry = async (
     deliveryTimeMin,
     deliveryTimeMax,
   };
+};
+
+// Function: getProductShippingFee
+// Description: Retrieves and calculates shipping fee based on user country and product.
+// Access Level: Public
+// Parameters:
+//   - shippingFeeMethod: The shipping fee method of the product.
+//   - userCountry: The parsed user country object from cookies.
+//   - store :  store details.
+//   - freeShipping.
+//   - weight.
+//   - quantity.
+// Returns: Calculated total shipping fee for product.
+export const getProductShippingFee = async (
+  shippingFeeMethod: ShippingFeeMethod,
+  userCountry: Country,
+  store: Store,
+  freeShipping: FreeShippingWithCountriesType | null,
+  weight: number,
+  quantity: number
+) => {
+  let shippingFee = 0;
+
+  // Get country details based on user country name and user country code
+  const country = await db.country.findUnique({
+    where: {
+      code: userCountry.code,
+    },
+  });
+
+  if (country) {
+    if (freeShipping) {
+      const freeShippingCountry = freeShipping.eligibleCountries;
+      const isEligibleForFreeShipping = freeShippingCountry.some(
+        (c) => c.countryId === country.name
+      );
+
+      if (isEligibleForFreeShipping) {
+        return 0; //Free shipping is available for this country
+      }
+    }
+
+    //Fetch shipping rate for the country
+    const shippingRate = await db.shippingRate.findFirst({
+      where: {
+        storeId: store.id,
+        countryId: country.id,
+      },
+    });
+
+    //Destructure the shipping rate with defaults
+    const {
+      shippingFeePerItem = store.defaultShippingFeesPerItem,
+      shippingFeeForAdditionalItem = store.defaultShippingFeesForAdditionalItem,
+      shippingFeePerKg = store.defaultShippingFeePerKg,
+      shippingFeeFixed = store.defaultShippingFeeFixed,
+    } = shippingRate || {};
+
+    //Calculate shipping fee based on shipping fee method
+    const additionalItemsQty = quantity - 1;
+
+    //Define fee calculation methods in a map (using functions)
+    const feeCalculators: Record<string, () => number> = {
+      ITEM: () =>
+        shippingFeePerItem + shippingFeeForAdditionalItem * additionalItemsQty,
+      WEIGHT: () => shippingFeePerKg * weight * quantity,
+      FIXED: () => shippingFeeFixed,
+    };
+
+    //Check if the fee calculation method exists and calculate the fee
+    const feeCalculationMethod = feeCalculators[shippingFeeMethod];
+    if (feeCalculationMethod) {
+      return feeCalculationMethod(); //Execute the fee calculation method
+    }
+
+    return 0; //Return 0 if the fee calculation method does not exist
+  }
+
+  return 0; //Return 0 if the country is not found
 };
