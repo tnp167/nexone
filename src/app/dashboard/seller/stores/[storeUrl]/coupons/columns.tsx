@@ -20,15 +20,26 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
 import { useToast } from "@/hooks/use-toast";
 import { useModal } from "@/providers/modal-provider";
 
-import { CopyPlus, FilePenLine, MoreHorizontal, Trash } from "lucide-react";
+import {
+  BadgeCheck,
+  BadgeMinus,
+  CopyPlus,
+  Edit,
+  FilePenLine,
+  MoreHorizontal,
+  Trash,
+} from "lucide-react";
+import { getCategory } from "@/queries/category";
 import { deleteProduct } from "@/queries/product";
 import { ColumnDef } from "@tanstack/react-table";
+import { Category } from "@prisma/client";
 import { StoreProductType } from "@/lib/types";
 import Link from "next/link";
 
