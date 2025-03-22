@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -36,149 +36,85 @@ import {
   MoreHorizontal,
   Trash,
 } from "lucide-react";
-import { getCategory } from "@/queries/category";
 import { deleteProduct } from "@/queries/product";
 import { ColumnDef } from "@tanstack/react-table";
-import { Category } from "@prisma/client";
-import { StoreProductType } from "@/lib/types";
+import { Coupon } from "@prisma/client";
 import Link from "next/link";
+import { getTimeUntil } from "@/lib/utils";
+import CustomModal from "@/components/dashboard/shared/CustomModal";
+import CouponDetails from "@/components/dashboard/forms/CouponDetails";
+import { deleteCoupon, getCoupon } from "@/queries/coupon";
 
-export const columns: ColumnDef<StoreProductType>[] = [
+export const columns: ColumnDef<Coupon>[] = [
   {
-    accessorKey: "image",
-    header: "",
+    accessorKey: "code",
+    header: "Code",
+    cell: ({ row }) => {
+      return <span>{row.original.code}</span>;
+    },
+  },
+  {
+    accessorKey: "discount",
+    header: "Discount",
+    cell: ({ row }) => {
+      return <span>{row.original.discount}%</span>;
+    },
+  },
+  {
+    accessorKey: "startDate",
+    header: "Start Date",
     cell: ({ row }) => {
       return (
-        <div className="flex flex-col gap-y-3">
-          <h1 className="font-bold truncate pb-3 border-b">
-            {row.original.name}
-          </h1>
-          <div className="relative flex flex-wrap gap-2">
-            {row.original.variants.map((variant) => (
-              <div key={variant.id} className="flex flex-col gap-y-2 group">
-                <div className="relative cursor-pointer p-2">
-                  <Image
-                    src={variant.images[0].url}
-                    alt={`${variant.variantName} image`}
-                    width={1000}
-                    height={1000}
-                    className="max-w-64 h-72 rounded-md object-cover shadow-sm"
-                  />
-                  <Link
-                    href={`/dashboard/seller/stores/${row.original.store.url}/products/${row.original.id}/variants/${variant.id}`}
-                  >
-                    <div className="w-[304px] h-full absolute inset-0 z-0 rounded-sm bg-black/50 transition-all duration-300 hidden group-hover:block">
-                      <FilePenLine className="absolute w-6 h-6 text-white top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
-                    </div>
-                  </Link>
-                  {/* Colors */}
-                  <div className="flex mt-2 gap-2 p-1">
-                    <div className="w-7 flex flex-col gap-2  rounded-md">
-                      {variant.colors.map((color) => (
-                        <>
-                          <span
-                            key={color.name}
-                            className="w-5 h-5 rounded-full shadow-2xl"
-                            style={{ backgroundColor: color.name }}
-                          />
-                        </>
-                      ))}
-                    </div>
-                  </div>
-                  {/*  Name of variant */}
-                  <div>
-                    <h1 className="max-w-40 capitalize text-sm">
-                      {variant.variantName}
-                    </h1>
-                    <div className="flex flex-wrap gap-2 max-w-72 mt-1">
-                      {variant.sizes.map((size) => (
-                        <span
-                          key={size.size}
-                          className="w-fit p-1 rounded-md text-xs font-medium bg-white/10"
-                        >
-                          {size.size} - ({size.quantity}) - {size.price}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      );
-    },
-    filterFn: (row, id, value) => {
-      return row.original.name.toLowerCase().includes(value.toLowerCase());
-    },
-  },
-  {
-    accessorKey: "category",
-    header: "Category",
-    cell: ({ row }) => {
-      return <span>{row.original.category.name}</span>;
-    },
-  },
-  {
-    accessorKey: "subCategory",
-    header: "Sub Category",
-    cell: ({ row }) => {
-      return <span>{row.original.subCategory.name}</span>;
-    },
-  },
-  {
-    accessorKey: "offerTag",
-    header: "Offer Tag",
-    cell: ({ row }) => {
-      const offerTag = row.original.offerTag;
-      return <span>{offerTag ? offerTag.name : "-"}</span>;
-    },
-  },
-  {
-    accessorKey: "brand",
-    header: "Brand",
-    cell: ({ row }) => {
-      return <span>{row.original.brand}</span>;
-    },
-  },
-  {
-    accessorKey: "new-variant",
-    header: "Add Variant",
-    cell: ({ row }) => {
-      return (
-        <Link
-          href={`/dashboard/seller/stores/${row.original.store.url}/products/${row.original.id}/variants/new`}
-        >
-          <CopyPlus className="hover:text-blue-500 " />
-        </Link>
+        <span>{new Date(row.original.startDate).toLocaleDateString()}</span>
       );
     },
   },
+  {
+    accessorKey: "endDate",
+    header: "End Date",
+    cell: ({ row }) => {
+      return <span>{new Date(row.original.endDate).toLocaleDateString()}</span>;
+    },
+  },
+  {
+    accessorKey: "timeLeft",
+    header: "Time Left",
+    cell: ({ row }) => {
+      const { days, hours } = getTimeUntil(new Date(row.original.endDate));
+      return (
+        <span>
+          {days} days {hours} hours
+        </span>
+      );
+    },
+  },
+
   {
     id: "actions",
     cell: ({ row }) => {
       const rowData = row.original;
 
-      return <CellActions productId={rowData.id} />;
+      return <CellActions coupon={rowData} />;
     },
   },
 ];
 
 // Define props interface for CellActions component
 interface CellActionsProps {
-  productId: string;
+  coupon: Coupon;
 }
 
 // CellActions component definition
-const CellActions: React.FC<CellActionsProps> = ({ productId }) => {
+const CellActions: React.FC<CellActionsProps> = ({ coupon }) => {
   // Hooks
-  const { setClose } = useModal();
+  const { setOpen, setClose } = useModal();
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
   const router = useRouter();
 
+  const params = useParams<{ storeUrl: string }>();
   // Return null if rowData or rowData.id don't exist
-  if (!productId) return null;
+  if (!coupon) return null;
 
   return (
     <AlertDialog>
@@ -191,9 +127,33 @@ const CellActions: React.FC<CellActionsProps> = ({ productId }) => {
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
           <DropdownMenuLabel>Actions</DropdownMenuLabel>
+          <DropdownMenuItem
+            className="flex gap-2"
+            onClick={() => {
+              setOpen(
+                // Custom modal component
+                <CustomModal>
+                  {/* Store details component */}
+                  <CouponDetails
+                    data={{ ...coupon }}
+                    storeUrl={params.storeUrl}
+                  />
+                </CustomModal>,
+                async () => {
+                  return {
+                    rowData: await getCoupon(coupon?.id),
+                  };
+                }
+              );
+            }}
+          >
+            <Edit size={15} />
+            Edit Details
+          </DropdownMenuItem>
+          <DropdownMenuSeparator />
           <AlertDialogTrigger asChild>
             <DropdownMenuItem className="flex gap-2" onClick={() => {}}>
-              <Trash size={15} /> Delete product
+              <Trash size={15} /> Delete coupon
             </DropdownMenuItem>
           </AlertDialogTrigger>
         </DropdownMenuContent>
@@ -205,7 +165,7 @@ const CellActions: React.FC<CellActionsProps> = ({ productId }) => {
           </AlertDialogTitle>
           <AlertDialogDescription className="text-left">
             This action cannot be undone. This will permanently delete the
-            product and related data.
+            coupon.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter className="flex items-center">
@@ -215,10 +175,10 @@ const CellActions: React.FC<CellActionsProps> = ({ productId }) => {
             className="bg-destructive hover:bg-destructive mb-2 text-white"
             onClick={async () => {
               setLoading(true);
-              await deleteProduct(productId);
+              await deleteCoupon(coupon.id, params.storeUrl);
               toast({
-                title: "Deleted product",
-                description: "The product has been deleted.",
+                title: "Deleted coupon",
+                description: "The coupon has been deleted.",
               });
               setLoading(false);
               router.refresh();

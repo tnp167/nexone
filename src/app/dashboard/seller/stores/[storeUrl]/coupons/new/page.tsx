@@ -1,7 +1,3 @@
-import ProductDetails from "@/components/dashboard/forms/ProductDetails";
-import { db } from "@/lib/db";
-import { getAllCategories } from "@/queries/category";
-import { getAllOfferTags } from "@/queries/offer-tag";
 import CouponDetails from "@/components/dashboard/forms/CouponDetails";
 
 export default async function SellerNewCouponPage({
@@ -9,9 +5,10 @@ export default async function SellerNewCouponPage({
 }: {
   params: Promise<{ storeUrl: string }>;
 }) {
+  const { storeUrl } = await params;
   return (
     <div className="w-full">
-      <CouponDetails />
+      <CouponDetails storeUrl={storeUrl} />
     </div>
   );
 }

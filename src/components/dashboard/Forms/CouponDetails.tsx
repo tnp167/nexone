@@ -35,12 +35,14 @@ import DateTimePicker from "react-datetime-picker";
 import "react-datetime-picker/dist/DateTimePicker.css";
 import "react-calendar/dist/Calendar.css";
 import "react-clock/dist/Clock.css";
+import { upsertCoupon } from "@/queries/coupon";
 
 interface CouponDetailsProps {
   data?: Coupon;
+  storeUrl: string;
 }
 
-const CouponDetails: FC<CouponDetailsProps> = ({ data }) => {
+const CouponDetails: FC<CouponDetailsProps> = ({ data, storeUrl }) => {
   const { toast } = useToast();
   const router = useRouter();
 
@@ -65,32 +67,36 @@ const CouponDetails: FC<CouponDetailsProps> = ({ data }) => {
 
   const handleSubmit = async (values: z.infer<typeof CouponFormSchema>) => {
     try {
-      const response = await upsertCategory({
-        id: data?.id ? data.id : uuidv4(),
-        name: values.name,
-        image: values.image[0].url,
-        url: values.url,
-        featured: values.featured,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      });
+      const response = await upsertCoupon(
+        {
+          id: data?.id ? data.id : uuidv4(),
+          code: values.code,
+          startDate: values.startDate,
+          endDate: values.endDate,
+          discount: values.discount,
+          storeId: "",
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
+        storeUrl
+      );
       toast({
         title: data?.id
-          ? "Category updated"
-          : `Category ${response?.name} has been created`,
+          ? "Coupon updated"
+          : `Coupon ${response?.code} has been created`,
       });
 
       if (data?.id) {
         router.refresh();
       } else {
-        router.push(`/dashboard/admin/categories`);
+        router.push(`/dashboard/seller/stores/${storeUrl}/coupons`);
       }
     } catch (error) {
       console.log(error);
       toast({
         variant: "destructive",
         title: "Error",
-        description: "Failed to create category",
+        description: "Failed to create coupon",
       });
     }
   };
