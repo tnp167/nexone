@@ -1,7 +1,7 @@
 "use client";
 
 import { ShippingAddress } from "@prisma/client";
-import { Dispatch, FC, SetStateAction } from "react";
+import { Dispatch, FC, SetStateAction, useState } from "react";
 import { Button } from "../ui/button";
 import FastDelivery from "./FastDelivery";
 import { SecurityPrivacyCard } from "../product-page/product-info/ReturnsPrivacySecurityCard";
@@ -12,6 +12,7 @@ import { useCartStore } from "@/cart-store/useCartStore";
 import { cn } from "@/lib/utils";
 import { CartWithCartItemsType } from "@/lib/types";
 import ApplyCouponForm from "../forms/ApplyCoupon";
+import { PulseLoader } from "react-spinners";
 
 interface Props {
   shippingAddress: ShippingAddress | null;
@@ -25,17 +26,20 @@ const PlaceOrderCard: FC<Props> = ({
   setCartData,
 }) => {
   const { id, coupon, subTotal, shippingFees, total } = cartData;
+  const [loading, setLoading] = useState<boolean>(false);
   const emptyCart = useCartStore((state) => state.emptyCart);
   const handlePlaceOrder = async () => {
+    setLoading(true);
     if (!shippingAddress) toast.error("Select shipping address first");
     else {
       const order = await placeOrder(shippingAddress, id);
       if (order) {
         emptyCart();
         await emptyUserCart();
-        redirect(`/orders/${order.orderId}`);
+        redirect(`/order/${order.orderId}`);
       }
     }
+    setLoading(false);
   };
 
   let discountedAmount = 0;
@@ -112,7 +116,11 @@ const PlaceOrderCard: FC<Props> = ({
       </div>
       <div className="py-4 px-6 mt-2 bg-white">
         <Button onClick={() => handlePlaceOrder()}>
-          <span>Place Order</span>
+          {loading ? (
+            <PulseLoader color="#fff" size={5} />
+          ) : (
+            <span>Place Order</span>
+          )}
         </Button>
       </div>
       <div className="mt-2 p-4 bg-white px-5">

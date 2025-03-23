@@ -365,12 +365,14 @@ export const placeOrder = async (
     },
     include: {
       cartItems: true,
+      coupon: true,
     },
   });
 
   if (!cart) throw new Error("Cart not found");
 
   const cartItems = cart.cartItems;
+  const cartCoupon = cart.coupon;
 
   const validatedCartItems = await Promise.all(
     cartItems.map(async (cartItem) => {
@@ -537,6 +539,18 @@ export const placeOrder = async (
         shippingAddress.countryId
       );
 
+    //Check coupon store
+    const check = storeId === cartCoupon?.storeId;
+
+    //Calculate discounted based on coupon
+    let discountedAmount = 0;
+    if (check && cartCoupon) {
+      discountedAmount = (groupedTotalPrice * cartCoupon.discount) / 100;
+    }
+
+    //Calculate the total after applying the discount
+    const totalAfterDiscount = groupedTotalPrice - discountedAmount;
+
     const orderGroup = await db.orderGroup.create({
       data: {
         orderId: order.id,
@@ -544,10 +558,11 @@ export const placeOrder = async (
         status: "Pending",
         subTotal: groupedTotalPrice - groupShippingFee,
         shippingFees: groupShippingFee,
-        total: groupedTotalPrice,
+        total: totalAfterDiscount,
         shippingService: shippingService || "International Delivery",
         shippingDeliveryMin: deliveryTimeMin || 7,
         shippingDeliveryMax: deliveryTimeMax || 30,
+        couponId: check && cartCoupon ? cartCoupon.id : null,
       },
     });
 
@@ -574,7 +589,7 @@ export const placeOrder = async (
     }
 
     //Update order totals
-    orderTotalPrice += groupedTotalPrice;
+    orderTotalPrice += totalAfterDiscount;
     orderShippingFee += groupShippingFee;
   }
 

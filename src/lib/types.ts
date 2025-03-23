@@ -100,6 +100,7 @@ export interface Country {
 }
 
 import countries from "@/data/countries.json";
+import { getOrder } from "@/queries/order";
 
 export type SelectMenuOption = (typeof countries)[number];
 
@@ -139,6 +140,8 @@ export type RatingStatisticsType = Prisma.PromiseReturnType<
 export type StatisticsCardType = Prisma.PromiseReturnType<
   typeof getRatingStatistics
 >["ratingStatistics"];
+
+export type OrderFullType = Prisma.PromiseReturnType<typeof getOrder>;
 
 export type FreeShippingWithCountriesType = FreeShipping & {
   eligibleCountries: FreeShippingCountry[];
@@ -214,3 +217,29 @@ export type CartWithCartItemsType = Cart & {
 export type UserShippingAddressType = ShippingAddress & {
   country: CountryPrisma;
 };
+
+export enum OrderStatus {
+  Pending = "Pending",
+  Confirmed = "Confirmed",
+  Processing = "Processing",
+  Shipped = "Shipped",
+  OutforDelivery = "OutforDelivery",
+  Delivered = "Delivered",
+  Cancelled = "Cancelled",
+  Failed = "Failed",
+  Refunded = "Refunded",
+  Returned = "Returned",
+  PartiallyShipped = "PartiallyShipped",
+  OnHold = "OnHold",
+}
+
+export enum PaymentStatus {
+  Pending = "Pending",
+  Paid = "Paid",
+  Failed = "Failed",
+  Declined = "Declined",
+  Cancelled = "Cancelled",
+  Refunded = "Refunded",
+  PartiallyRefunded = "PartiallyRefunded",
+  Chargeback = "Chargeback",
+}
