@@ -5,8 +5,14 @@ import Image from "next/image";
 import Link from "next/link";
 import React from "react";
 
-const CheckoutProductCard = ({ product }: { product: CartItem }) => {
-  const { productSlug, variantSlug, sizeId } = product;
+const CheckoutProductCard = ({
+  product,
+  isDiscounted,
+}: {
+  product: CartItem;
+  isDiscounted: boolean;
+}) => {
+  const { productSlug, variantSlug, sizeId, shippingFee } = product;
   return (
     <div className="bg-white px-6 border-t bordet-t-[#ebebeb] select-none">
       <div className="py-4">
@@ -59,11 +65,11 @@ const CheckoutProductCard = ({ product }: { product: CartItem }) => {
                   <span className="inline-block break-all">
                     £{product.price.toFixed(2)} x {product.quantity}
                   </span>
-                  {/* {isDiscounted && (
+                  {isDiscounted && (
                     <span className="text-xs font-normal text-orange-background">
                       (Coupon applied)
                     </span>
-                  )} */}
+                  )}
                 </div>
               </div>
               {/* Shipping fee */}
@@ -73,9 +79,9 @@ const CheckoutProductCard = ({ product }: { product: CartItem }) => {
                   <span>
                     <Truck className="w-4 inline-block text-[#01a971]" />
                     <span className="text-[#01a971] ml-1">
-                      {/* {shippingFee
+                      {shippingFee
                         ? `$${shippingFee.toFixed(2)}`
-                        : "Free Delivery"} */}
+                        : "Free Delivery"}
                     </span>
                   </span>
                 </div>

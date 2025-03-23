@@ -925,7 +925,11 @@ export const updateCheckoutProductsWithLatest = async (
     },
     include: {
       cartItems: true,
-      coupon: true,
+      coupon: {
+        include: {
+          store: true,
+        },
+      },
     },
   });
 

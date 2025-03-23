@@ -63,19 +63,18 @@ const CheckoutContainer: FC<Props> = ({
         <div className="w-full py-4 px-4 bg-white my-3">
           <div className="relative">
             {cartData.cartItems.map((product) => (
-              <CheckoutProductCard key={product.variantId} product={product} />
+              <CheckoutProductCard
+                key={product.variantId}
+                product={product}
+                isDiscounted={cartData.coupon?.storeId === product.storeId}
+              />
             ))}
           </div>
         </div>
       </div>
       <PlaceOrderCard
-        shippingFees={cartData.shippingFees}
-        subTotal={cartData.subTotal}
-        total={cartData.total}
         shippingAddress={selectedAddress}
-        cartId={cartData.id}
         setCartData={setCartData}
-        coupon={cartData.coupon}
         cartData={cartData}
       />
     </div>

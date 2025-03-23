@@ -1,6 +1,6 @@
 "use client";
 
-import { Coupon, ShippingAddress } from "@prisma/client";
+import { ShippingAddress } from "@prisma/client";
 import { Dispatch, FC, SetStateAction } from "react";
 import { Button } from "../ui/button";
 import FastDelivery from "./FastDelivery";
@@ -14,31 +14,22 @@ import { CartWithCartItemsType } from "@/lib/types";
 import ApplyCouponForm from "../forms/ApplyCoupon";
 
 interface Props {
-  shippingFees: number;
-  subTotal: number;
-  total: number;
   shippingAddress: ShippingAddress | null;
-  cartId: string;
   cartData: CartWithCartItemsType;
   setCartData: Dispatch<SetStateAction<CartWithCartItemsType>>;
-  coupon: Coupon | null;
 }
 
 const PlaceOrderCard: FC<Props> = ({
-  shippingFees,
-  subTotal,
-  total,
   shippingAddress,
-  cartId,
   cartData,
   setCartData,
-  coupon,
 }) => {
+  const { id, coupon, subTotal, shippingFees, total } = cartData;
   const emptyCart = useCartStore((state) => state.emptyCart);
   const handlePlaceOrder = async () => {
     if (!shippingAddress) toast.error("Select shipping address first");
     else {
-      const order = await placeOrder(shippingAddress, cartId);
+      const order = await placeOrder(shippingAddress, id);
       if (order) {
         emptyCart();
         await emptyUserCart();
@@ -75,12 +66,51 @@ const PlaceOrderCard: FC<Props> = ({
           />
         )}
         <Info title="Total" text={`${total.toFixed(2)}`} isBold />
-        <div className="mt-2">
-          <div className="p-4 bg-white">
-            <ApplyCouponForm cartId={cartId} setCartData={setCartData} />
+      </div>
+      <div className="mt-2">
+        {coupon ? (
+          <div className="flex bg-white">
+            <svg width={16} height={96} xmlns="http://www.w3.org/2000/svg">
+              <path
+                d="M 8 0 
+         Q 4 4.8, 8 9.6 
+         T 8 19.2 
+         Q 4 24, 8 28.8 
+         T 8 38.4 
+         Q 4 43.2, 8 48 
+         T 8 57.6 
+         Q 4 62.4, 8 67.2 
+         T 8 76.8 
+         Q 4 81.6, 8 86.4 
+         T 8 96 
+         L 0 96 
+         L 0 0 
+         Z"
+                fill="#66cdaa"
+                stroke="#66cdaa"
+                strokeWidth={2}
+                strokeLinecap="round"
+              />
+            </svg>
+            <div className="mx-3 overflow-hidden w-full">
+              <p className="mt-1.5 text-xl font-bold text-[#66cdaa] leading-8 mr-3 overflow-hidden text-ellipsis whitespace-nowrap">
+                Coupon Applied
+              </p>
+              <p className="overflow-hidden leading-5 break-all text-zinc-400 max-h-10">
+                ({coupon.code}) ({coupon.discount}%) discount
+              </p>
+              <p className="overflow-hidden text-sm leading-5 break-worrds text-zinc-400">
+                Coupon applied only to items from {coupon.store.name} store
+              </p>
+            </div>
           </div>
-        </div>
-        <div className="p-3 mt-2 bg-white px-6"></div>
+        ) : (
+          <div className="p-4 bg-white">
+            <ApplyCouponForm cartId={id} setCartData={setCartData} />
+          </div>
+        )}
+      </div>
+      <div className="py-4 px-6 mt-2 bg-white">
         <Button onClick={() => handlePlaceOrder()}>
           <span>Place Order</span>
         </Button>
