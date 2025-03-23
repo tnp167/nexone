@@ -74,6 +74,9 @@ const CheckoutContainer: FC<Props> = ({
         total={cartData.total}
         shippingAddress={selectedAddress}
         cartId={cartData.id}
+        setCartData={setCartData}
+        coupon={cartData.coupon}
+        cartData={cartData}
       />
     </div>
   );

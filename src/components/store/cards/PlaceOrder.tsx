@@ -1,7 +1,7 @@
 "use client";
 
-import { ShippingAddress } from "@prisma/client";
-import { FC } from "react";
+import { Coupon, ShippingAddress } from "@prisma/client";
+import { Dispatch, FC, SetStateAction } from "react";
 import { Button } from "../ui/button";
 import FastDelivery from "./FastDelivery";
 import { SecurityPrivacyCard } from "../product-page/product-info/ReturnsPrivacySecurityCard";
@@ -10,6 +10,8 @@ import { placeOrder, emptyUserCart } from "@/queries/user";
 import { redirect } from "next/navigation";
 import { useCartStore } from "@/cart-store/useCartStore";
 import { cn } from "@/lib/utils";
+import { CartWithCartItemsType } from "@/lib/types";
+import ApplyCouponForm from "../forms/ApplyCoupon";
 
 interface Props {
   shippingFees: number;
@@ -17,6 +19,9 @@ interface Props {
   total: number;
   shippingAddress: ShippingAddress | null;
   cartId: string;
+  cartData: CartWithCartItemsType;
+  setCartData: Dispatch<SetStateAction<CartWithCartItemsType>>;
+  coupon: Coupon | null;
 }
 
 const PlaceOrderCard: FC<Props> = ({
@@ -25,6 +30,9 @@ const PlaceOrderCard: FC<Props> = ({
   total,
   shippingAddress,
   cartId,
+  cartData,
+  setCartData,
+  coupon,
 }) => {
   const emptyCart = useCartStore((state) => state.emptyCart);
   const handlePlaceOrder = async () => {
@@ -38,6 +46,20 @@ const PlaceOrderCard: FC<Props> = ({
       }
     }
   };
+
+  let discountedAmount = 0;
+  const applicableStoreItems = cartData.cartItems.filter(
+    (item) => item.storeId === coupon?.storeId
+  );
+  const storeSubTotal = applicableStoreItems.reduce(
+    (acc, item) => acc + item.price * item.quantity + item.shippingFee,
+    0
+  );
+
+  if (coupon) {
+    discountedAmount = (storeSubTotal * coupon.discount) / 100;
+  }
+
   return (
     <div className="sticky top-4 mt-3 ml-5 w-[380px] max-h-max">
       <div className="relative py-4 px-6 bg-white">
@@ -45,8 +67,20 @@ const PlaceOrderCard: FC<Props> = ({
         <Info title="Subtotal" text={`${subTotal.toFixed(2)}`} />
         <Info title="Shipping Fees" text={`+${shippingFees.toFixed(2)}`} />
         <Info title="Taxes" text="+0.00" />
-        <Info title="Total" text={`+${total.toFixed(2)}`} isBold />
-        <div className="pt-3"></div>
+        {coupon && (
+          <Info
+            title={`Coupon: (${coupon.code}) (-${coupon.discount}%)`}
+            text={`-${discountedAmount.toFixed(2)}`}
+            noBorder
+          />
+        )}
+        <Info title="Total" text={`${total.toFixed(2)}`} isBold />
+        <div className="mt-2">
+          <div className="p-4 bg-white">
+            <ApplyCouponForm cartId={cartId} setCartData={setCartData} />
+          </div>
+        </div>
+        <div className="p-3 mt-2 bg-white px-6"></div>
         <Button onClick={() => handlePlaceOrder()}>
           <span>Place Order</span>
         </Button>

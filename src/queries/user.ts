@@ -12,6 +12,7 @@ import {
 } from "./product";
 import { CartItem, ShippingAddress } from "@prisma/client";
 import { Country as CountryDB } from "@prisma/client";
+import { applyCoupon } from "./coupon";
 
 /**
  * @name followStore
@@ -862,6 +863,20 @@ export const updateCheckoutProductsWithLatest = async (
     })
   );
 
+  //Apply coupon if any
+  const cartCoupon = await db.cart.findUnique({
+    where: {
+      id: cartProducts[0].cartId,
+    },
+    select: {
+      coupon: {
+        include: {
+          store: true,
+        },
+      },
+    },
+  });
+
   //Revalidate the cart's total price and shipping fee
   const subTotal = validatedCartItems.reduce(
     (acc, item) => acc + item.price * item.quantity,
@@ -871,8 +886,34 @@ export const updateCheckoutProductsWithLatest = async (
     (acc, item) => acc + item.shippingFee,
     0
   );
-  const total = subTotal + shippingFees;
+  let total = subTotal + shippingFees;
 
+  if (cartCoupon?.coupon) {
+    const { coupon } = cartCoupon;
+
+    const currentDate = new Date();
+    const startDate = new Date(coupon.startDate);
+    const endDate = new Date(coupon.endDate);
+
+    if (currentDate > startDate && currentDate < endDate) {
+      //Check if the coupon applies to any store in the cart
+      const applicableStoreItems = validatedCartItems.filter(
+        (item) => item.storeId === coupon.storeId
+      );
+
+      if (applicableStoreItems.length > 0) {
+        //Calculate the subtotal for  the coupon's store (including shipping fees)
+        const storeSubTotal = applicableStoreItems.reduce(
+          (acc, item) => acc + item.price * item.quantity + item.shippingFee,
+          0
+        );
+
+        //Apply the coupon to the store's items
+        const discountAmount = (storeSubTotal * coupon.discount) / 100;
+        total -= discountAmount;
+      }
+    }
+  }
   const cart = await db.cart.update({
     where: {
       id: cartProducts[0].cartId,
@@ -884,6 +925,7 @@ export const updateCheckoutProductsWithLatest = async (
     },
     include: {
       cartItems: true,
+      coupon: true,
     },
   });
 
