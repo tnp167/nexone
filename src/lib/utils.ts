@@ -112,8 +112,12 @@ export async function getUserCountry(): Promise<Country> {
 }
 
 //Function to get the shipping rate range by adding the specified min and max
-export const getShippingDatesRange = (minDays: number, maxDays: number) => {
-  const currentDate = new Date();
+export const getShippingDatesRange = (
+  minDays: number,
+  maxDays: number,
+  date?: Date
+) => {
+  const currentDate = date ? new Date(date) : new Date();
 
   //Calculate minDate by adding minDays to currentDate
   const minDate = new Date(currentDate);

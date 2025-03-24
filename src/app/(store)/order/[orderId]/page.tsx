@@ -1,6 +1,8 @@
 import OrderInfo from "@/components/store/cards/order/Info";
+import OrderTotalDetailsCard from "@/components/store/cards/order/Total";
 import OrderUserDrtailsCard from "@/components/store/cards/order/User";
 import Header from "@/components/store/layout/header/Header";
+import OrderGroupsContainer from "@/components/store/order-page/GroupsContainer";
 import OrderHeader from "@/components/store/order-page/Header";
 import { getOrder } from "@/queries/order";
 import { redirect } from "next/navigation";
@@ -49,19 +51,31 @@ const OrderPage = async ({ params }: { params: { orderId: string } }) => {
             />
             {(order.paymentStatus === "Pending" ||
               order.paymentStatus === "Failed") && (
-              <div>{/* Order total details */}</div>
+              <OrderTotalDetailsCard
+                details={{
+                  subTotal: order.subTotal,
+                  shippingFees: order.shippingFees,
+                  total: order.total,
+                }}
+              />
             )}
             {/* Order total details */}
           </div>
           {/* Col 2 - Order Groups */}
-          <div className="h-[calc(100vh-137px)] overflow-auto scrollbar bg-blue-500">
-            {/* Order group details */}
+          <div className="h-[calc(100vh-137px)] overflow-auto scrollbar">
+            <OrderGroupsContainer groups={order.groups} />
           </div>
           {/* Col 3 - Payment Gateways */}
           {(order.paymentStatus === "Pending" ||
             order.paymentStatus === "Failed") && (
-            <div className="h-[calc(100vh-137px)] overflow-auto scrollbarborder-l py-4 px-2 bg-yellow-500">
-              {/* Order total details */}
+            <div className="h-[calc(100vh-137px)] overflow-auto scrollbarborder-l py-4 px-2">
+              <OrderTotalDetailsCard
+                details={{
+                  subTotal: order.subTotal,
+                  shippingFees: order.shippingFees,
+                  total: order.total,
+                }}
+              />
             </div>
           )}
         </div>

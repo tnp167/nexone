@@ -25,7 +25,7 @@ const OrderInfo = ({
             <p className="text-main-secondary text-sm">Paid at</p>
           </div>
           <div className="text-right space-y-4">
-            <p className="mt-0.5 text-neutral-500 text-sm">{totalItemsCount}</p>
+            <p className="text-neutral-500 text-sm">{totalItemsCount}</p>
             <p className="mt-0.5 text-neutral-500 text-sm">
               {deliveredItemsCount}
             </p>

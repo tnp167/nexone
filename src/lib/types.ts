@@ -26,6 +26,8 @@ import {
   Country as CountryPrisma,
   Coupon,
   Store,
+  OrderGroup,
+  OrderItem,
 } from "@prisma/client";
 
 export interface DashboardSidebarMenuInterface {
@@ -242,4 +244,30 @@ export enum PaymentStatus {
   Refunded = "Refunded",
   PartiallyRefunded = "PartiallyRefunded",
   Chargeback = "Chargeback",
+}
+
+export type OrderGroupWithItemsType = OrderGroup & {
+  items: OrderItem[];
+  store: Store;
+  _count: {
+    items: number;
+  };
+  coupon: Coupon | null;
+};
+
+export enum ProductStatus {
+  Pending = "Pending",
+  Processing = "Processing",
+  ReadyForShipment = "ReadyForShipment",
+  Shipped = "Shipped",
+  Delivered = "Delivered",
+  Canceled = "Canceled",
+  Returned = "Returned",
+  Refunded = "Refunded",
+  FailedDelivery = "FailedDelivery",
+  OnHold = "OnHold",
+  Backordered = "Backordered",
+  PartiallyShipped = "PartiallyShipped",
+  ExchangeRequested = "ExchangeRequested",
+  AwaitingPickup = "AwaitingPickup",
 }
