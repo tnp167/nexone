@@ -114,7 +114,7 @@ const OrderGroupTable = ({
         <div>
           <p className="font-semibold text-xl text-black py-2">
             Total price:
-            <span className="text-blue-primary ms-1">${total.toFixed(2)}</span>
+            <span className="text-blue-primary ms-1">£{total.toFixed(2)}</span>
           </p>
         </div>
       </div>

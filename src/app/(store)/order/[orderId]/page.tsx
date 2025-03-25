@@ -4,6 +4,8 @@ import OrderUserDrtailsCard from "@/components/store/cards/order/User";
 import Header from "@/components/store/layout/header/Header";
 import OrderGroupsContainer from "@/components/store/order-page/GroupsContainer";
 import OrderHeader from "@/components/store/order-page/Header";
+import OrderPayment from "@/components/store/order-page/Payment";
+import { Separator } from "@/components/ui/separator";
 import { getOrder } from "@/queries/order";
 import { redirect } from "next/navigation";
 import React from "react";
@@ -76,6 +78,8 @@ const OrderPage = async ({ params }: { params: { orderId: string } }) => {
                   total: order.total,
                 }}
               />
+              <Separator />
+              <OrderPayment orderId={order.id} amount={order.total} />
             </div>
           )}
         </div>

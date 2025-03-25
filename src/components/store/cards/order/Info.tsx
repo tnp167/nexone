@@ -41,7 +41,7 @@ const OrderInfo = ({
             <p className="mt-0.5 text-neutral-500 text-sm">
               {paymentDetails &&
               (paymentDetails.status === "COMPLETED" ||
-                paymentDetails.status === "succeeded")
+                paymentDetails.status === "success")
                 ? paymentDetails.updatedAt.toDateString()
                 : "-"}
             </p>
