@@ -271,3 +271,9 @@ export enum ProductStatus {
   ExchangeRequested = "ExchangeRequested",
   AwaitingPickup = "AwaitingPickup",
 }
+
+export interface SearchResult {
+  name: string;
+  link: string;
+  image: string;
+}
