@@ -1,7 +1,7 @@
 import React from "react";
 
 const PaymentWishlistPage = () => {
-  return <div>PaymentWishlistPage</div>;
+  return <div></div>;
 };
 
 export default PaymentWishlistPage;
