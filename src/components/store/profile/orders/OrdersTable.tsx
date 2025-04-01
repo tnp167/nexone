@@ -2,11 +2,19 @@
 
 import OrderStatusTag from "@/components/shared/order-status";
 import PaymentStatusTag from "@/components/shared/payment-status";
-import { OrderStatus, PaymentStatus, UserOrderType } from "@/lib/types";
+import {
+  OrderStatus,
+  OrderTableDateFilter,
+  OrderTableFilter,
+  PaymentStatus,
+  UserOrderType,
+} from "@/lib/types";
 import Image from "next/image";
 import Link from "next/link";
-import React, { useState } from "react";
-
+import React, { useEffect, useState } from "react";
+import Pagination from "@/components/store/shared/Pagination";
+import { getUserOrders } from "@/queries/profile";
+import OrderTableHeader from "./OrderTableHeader";
 const OrdersTable = ({
   orders,
   totalPages,
@@ -15,11 +23,37 @@ const OrdersTable = ({
   totalPages: number;
 }) => {
   const [data, setData] = useState<UserOrderType[]>(orders);
+  const [page, setPage] = useState(1);
+  const [totalDataPages, setTotalDataPages] = useState<number>(totalPages);
+
+  //Filter
+  const [filter, setFilter] = useState<OrderTableFilter>("");
+  const [period, setPeriod] = useState<OrderTableDateFilter>("");
+  const [search, setSearch] = useState<string>("");
+
+  useEffect(() => {
+    const getData = async () => {
+      const response = await getUserOrders(filter, page, 10, "", "");
+      if (response) {
+        setData(response.orders);
+        setTotalDataPages(response.totalPages);
+      }
+    };
+    getData();
+  }, [page, filter]);
+
   return (
     <div>
       <div className="space-y-4">
         {/* Header */}
-
+        <OrderTableHeader
+          filter={filter}
+          setFilter={setFilter}
+          period={period}
+          setPeriod={setPeriod}
+          search={search}
+          setSearch={setSearch}
+        />
         {/* Table */}
         <div className="overflow-hidden">
           <div className="bg-white p-6">
@@ -117,6 +151,7 @@ const OrdersTable = ({
           </div>
         </div>
       </div>
+      <Pagination page={page} totalPages={totalPages} setPage={setPage} />
     </div>
   );
 };
