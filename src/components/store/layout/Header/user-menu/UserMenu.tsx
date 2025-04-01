@@ -78,7 +78,7 @@ const UserMenu = async () => {
             alt={user.fullName || "user"}
             width={32}
             height={32}
-            className="rounded-full"
+            className="size-10 object-cover rounded-full"
           />
         ) : (
           <div className="flex h-10 items-center py-0 mx-2 cursor-pointer">
@@ -104,7 +104,7 @@ const UserMenu = async () => {
         className={cn(
           "hidden absolute top-0 -left-20 group-hover:block cursor-pointer",
           {
-            "-left-[200px] lg:left-[130px]": user,
+            "-left-[200px] lg:-left-[145px]": user,
           }
         )}
       >
