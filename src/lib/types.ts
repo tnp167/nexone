@@ -103,6 +103,7 @@ export interface Country {
 
 import countries from "@/data/countries.json";
 import { getOrder } from "@/queries/order";
+import { getUserOrders } from "@/queries/profile";
 
 export type SelectMenuOption = (typeof countries)[number];
 
@@ -277,3 +278,20 @@ export interface SearchResult {
   link: string;
   image: string;
 }
+
+export type OrderTableFilter =
+  | ""
+  | "unpaid"
+  | "toShip"
+  | "shipped"
+  | "delivered";
+
+export type OrderTableDateFilter =
+  | ""
+  | "last-6-months"
+  | "last-1-year"
+  | "last-2-years";
+
+export type UserOrderType = Prisma.PromiseReturnType<
+  typeof getUserOrders
+>["orders"][0];
