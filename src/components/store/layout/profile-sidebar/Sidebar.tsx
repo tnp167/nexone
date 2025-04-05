@@ -77,7 +77,10 @@ const ProfileSidebar = () => {
                   "relative flex h-9 items-center px-4 text-sm cursor-pointer hover:bg-[#F5F5F5]",
                   {
                     "bg-[#F5F5F5] user-menu-item":
-                      item.link && pathname === item.link,
+                      item.link &&
+                      (pathname === item.link ||
+                        (pathname.startsWith(item.link) &&
+                          item.link !== "/profile")),
                   }
                 )}
               >

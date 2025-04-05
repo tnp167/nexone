@@ -18,9 +18,11 @@ import OrderTableHeader from "./OrderTableHeader";
 const OrdersTable = ({
   orders,
   totalPages,
+  prev_filter: OrderTableFilter,
 }: {
   orders: UserOrderType[];
   totalPages: number;
+  prev_filter: OrderTableFilter;
 }) => {
   const [data, setData] = useState<UserOrderType[]>(orders);
   const [page, setPage] = useState(1);
@@ -32,15 +34,19 @@ const OrdersTable = ({
   const [search, setSearch] = useState<string>("");
 
   useEffect(() => {
+    setPage(1);
+  }, [filter, search, period]);
+
+  useEffect(() => {
     const getData = async () => {
-      const response = await getUserOrders(filter, page, 10, "", "");
+      const response = await getUserOrders(filter, page, 10, search, period);
       if (response) {
         setData(response.orders);
         setTotalDataPages(response.totalPages);
       }
     };
     getData();
-  }, [page, filter]);
+  }, [page, filter, search, period]);
 
   return (
     <div>
@@ -56,7 +62,7 @@ const OrdersTable = ({
         />
         {/* Table */}
         <div className="overflow-hidden">
-          <div className="bg-white p-6">
+          <div className="bg-white px-6 py-1">
             <div className="max-h-[700px] overflow-x-auto overflow-y-auto border rounded-md scrollbar">
               <table className="w-full min-w-max table-auto text-left">
                 <thead>
