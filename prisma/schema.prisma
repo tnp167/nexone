@@ -478,7 +478,7 @@ enum PaymentStatus {
 
 enum PaymentMethod {
   Stripe
-  PayPal
+  Paypal
 }
 
 model Order {

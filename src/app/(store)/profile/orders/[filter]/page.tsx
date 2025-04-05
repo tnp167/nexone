@@ -7,15 +7,16 @@ const ProfileFilteredOrdersPage = async ({
 }: {
   params: { filter: string };
 }) => {
-  const filter = params.filter ? (params.filter as OrderTableFilter) : "";
+  const { filter } = await params;
+  const parsedFilter = filter ? (filter as OrderTableFilter) : "";
 
-  const { orders, totalPages } = await getUserOrders(filter);
+  const { orders, totalPages } = await getUserOrders(parsedFilter);
   return (
     <div>
       <OrdersTable
         orders={orders}
         totalPages={totalPages}
-        prev_filter={filter}
+        prev_filter={parsedFilter}
       />
     </div>
   );

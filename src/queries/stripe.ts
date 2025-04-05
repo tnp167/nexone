@@ -60,8 +60,9 @@ export const creataStripePayment = async (
       update: {
         paymentIntentId: paymentIntent.id,
         paymentMethod: "Stripe",
-        amount: paymentIntent.amount,
+        amount: paymentIntent.amount / 100,
         currency: paymentIntent.currency,
+        userId: user.id,
         status:
           paymentIntent.status === "succeeded"
             ? "Completed"
@@ -72,7 +73,7 @@ export const creataStripePayment = async (
         orderId,
         paymentIntentId: paymentIntent.id,
         paymentMethod: "Stripe",
-        amount: paymentIntent.amount,
+        amount: paymentIntent.amount / 100,
         currency: paymentIntent.currency,
         status:
           paymentIntent.status === "succeeded"

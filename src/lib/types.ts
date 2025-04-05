@@ -103,7 +103,7 @@ export interface Country {
 
 import countries from "@/data/countries.json";
 import { getOrder } from "@/queries/order";
-import { getUserOrders } from "@/queries/profile";
+import { getUserOrders, getUserPayments } from "@/queries/profile";
 
 export type SelectMenuOption = (typeof countries)[number];
 
@@ -295,3 +295,15 @@ export type OrderTableDateFilter =
 export type UserOrderType = Prisma.PromiseReturnType<
   typeof getUserOrders
 >["orders"][0];
+
+export type UserPaymentType = Prisma.PromiseReturnType<
+  typeof getUserPayments
+>["payments"][0];
+
+export type PaymentTableFilter = "" | "paypal" | "credit-card";
+
+export type PaymentTableDateFilter =
+  | ""
+  | "last-6-months"
+  | "last-1-year"
+  | "last-2-years";

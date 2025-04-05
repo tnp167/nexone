@@ -2,7 +2,6 @@
 
 import { db } from "@/lib/db";
 import { currentUser } from "@clerk/nextjs/server";
-import axios from "axios";
 // Function: createPayPalPayment
 // Description: Creates a PayPal payment and return payment details.
 // Permission Level: User only
@@ -142,7 +141,7 @@ export const capturePaypalPayment = async (
       },
       data: {
         paymentStatus: captureData.status === "COMPLETED" ? "Paid" : "Failed",
-        paymentMethod: "PayPal",
+        paymentMethod: "Paypal",
         paymentDetails: {
           connect: {
             id: newPaymentDetails.id,
