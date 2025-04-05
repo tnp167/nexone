@@ -18,18 +18,18 @@ import OrderTableHeader from "./OrderTableHeader";
 const OrdersTable = ({
   orders,
   totalPages,
-  prev_filter: OrderTableFilter,
+  prev_filter,
 }: {
   orders: UserOrderType[];
   totalPages: number;
-  prev_filter: OrderTableFilter;
+  prev_filter?: OrderTableFilter;
 }) => {
   const [data, setData] = useState<UserOrderType[]>(orders);
   const [page, setPage] = useState(1);
   const [totalDataPages, setTotalDataPages] = useState<number>(totalPages);
 
   //Filter
-  const [filter, setFilter] = useState<OrderTableFilter>("");
+  const [filter, setFilter] = useState<OrderTableFilter>(prev_filter || "");
   const [period, setPeriod] = useState<OrderTableDateFilter>("");
   const [search, setSearch] = useState<string>("");
 
@@ -157,7 +157,7 @@ const OrdersTable = ({
           </div>
         </div>
       </div>
-      <Pagination page={page} totalPages={totalPages} setPage={setPage} />
+      <Pagination page={page} totalPages={totalDataPages} setPage={setPage} />
     </div>
   );
 };
