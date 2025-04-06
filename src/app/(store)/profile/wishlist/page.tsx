@@ -1,7 +1,7 @@
-import React from "react";
+import { redirect } from "next/navigation";
 
 const PaymentWishlistPage = () => {
-  return <div></div>;
+  redirect("/profile/wishlist/1");
 };
 
 export default PaymentWishlistPage;

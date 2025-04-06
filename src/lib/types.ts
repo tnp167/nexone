@@ -107,6 +107,7 @@ import {
   getUserOrders,
   getUserPayments,
   getUserReviews,
+  getUserWishlist,
 } from "@/queries/profile";
 
 export type SelectMenuOption = (typeof countries)[number];
@@ -114,6 +115,10 @@ export type SelectMenuOption = (typeof countries)[number];
 export type ProductType = Prisma.PromiseReturnType<
   typeof getProducts
 >["products"][0];
+
+export type ProductWishlistType = Prisma.PromiseReturnType<
+  typeof getUserWishlist
+>["wishlist"][0];
 
 export type VariantSimplified = {
   variantId: string;

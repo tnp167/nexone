@@ -6,6 +6,7 @@ import React, { useEffect, useState } from "react";
 
 const ProductHistoryPage = ({ params }: { params: { page: string } }) => {
   const [products, setProducts] = useState<any>([]);
+  const [page, setPage] = useState<number>(Number(params.page) || 1);
   const [totalPages, setTotalPages] = useState<number>(0);
   const [loading, setLoading] = useState<boolean>(false);
 
