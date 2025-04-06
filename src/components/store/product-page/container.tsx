@@ -1,7 +1,7 @@
 "use client";
 
 import { CartProductType, ProductPageDataType } from "@/lib/types";
-import { cn, isProductValidToAdd } from "@/lib/utils";
+import { cn, isProductValidToAdd, updateProductHistory } from "@/lib/utils";
 import { FC, useEffect, useMemo, useState } from "react";
 import ProductSwiper from "./ProductSwiper";
 import ProductInfo from "./product-info/ProductInfo";
@@ -30,7 +30,8 @@ const ProductPageContainer: FC<ProductPageContainerProps> = ({
     return null;
   }
 
-  const { productId, variantId, images, shippingDetails, sizes } = productData;
+  const { productId, variantId, images, shippingDetails, sizes, variantSlug } =
+    productData;
 
   //Manage the active image being displayed, initialize to the first image
   const [activeImage, setActiveImage] = useState<ProductVariantImage | null>(
@@ -119,6 +120,11 @@ const ProductPageContainer: FC<ProductPageContainerProps> = ({
       window.removeEventListener("storage", handleStorageChange);
     };
   }, []);
+
+  //Add product to history
+  useEffect(() => {
+    updateProductHistory(variantId);
+  }, [variantId]);
 
   const handleAddToCart = () => {
     if (maxQty <= 0) return;

@@ -6,6 +6,7 @@ import {
   FreeShippingWithCountriesType,
   ProductPageType,
   ProductShippingDetailsType,
+  ProductType,
   ProductWithVariantType,
   RatingStatisticsType,
   SortOrder,
@@ -18,6 +19,7 @@ import slugify from "slugify";
 import { getCookie } from "cookies-next";
 import { cookies } from "next/headers";
 import { ShippingFeeMethod, Store } from "@prisma/client";
+import VariantSwitcher from "@/components/store/cards/product/VariantSwitcher";
 
 // Function: upsertProduct
 // Description: Upserts a product and its variant into the database, ensuring proper association with the store.
@@ -1054,4 +1056,102 @@ export const getProductShippingFee = async (
   }
 
   return 0; //Return 0 if the country is not found
+};
+
+/**
+ * Retrieves product details based on an array of product ids.
+ *
+ * @param ids - An array of product ids to fetch details for.
+ * @returns A promise that resolves to an array of product objects.
+ *          If a id doesn't exist in the database, it will be skipped.
+ * @throws An error if the database query fails.
+ */
+
+export const getProductsByIds = async (
+  ids: string[],
+  page: number = 1,
+  pageSize: number = 10
+): Promise<{ products: any; totalPages: number }> => {
+  if (!ids || ids.length === 0) {
+    throw new Error("No product ids provided");
+  }
+
+  const currentPage = page;
+  const limit = pageSize;
+  const skip = (currentPage - 1) * limit;
+
+  try {
+    const variants = await db.productVariant.findMany({
+      where: {
+        id: {
+          in: ids,
+        },
+      },
+      select: {
+        id: true,
+        variantName: true,
+        slug: true,
+        images: {
+          select: {
+            url: true,
+          },
+        },
+        sizes: true,
+        product: {
+          select: {
+            id: true,
+            name: true,
+            slug: true,
+            rating: true,
+            sales: true,
+          },
+        },
+      },
+      take: limit,
+      skip: skip,
+    });
+
+    const newProducts = variants.map((variant) => ({
+      id: variant.product.id,
+      slug: variant.product.slug,
+      name: variant.product.name,
+      rating: variant.product.rating,
+      sales: variant.product.sales,
+      variants: [
+        {
+          variantId: variant.id,
+          variantName: variant.variantName,
+          variantSlug: variant.slug,
+          images: variant.images,
+          sizes: variant.sizes,
+        },
+      ],
+      variantImages: [],
+    }));
+
+    //Return products sorted in order of ids provided
+    const orderedProducts = ids
+      .map((id) =>
+        newProducts.find((product) => product.variants[0].variantId === id)
+      )
+      .filter(Boolean);
+
+    const allProducts = await db.productVariant.count({
+      where: {
+        id: {
+          in: ids,
+        },
+      },
+    });
+
+    const totalPages = Math.ceil(allProducts / pageSize);
+
+    return {
+      products: orderedProducts,
+      totalPages,
+    };
+  } catch (error) {
+    console.error("Error fetching products by ids", error);
+    throw new Error("Failed to fetch products by ids");
+  }
 };

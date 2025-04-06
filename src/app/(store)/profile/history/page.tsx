@@ -1,7 +1,7 @@
-import React from "react";
+import { redirect } from "next/navigation";
 
-const PaymentHistoryPage = () => {
-  return <div>PaymentHistoryPage</div>;
+const ProductHistoryPage = () => {
+  redirect("/profile/history/1");
 };
 
-export default PaymentHistoryPage;
+export default ProductHistoryPage;

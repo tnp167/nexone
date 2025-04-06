@@ -90,7 +90,7 @@ const ReviewsHeader: FC<Props> = ({
         <div className="-ml-2 text-sm text-main-primary">
           <div className="relative overflow-x-hidden">
             <div className="py-4 inline-flex items-center bg-white justifycenter relative">
-              {filters.map((f, index) => (
+              {filters.map((f) => (
                 <div
                   key={f.filter}
                   className={cn(

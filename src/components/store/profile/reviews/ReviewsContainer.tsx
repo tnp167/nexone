@@ -5,11 +5,9 @@ import {
   ReviewFilter,
   ReviewWithImageType,
 } from "@/lib/types";
-import Link from "next/link";
 import React, { useEffect, useState } from "react";
 import Pagination from "@/components/store/shared/Pagination";
-import { getUserPayments, getUserReviews } from "@/queries/profile";
-import PaymentTableHeader from "./ReviewsHeader";
+import { getUserReviews } from "@/queries/profile";
 import ReviewCard from "../../cards/Review";
 import ReviewsHeader from "./ReviewsHeader";
 const ReviewsContainer = ({

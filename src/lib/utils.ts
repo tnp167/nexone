@@ -247,3 +247,30 @@ export const printPDF = (blob: Blob) => {
     });
   }
 };
+
+export const updateProductHistory = (variantSlug: string) => {
+  let productHistory: string[] = [];
+  const historyString = localStorage.getItem("productHistory");
+
+  if (historyString) {
+    try {
+      productHistory = JSON.parse(historyString);
+    } catch (error) {
+      console.error("Error parsing product history", error);
+      productHistory = [];
+    }
+  }
+
+  //Update the history
+  productHistory = productHistory.filter((slug) => slug != variantSlug);
+  productHistory.unshift(variantSlug);
+
+  //Check storage limit
+  const MAX_PRODUCTS = 100;
+  if (productHistory.length > MAX_PRODUCTS) {
+    productHistory.pop();
+  }
+
+  //Save the updated history
+  localStorage.setItem("productHistory", JSON.stringify(productHistory));
+};
