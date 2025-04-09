@@ -60,6 +60,7 @@ const ProductInfo: FC<ProductInfoProps> = ({
       toast.error("Failed to copy SKU");
     }
   };
+  
   return (
     <div className="relative w-full xl:w-[540px]">
       {/* Title */}

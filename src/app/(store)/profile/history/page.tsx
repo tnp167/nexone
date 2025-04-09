@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 
-const ProductHistoryPage = () => {
+const ProfileHistoryPage = () => {
   redirect("/profile/history/1");
 };
 
-export default ProductHistoryPage;
+export default ProfileHistoryPage;

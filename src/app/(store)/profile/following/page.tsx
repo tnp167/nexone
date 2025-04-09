@@ -1,7 +1,8 @@
+import { redirect } from "next/navigation";
 import React from "react";
 
-const PaymentFollowingPage = () => {
-  return <div>PaymentFollowingPage</div>;
+const ProfileFollowingPage = () => {
+  redirect("/profile/following/1");
 };
 
-export default PaymentFollowingPage;
+export default ProfileFollowingPage;

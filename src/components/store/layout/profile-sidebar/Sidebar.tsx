@@ -43,6 +43,7 @@ const menu = [
 const ProfileSidebar = () => {
   const pathname = usePathname();
   const path = pathname.split("/profile/")[1];
+  const pathTrim = path ? path.split("/")[0] : "";
   return (
     <div>
       <div className="w-full p-4 text-xs text-[#999]">
@@ -57,7 +58,7 @@ const ProfileSidebar = () => {
         {path && (
           <span>
             <Link href={pathname} className="capitalize">
-              {path}
+              {pathTrim || path}
             </Link>
           </span>
         )}

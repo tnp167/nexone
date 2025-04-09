@@ -4,7 +4,7 @@ import ProductList from "@/components/store/shared/ProductList";
 import { getProductsByIds } from "@/queries/product";
 import React, { useEffect, useState } from "react";
 
-const ProductHistoryPage = ({ params }: { params: { page: string } }) => {
+const ProfileHistoryPage = ({ params }: { params: { page: string } }) => {
   const [products, setProducts] = useState<any>([]);
   const [page, setPage] = useState<number>(Number(params.page) || 1);
   const [totalPages, setTotalPages] = useState<number>(0);
@@ -57,4 +57,4 @@ const ProductHistoryPage = ({ params }: { params: { page: string } }) => {
   );
 };
 
-export default ProductHistoryPage;
+export default ProfileHistoryPage;

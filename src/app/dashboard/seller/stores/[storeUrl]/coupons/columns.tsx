@@ -80,7 +80,7 @@ export const columns: ColumnDef<Coupon>[] = [
     accessorKey: "timeLeft",
     header: "Time Left",
     cell: ({ row }) => {
-      const { days, hours } = getTimeUntil(new Date(row.original.endDate));
+      const { days, hours } = getTimeUntil(row.original.endDate);
       return (
         <span>
           {days} days {hours} hours

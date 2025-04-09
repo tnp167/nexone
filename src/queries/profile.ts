@@ -422,3 +422,75 @@ export const getUserWishlist = async (
     totalPages,
   };
 };
+
+/**
+ * @name getUserFollowedStores
+ * @description - Retrieves all stores that the authenticated user follows, with pagination.
+ * @access User
+ * @param page - The page number for pagination (default is 1).
+ * @param pageSize - The number of stores per page (default is 10).
+ * @returns A Promise resolving to an object containing:
+ *   - `stores`: An array of stores in the required format.
+ *   - `totalPages`: The total number of pages.
+ */
+export const getUserFollowedStores = async (
+  page: number = 1,
+  pageSize: number = 10
+) => {
+  const user = await currentUser();
+
+  if (!user) throw new Error("Unauthenticated");
+
+  const skip = (page - 1) * pageSize;
+
+  //Fetch the stores the user follows
+  const followedStores = await db.store.findMany({
+    where: {
+      followers: {
+        some: { id: user.id },
+      },
+    },
+    select: {
+      id: true,
+      url: true,
+      name: true,
+      logo: true,
+      followers: {
+        select: {
+          id: true,
+        },
+      },
+    },
+    skip,
+    take: pageSize,
+  });
+
+  //Fetch the total number of followed stores (without pagination)
+  const totalCount = await db.store.count({
+    where: {
+      followers: {
+        some: {
+          id: user.id,
+        },
+      },
+    },
+  });
+
+  //Calculate the total number of pages
+  const totalPages = Math.ceil(totalCount / pageSize);
+
+  //Transform the stores into the required format
+  const stores = followedStores.map((store) => ({
+    id: store.id,
+    url: store.url,
+    name: store.name,
+    logo: store.logo,
+    followersCount: store.followers.length,
+    isUserFollowingStore: true,
+  }));
+
+  return {
+    stores,
+    totalPages,
+  };
+};
