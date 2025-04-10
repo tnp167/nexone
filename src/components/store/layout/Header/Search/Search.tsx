@@ -11,7 +11,8 @@ const Search = () => {
   const params = new URLSearchParams(searchParams);
   const { push, replace } = useRouter();
 
-  const [searchQuery, setSearchQuery] = useState("");
+  const searchQueryUrl = params.get("search");
+  const [searchQuery, setSearchQuery] = useState(searchQueryUrl || "");
   const [suggestions, setSuggestions] = useState<SearchResult[]>([]);
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
@@ -23,8 +24,9 @@ const Search = () => {
         params.delete("search");
       } else {
         params.set("search", searchQuery);
+        setSuggestions([]);
       }
-      replace(`/browse?${params.toString()}`);
+      replace(`${pathname}?${params.toString()}`);
     }
   };
 
@@ -32,6 +34,7 @@ const Search = () => {
     const value = e.target.value;
     setSearchQuery(value);
 
+    if (pathname === "/browse") return;
     if (value.length >= 2) {
       try {
         const response = await fetch(`/api/search-products?search=${value}`);

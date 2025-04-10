@@ -1,10 +1,39 @@
 import React from "react";
 import Header from "@/components/store/layout/header/Header";
-const BrowsePage = () => {
+import { getProducts } from "@/queries/product";
+import ProductList from "@/components/store/shared/ProductList";
+import { FiltersQueryType } from "@/lib/types";
+const BrowsePage = async ({
+  searchParams,
+}: {
+  searchParams: FiltersQueryType;
+}) => {
+  const { category, subCategory, search, offer, size, sort } =
+    await searchParams;
+  const productsData = await getProducts(
+    {
+      search,
+      category,
+      subCategory,
+      offer,
+      size: Array.isArray(size) ? size : size ? [size] : undefined,
+    },
+    sort
+  );
+  const { products } = productsData;
   return (
     <>
       <Header />
-      <div>BrowsePage</div>
+      <div className="max-w-[95%] mx-auto">
+        <div className="flex mt-5 gap-x-5">
+          {/* Product filtrs */}
+          <div className="p-4 space-y-5">
+            {/* Product sort */}
+            {/* Product list */}
+            <ProductList products={products} />
+          </div>
+        </div>
+      </div>
     </>
   );
 };

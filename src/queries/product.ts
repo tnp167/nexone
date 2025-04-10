@@ -420,6 +420,35 @@ export const getProducts = async (
     }
   }
 
+  //Apply search filter
+  if (filters.search) {
+    whereClause.AND.push({
+      OR: [
+        {
+          name: {
+            contains: filters.search,
+          },
+        },
+        {
+          description: {
+            contains: filters.search,
+          },
+        },
+        {
+          variants: {
+            some: {
+              variantName: {
+                contains: filters.search,
+              },
+              variantDescription: {
+                contains: filters.search,
+              },
+            },
+          },
+        },
+      ],
+    });
+  }
   //Get all filtered, sorted products
   const products = await db.product.findMany({
     where: whereClause,
