@@ -11,6 +11,7 @@ const BrowsePage = async ({
 }) => {
   const { category, subCategory, search, offer, size, sort } =
     await searchParams;
+
   const productsData = await getProducts(
     {
       search,

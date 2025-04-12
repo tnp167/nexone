@@ -420,6 +420,23 @@ export const getProducts = async (
     }
   }
 
+  //Apply size filter
+  if (filters.size && Array.isArray(filters.size)) {
+    whereClause.AND.push({
+      variants: {
+        some: {
+          sizes: {
+            some: {
+              size: {
+                in: filters.size,
+              },
+            },
+          },
+        },
+      },
+    });
+  }
+
   //Apply offer filter (using offer url)
   if (filters.offer) {
     const offer = await db.offerTag.findUnique({
