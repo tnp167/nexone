@@ -57,6 +57,9 @@ export const upsertCategory = async (category: Category) => {
 //Retrieve all categories
 export const getAllCategories = async () => {
   const categories = await db.category.findMany({
+    include: {
+      subCategories: true,
+    },
     orderBy: {
       updatedAt: "desc",
     },

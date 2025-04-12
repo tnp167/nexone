@@ -3,6 +3,7 @@ import Header from "@/components/store/layout/header/Header";
 import { getProducts } from "@/queries/product";
 import ProductList from "@/components/store/shared/ProductList";
 import { FiltersQueryType } from "@/lib/types";
+import ProductFilters from "@/components/store/browse-page/Filters";
 const BrowsePage = async ({
   searchParams,
 }: {
@@ -26,7 +27,7 @@ const BrowsePage = async ({
       <Header />
       <div className="max-w-[95%] mx-auto">
         <div className="flex mt-5 gap-x-5">
-          {/* Product filtrs */}
+          <ProductFilters queries={searchParams} />
           <div className="p-4 space-y-5">
             {/* Product sort */}
             {/* Product list */}
