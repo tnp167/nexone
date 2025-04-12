@@ -1,15 +1,11 @@
 "use client";
 
-import { CategoryWithSubsType } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { Minus, Plus } from "lucide-react";
 import React, { useState } from "react";
-import CategoryLink from "./CategoryLink";
-const CategoryFilter = ({
-  categories,
-}: {
-  categories: CategoryWithSubsType[];
-}) => {
+import { OfferTag } from "@prisma/client";
+import OfferLink from "./OfferLink";
+const OfferFilter = ({ offers }: { offers: OfferTag[] }) => {
   const [show, setShow] = useState<boolean>(false);
   return (
     <div className="pt-5 pb-4">
@@ -19,7 +15,7 @@ const CategoryFilter = ({
         onClick={() => setShow((prev) => !prev)}
       >
         <h3 className="text-sm font-bold overflow-ellipsis capitalize line-clamp-1 text-main-primary">
-          Category
+          Offer
         </h3>
         <span className="absolute right-0">
           {show ? <Minus className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
@@ -27,16 +23,16 @@ const CategoryFilter = ({
       </div>
       {/* Filter */}
       <div
-        className={cn("mt-3", {
+        className={cn("mt-3 flex flex-wrap gap-2", {
           hidden: !show,
         })}
       >
-        {categories.map((category) => (
-          <CategoryLink key={category.id} category={category} />
+        {offers.map((offer) => (
+          <OfferLink key={offer.id} offer={offer} />
         ))}
       </div>
     </div>
   );
 };
 
-export default CategoryFilter;
+export default OfferFilter;

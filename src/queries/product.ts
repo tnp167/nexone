@@ -420,6 +420,21 @@ export const getProducts = async (
     }
   }
 
+  //Apply offer filter (using offer url)
+  if (filters.offer) {
+    const offer = await db.offerTag.findUnique({
+      where: {
+        url: filters.offer,
+      },
+      select: {
+        id: true,
+      },
+    });
+    if (offer) {
+      whereClause.AND.push({ offerTagId: offer.id });
+    }
+  }
+
   //Apply search filter
   if (filters.search) {
     whereClause.AND.push({
