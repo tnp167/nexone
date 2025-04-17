@@ -12,6 +12,8 @@ const BrowsePage = async ({
   const { category, subCategory, search, offer, size, sort } =
     await searchParams;
 
+  const searcParamsObj = await searchParams;
+
   const productsData = await getProducts(
     {
       search,
@@ -28,7 +30,7 @@ const BrowsePage = async ({
       <Header />
       <div className="max-w-[95%] mx-auto">
         <div className="flex mt-5 gap-x-5">
-          <ProductFilters queries={searchParams} />
+          <ProductFilters queries={searcParamsObj} />
           <div className="p-4 space-y-5">
             {/* Product sort */}
             {/* Product list */}
