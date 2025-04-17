@@ -18,7 +18,7 @@ import { currentUser } from "@clerk/nextjs/server";
 import slugify from "slugify";
 import { getCookie } from "cookies-next";
 import { cookies } from "next/headers";
-import { ShippingFeeMethod, Store } from "@prisma/client";
+import { ProductVariant, ShippingFeeMethod, Size, Store } from "@prisma/client";
 import VariantSwitcher from "@/components/store/cards/product/VariantSwitcher";
 
 // Function: upsertProduct
@@ -481,11 +481,37 @@ export const getProducts = async (
       ],
     });
   }
+
+  //Define the sort order
+  let orderBy: Record<string, SortOrder> = {};
+  switch (sortBy) {
+    case "most-popular":
+      orderBy = {
+        views: "desc",
+      };
+      break;
+    case "new-arrivals":
+      orderBy = {
+        createdAt: "desc",
+      };
+      break;
+    case "top-rated":
+      orderBy = {
+        rating: "desc",
+      };
+      break;
+    default: {
+      orderBy = {
+        views: "desc",
+      };
+    }
+  }
   //Get all filtered, sorted products
   const products = await db.product.findMany({
     where: whereClause,
     skip: skip,
     take: limit,
+    orderBy: orderBy,
     include: {
       variants: {
         include: {
@@ -497,6 +523,31 @@ export const getProducts = async (
     },
   });
 
+  type VariantWithSizes = ProductVariant & { sizes: Size[] };
+  //Product price sorting
+  products.sort((a, b) => {
+    const getMinPrice = (product: any) =>
+      Math.min(
+        ...product.variants.flatMap((variant: VariantWithSizes) =>
+          variant.sizes.map((s: any) => {
+            const price = s.price * (1 - s.discount / 100);
+            return price;
+          })
+        ),
+        Infinity
+      );
+
+    //Get minimum proces for both products
+    const minPriceA = getMinPrice(a);
+    const minPriceB = getMinPrice(b);
+
+    if (sortBy === "price-low-to-high") {
+      return minPriceA - minPriceB;
+    } else if (sortBy === "price-high-to-low") {
+      return minPriceB - minPriceA;
+    }
+    return 0;
+  });
   const productWithFilteredVariants = products.map((product) => {
     const filteredVariants = product.variants;
 

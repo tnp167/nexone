@@ -4,6 +4,7 @@ import { getProducts } from "@/queries/product";
 import ProductList from "@/components/store/shared/ProductList";
 import { FiltersQueryType } from "@/lib/types";
 import ProductFilters from "@/components/store/browse-page/Filters";
+import ProductSort from "@/components/store/browse-page/Sort";
 const BrowsePage = async ({
   searchParams,
 }: {
@@ -32,7 +33,7 @@ const BrowsePage = async ({
         <div className="flex mt-5 gap-x-5">
           <ProductFilters queries={searcParamsObj} />
           <div className="p-4 space-y-5">
-            {/* Product sort */}
+            <ProductSort />
             {/* Product list */}
             <ProductList products={products} />
           </div>
