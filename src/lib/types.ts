@@ -6,7 +6,10 @@ import {
   retrieveProductDetails,
   getRatingStatistics,
 } from "@/queries/product";
-import { getStoreDefaultShippingDetails } from "@/queries/store";
+import {
+  getStoreDefaultShippingDetails,
+  getStoreOrders,
+} from "@/queries/store";
 import { getAllSubCategories } from "@/queries/subCategory";
 import {
   Cart,
@@ -156,6 +159,7 @@ export type StatisticsCardType = Prisma.PromiseReturnType<
 >["ratingStatistics"];
 
 export type OrderFullType = Prisma.PromiseReturnType<typeof getOrder>;
+export type StoreOrderType = Prisma.PromiseReturnType<typeof getStoreOrders>[0];
 
 export type FreeShippingWithCountriesType = FreeShipping & {
   eligibleCountries: FreeShippingCountry[];

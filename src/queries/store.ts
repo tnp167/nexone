@@ -276,3 +276,69 @@ export const upsertStoreShippingRate = async (
     throw new Error("Failed to upsert store shipping rate");
   }
 };
+
+/**
+ * @name getStoreOrders
+ * @description - Retrieves all orders for a specific store.
+ *              - Returns order that include items, order details.
+ * @access User
+ * @param storeUrl - The url of the store whose order groups are being retrieved.
+ * @returns {Array} - Array of order groups, including items.
+ */
+
+export const getStoreOrders = async (storeUrl: string) => {
+  try {
+    const user = await currentUser();
+
+    if (!user) throw new Error("Unauthenticated");
+
+    if (user.privateMetadata.role !== "SELLER")
+      throw new Error("Unauthorized. Seller only can view store orders");
+
+    const store = await db.store.findUnique({
+      where: {
+        url: storeUrl,
+        userId: user.id,
+      },
+    });
+
+    if (!store) throw new Error("Unauthorized. Permission or ownership denied");
+
+    //Veriy ownership
+    if (user.id !== store.userId) {
+      throw new Error("Unauthorized. Permission or ownership denied");
+    }
+
+    //Retrieve orders
+    const orders = await db.orderGroup.findMany({
+      where: {
+        storeId: store.id,
+      },
+      include: {
+        items: true,
+        coupon: true,
+        order: {
+          select: {
+            paymentStatus: true,
+            user: {
+              select: {
+                email: true,
+              },
+            },
+            shippingAddress: {
+              include: {
+                country: true,
+              },
+            },
+            paymentDetails: true,
+          },
+        },
+      },
+    });
+
+    return orders;
+  } catch (error) {
+    console.log(error);
+    throw new Error("Failed to get store orders");
+  }
+};
