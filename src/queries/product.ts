@@ -482,6 +482,26 @@ export const getProducts = async (
     });
   }
 
+  //Apply color filter
+  if (filters.color) {
+    const selectedColors = Array.isArray(filters.color)
+      ? filters.color.map((c) => decodeURIComponent(c))
+      : [decodeURIComponent(filters.color)];
+
+    whereClause.AND.push({
+      variants: {
+        some: {
+          colors: {
+            some: {
+              name: {
+                in: selectedColors,
+              },
+            },
+          },
+        },
+      },
+    });
+  }
   //Define the sort order
   let orderBy: Record<string, SortOrder> = {};
   switch (sortBy) {
@@ -506,6 +526,7 @@ export const getProducts = async (
       };
     }
   }
+
   //Get all filtered, sorted products
   const products = await db.product.findMany({
     where: whereClause,
@@ -523,9 +544,22 @@ export const getProducts = async (
     },
   });
 
+  const filteredProducts = products.filter((product) =>
+    product.variants.some((variant) =>
+      variant.sizes.some((s) => {
+        const discountedPrice = s.price * (1 + s.discount / 100);
+        return (
+          (!filters.minPrice ||
+            discountedPrice >= parseFloat(filters.minPrice)) &&
+          (!filters.maxPrice || discountedPrice <= parseFloat(filters.maxPrice))
+        );
+      })
+    )
+  );
+
   type VariantWithSizes = ProductVariant & { sizes: Size[] };
   //Product price sorting
-  products.sort((a, b) => {
+  filteredProducts.sort((a, b) => {
     const getMinPrice = (product: any) =>
       Math.min(
         ...product.variants.flatMap((variant: VariantWithSizes) =>
@@ -548,7 +582,7 @@ export const getProducts = async (
     }
     return 0;
   });
-  const productWithFilteredVariants = products.map((product) => {
+  const productWithFilteredVariants = filteredProducts.map((product) => {
     const filteredVariants = product.variants;
 
     const variants: VariantSimplified[] = filteredVariants.map((variant) => ({

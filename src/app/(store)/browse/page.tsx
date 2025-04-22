@@ -10,8 +10,17 @@ const BrowsePage = async ({
 }: {
   searchParams: FiltersQueryType;
 }) => {
-  const { category, subCategory, search, offer, size, sort } =
-    await searchParams;
+  const {
+    category,
+    subCategory,
+    search,
+    offer,
+    size,
+    sort,
+    minPrice,
+    maxPrice,
+    color,
+  } = await searchParams;
 
   const searcParamsObj = await searchParams;
 
@@ -22,10 +31,18 @@ const BrowsePage = async ({
       subCategory,
       offer,
       size: Array.isArray(size) ? size : size ? [size] : undefined,
+      minPrice,
+      maxPrice,
+      color: Array.isArray(color)
+        ? color.map((c) => encodeURIComponent(c))
+        : color
+        ? [encodeURIComponent(color)]
+        : undefined,
     },
     sort
   );
   const { products } = productsData;
+
   return (
     <>
       <Header />
