@@ -1,19 +1,19 @@
 import { Select } from "@/components/ui/select";
-import { OrderStatus } from "@/lib/types";
+import { ProductStatus } from "@/lib/types";
 import { useRouter } from "next/navigation";
 import { FC, useState } from "react";
 import { useToast } from "@/hooks/use-toast";
-import OrderStatusTag from "@/components/shared/order-status";
-import { updateOrderGroupStatus } from "@/queries/order";
+import ProductStatusTag from "@/components/shared/product-status";
+import { updateOrderItemStatus } from "@/queries/order";
 
 interface Props {
   storeId: string;
-  groupId: string;
-  status: OrderStatus;
+  orderItemId: string;
+  status: ProductStatus;
 }
 
-const OrderStatusSelect: FC<Props> = ({ storeId, groupId, status }) => {
-  const [newStatus, setNewStatus] = useState<OrderStatus>(status);
+const ProductStatusSelect: FC<Props> = ({ storeId, orderItemId, status }) => {
+  const [newStatus, setNewStatus] = useState<ProductStatus>(status);
   const [isOpen, setIsOpen] = useState<boolean>(false);
 
   const router = useRouter();
@@ -21,20 +21,19 @@ const OrderStatusSelect: FC<Props> = ({ storeId, groupId, status }) => {
   const { toast } = useToast();
 
   //Options
-  const options = Object.values(OrderStatus).filter(
+  const options = Object.values(ProductStatus).filter(
     (status) => status !== newStatus
   );
 
-  const handleClick = async (selectedStatus: OrderStatus) => {
+  const handleClick = async (selectedStatus: ProductStatus) => {
     try {
-      const response = await updateOrderGroupStatus(
+      const response = await updateOrderItemStatus(
         storeId,
-        groupId,
+        orderItemId,
         selectedStatus
       );
       if (response) {
-        setNewStatus(response as OrderStatus);
-        setIsOpen(false);
+        setNewStatus(response as ProductStatus);
         router.refresh();
       }
     } catch (error: unknown) {
@@ -50,7 +49,7 @@ const OrderStatusSelect: FC<Props> = ({ storeId, groupId, status }) => {
     <div className="relative">
       {/* Current status */}
       <div className="cursor-pointer" onClick={() => setIsOpen(!isOpen)}>
-        <OrderStatusTag status={newStatus} />
+        <ProductStatusTag status={newStatus} />
       </div>
       {/* Dropdown */}
       {isOpen && (
@@ -61,7 +60,7 @@ const OrderStatusSelect: FC<Props> = ({ storeId, groupId, status }) => {
               className="w-full flex items-center p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md"
               onClick={() => handleClick(option)}
             >
-              <OrderStatusTag status={option} />
+              <ProductStatusTag status={option} />
             </button>
           ))}
         </div>
@@ -70,4 +69,4 @@ const OrderStatusSelect: FC<Props> = ({ storeId, groupId, status }) => {
   );
 };
 
-export default OrderStatusSelect;
+export default ProductStatusSelect;

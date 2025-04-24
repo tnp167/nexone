@@ -2,7 +2,7 @@
 
 import { currentUser } from "@clerk/nextjs/server";
 import { db } from "@/lib/db";
-import { OrderStatus } from "@/lib/types";
+import { OrderStatus, ProductStatus } from "@/lib/types";
 
 // Function: getOrder
 // Description: Retrieves a specific order by its ID and the current user's ID, including associated groups, items, store information,
@@ -100,4 +100,47 @@ export const updateOrderGroupStatus = async (
   });
 
   return updatedOrder.status;
+};
+
+export const updateOrderItemStatus = async (
+  storeId: string,
+  orderItemId: string,
+  status: ProductStatus
+) => {
+  const user = await currentUser();
+  if (!user) throw new Error("User not found");
+
+  //Verify seller permission
+  if (user.privateMetadata.role !== "SELLER")
+    throw new Error("Seller permission required");
+
+  //Verify store ownership
+  const store = await db.store.findUnique({
+    where: {
+      id: storeId,
+      userId: user.id,
+    },
+  });
+  if (!store) throw new Error("Store not found");
+
+  //Retrieve the product item to be updated
+  const product = await db.orderItem.findUnique({
+    where: {
+      id: orderItemId,
+    },
+  });
+
+  if (!product) throw new Error("Order item not found");
+
+  //Update order item status
+  const updatedProduct = await db.orderItem.update({
+    where: {
+      id: orderItemId,
+    },
+    data: {
+      status,
+    },
+  });
+
+  return updatedProduct.status;
 };

@@ -320,14 +320,14 @@ export const getStoreOrders = async (storeUrl: string) => {
         order: {
           select: {
             paymentStatus: true,
-            user: {
-              select: {
-                email: true,
-              },
-            },
             shippingAddress: {
               include: {
                 country: true,
+                user: {
+                  select: {
+                    email: true,
+                  },
+                },
               },
             },
             paymentDetails: true,
