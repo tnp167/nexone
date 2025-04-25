@@ -161,7 +161,7 @@ export const getHomeDataDynamic = async (
   return results.reduce((acc, curr) => ({ ...acc, ...curr }), {});
 };
 
-export const gerHomeFeatureCategories = async () => {
+export const getHomeFeatureCategories = async () => {
   const featuredCategoreis = await db.category.findMany({
     where: {
       featured: true,
