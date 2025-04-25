@@ -160,3 +160,60 @@ export const getHomeDataDynamic = async (
 
   return results.reduce((acc, curr) => ({ ...acc, ...curr }), {});
 };
+
+export const gerHomeFeatureCategories = async () => {
+  const featuredCategoreis = await db.category.findMany({
+    where: {
+      featured: true,
+    },
+    select: {
+      id: true,
+      name: true,
+      image: true,
+      subCategories: {
+        where: {
+          featured: true,
+        },
+        select: {
+          id: true,
+          name: true,
+          image: true,
+          _count: {
+            select: {
+              products: true,
+            },
+          },
+        },
+        orderBy: {
+          products: {
+            _count: "desc",
+          },
+        },
+        take: 3,
+      },
+      _count: {
+        select: {
+          products: true,
+        },
+      },
+    },
+    orderBy: {
+      products: {
+        _count: "desc",
+      },
+    },
+    take: 6,
+  });
+
+  return featuredCategoreis.map((category) => ({
+    id: category.id,
+    name: category.name,
+    productCount: category._count.products,
+    subCategories: category.subCategories.map((subCategory) => ({
+      id: subCategory.id,
+      name: subCategory.name,
+      productCount: subCategory._count.products,
+      image: subCategory.image,
+    })),
+  }));
+};
