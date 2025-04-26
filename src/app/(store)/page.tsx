@@ -6,10 +6,16 @@ import { getHomeDataDynamic, getHomeFeatureCategories } from "@/queries/home";
 import Footer from "@/components/store/layout/footer/Footer";
 import Sideline from "@/components/store/home/sideline/Sideline";
 import HomeMainSwiper from "@/components/store/home/main/HomeSwiper";
+import HomeUserCard from "@/components/store/home/main/user/User";
+import MainSwiper from "@/components/store/shared/Swiper";
+import ProductSimpleCard from "@/components/store/cards/product/SimpleCard";
+import { SimpleProduct } from "@/lib/types";
+
 export default async function Home() {
   const { products } = await getProducts();
-  const data = await getHomeDataDynamic([
-    { property: "offer", value: "today-deals", type: "full" },
+  const { product_today_deals, product_user_card } = await getHomeDataDynamic([
+    { property: "offer", value: "today-deals", type: "simple" },
+    { property: "offer", value: "user-card", type: "simple" },
   ]);
   const categories = await getHomeFeatureCategories();
   return (
@@ -35,6 +41,16 @@ export default async function Home() {
                 {/* Main Swiper */}
                 <HomeMainSwiper />
                 {/* Featured card */}
+                <div className="h-[200px]"></div>
+              </div>
+              {/* Right */}
+              <div className="h-full">
+                <HomeUserCard
+                  products={product_user_card.filter(
+                    (product): product is SimpleProduct =>
+                      "variantSlug" in product
+                  )}
+                />
               </div>
             </div>
           </div>
