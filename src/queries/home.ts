@@ -169,6 +169,7 @@ export const getHomeFeatureCategories = async () => {
     select: {
       id: true,
       name: true,
+      url: true,
       image: true,
       subCategories: {
         where: {
@@ -177,6 +178,7 @@ export const getHomeFeatureCategories = async () => {
         select: {
           id: true,
           name: true,
+          url: true,
           image: true,
           _count: {
             select: {
@@ -208,10 +210,12 @@ export const getHomeFeatureCategories = async () => {
   return featuredCategoreis.map((category) => ({
     id: category.id,
     name: category.name,
+    url: category.url,
     productCount: category._count.products,
     subCategories: category.subCategories.map((subCategory) => ({
       id: subCategory.id,
       name: subCategory.name,
+      url: subCategory.url,
       productCount: subCategory._count.products,
       image: subCategory.image,
     })),

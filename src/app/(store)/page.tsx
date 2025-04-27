@@ -14,8 +14,10 @@ import Featured from "@/components/store/home/main/Featured";
 import AnimatedDeals from "@/components/store/home/AnimatedDeals";
 import Image from "next/image";
 import SuperDealsImg from "@/public/assets/images/ads/super-deals.avif";
+import FeaturedCategories from "@/components/store/home/FeaturedCategories";
+import ProductCard from "@/components/store/cards/product/ProductCard";
 export default async function Home() {
-  const { products } = await getProducts();
+  const { products } = await getProducts({}, "", 1, 100);
   const {
     product_best_deals,
     product_super_deals,
@@ -27,7 +29,7 @@ export default async function Home() {
     { property: "offer", value: "user-card", type: "simple" },
     { property: "offer", value: "featured", type: "simple" },
   ]);
-  const categories = await getHomeFeatureCategories();
+  const featuredCategories = await getHomeFeatureCategories();
   return (
     <div>
       <Header />
@@ -89,6 +91,20 @@ export default async function Home() {
                     />
                   </div>
                 </MainSwiper>
+              </div>
+              <FeaturedCategories categories={featuredCategories} />
+              <div>
+                {/* Header */}
+                <div className="text-center h-[32px] leading-[32px] text-[24px] font-extrabold text-[#222] flex justify-center">
+                  <div className="h-[1px] flex-1 border-t-[2px] border-t-[hsla(0,0%,59.2%,.3)] my-4 mx-[14px]" />
+                  <span>More products</span>
+                  <div className="h-[1px] flex-1 border-t-[2px] border-t-[hsla(0,0%,59.2%,.3)] my-4 mx-[14px]" />
+                </div>
+                <div className="mt-7 bg-white justify-center flex flex-wrap min-[1530px]:grid min-[1530px]:grid-cols-7 p-4 pb-16 rounded-md">
+                  {products.map((product, idx) => (
+                    <ProductCard key={idx} product={product} />
+                  ))}
+                </div>
               </div>
             </div>
           </div>

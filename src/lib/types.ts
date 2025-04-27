@@ -114,6 +114,7 @@ import {
   getUserReviews,
   getUserWishlist,
 } from "@/queries/profile";
+import { getHomeFeatureCategories } from "@/queries/home";
 
 export type SelectMenuOption = (typeof countries)[number];
 
@@ -392,3 +393,7 @@ export type ProductSimpleVariantType = {
   images: ProductVariantImage[];
   sizes: Size[];
 };
+
+export type FeaturedCategoryType = Prisma.PromiseReturnType<
+  typeof getHomeFeatureCategories
+>[0];

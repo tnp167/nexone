@@ -70,7 +70,9 @@ const ProductCard = ({ product }: { product: ProductType }) => {
           />
           {/* Actions */}
           <div className="flex gap-x-1">
-            <Button>Add to cart</Button>
+            <Link href={`/product/${slug}/${variantSlug}`}>
+              <Button>Add to cart</Button>
+            </Link>
             <Button
               variant="black"
               size="icon"
