@@ -11,11 +11,13 @@ import MainSwiper from "@/components/store/shared/Swiper";
 import ProductSimpleCard from "@/components/store/cards/product/SimpleCard";
 import { SimpleProduct } from "@/lib/types";
 import Featured from "@/components/store/home/main/Featured";
+import AnimatedDeals from "@/components/store/home/AnimatedDeals";
+
 export default async function Home() {
   const { products } = await getProducts();
-  const { product_today_deals, product_user_card, product_featured } =
+  const { product_super_deals, product_user_card, product_featured } =
     await getHomeDataDynamic([
-      { property: "offer", value: "today-deals", type: "simple" },
+      { property: "offer", value: "super-deals", type: "simple" },
       { property: "offer", value: "user-card", type: "simple" },
       { property: "offer", value: "featured", type: "simple" },
     ]);
@@ -49,7 +51,6 @@ export default async function Home() {
                       "variantSlug" in product
                   )}
                 />
-                <div className="h-[200px]"></div>
               </div>
               {/* Right */}
               <div className="h-full">
@@ -60,6 +61,15 @@ export default async function Home() {
                   )}
                 />
               </div>
+            </div>
+            {/* Animated Deals */}
+            <div className="mt-2 lg:block hidden">
+              <AnimatedDeals
+                products={product_super_deals.filter(
+                  (product): product is SimpleProduct =>
+                    "variantSlug" in product
+                )}
+              />
             </div>
           </div>
         </div>

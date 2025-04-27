@@ -1,10 +1,12 @@
 import { FC, useEffect, useState } from "react";
+import { cn } from "@/lib/utils";
 
 interface Props {
   targetDate: string; //Target date in string format
+  homeStyle?: boolean;
 }
 
-const Countdown: FC<Props> = ({ targetDate }) => {
+const Countdown: FC<Props> = ({ targetDate, homeStyle }) => {
   const [timeLeft, setTimeLeft] = useState<{
     days: number;
     hours: number;
@@ -41,24 +43,62 @@ const Countdown: FC<Props> = ({ targetDate }) => {
   }, [targetDate]);
 
   return (
-    <div className="text-orange-background leading-4">
-      <span className="mr-1">Sales ends in:</span>
-      <div className="inline-block">
-        <span className="bg-orange-background text-white min-w-5 p-0 text-center rounded-[1px] inline-block min-h-4">
-          {timeLeft.days.toString().padStart(2, "0")}
-        </span>
-        <span className="mx-1">:</span>
-        <span className="bg-orange-background text-white min-w-5 p-0 text-center rounded-[1px] inline-block min-h-4">
-          {timeLeft.hours.toString().padStart(2, "0")}
-        </span>
-        <span className="mx-1">:</span>
-        <span className="bg-orange-background text-white min-w-5 p-0 text-center rounded-[1px] inline-block min-h-4">
-          {timeLeft.minutes.toString().padStart(2, "0")}
-        </span>
-        <span className="mx-1">:</span>
-        <span className="bg-orange-background text-white min-w-5 p-0 text-center rounded-[1px] inline-block min-h-4">
-          {timeLeft.seconds.toString().padStart(2, "0")}
-        </span>
+    <div
+      className={cn("text-orange-background leading-4", {
+        "text-white": homeStyle,
+      })}
+    >
+      <div
+        className={cn("inline-block text-xs", {
+          "text-2xl font-bold": homeStyle,
+        })}
+      >
+        <span className="mr-1">Ends in:</span>
+        <div className="inline-block">
+          <span
+            className={cn(
+              "bg-orange-background text-white min-w-5 p-0 rounded-[2px] inline-block min-h-4 text-center",
+              {
+                "p-2 bg-white text-black mr-1": homeStyle,
+              }
+            )}
+          >
+            {timeLeft.days.toString().padStart(2, "0")}
+          </span>
+          <span className="mx-1">:</span>
+          <span
+            className={cn(
+              "bg-orange-background text-white min-w-5 p-0 rounded-[2px] inline-block min-h-4 text-center",
+              {
+                "p-2 bg-white text-black mr-1": homeStyle,
+              }
+            )}
+          >
+            {timeLeft.hours.toString().padStart(2, "0")}
+          </span>
+          <span className="mx-1">:</span>
+          <span
+            className={cn(
+              "bg-orange-background text-white min-w-5 p-0 rounded-[2px] inline-block min-h-4 text-center",
+              {
+                "p-2 bg-white text-black mr-1": homeStyle,
+              }
+            )}
+          >
+            {timeLeft.minutes.toString().padStart(2, "0")}
+          </span>
+          <span className="mx-1">:</span>
+          <span
+            className={cn(
+              "bg-orange-background text-white min-w-5 p-0 rounded-[2px] inline-block min-h-4 text-center",
+              {
+                "p-2 bg-white text-black mr-1": homeStyle,
+              }
+            )}
+          >
+            {timeLeft.seconds.toString().padStart(2, "0")}
+          </span>
+        </div>
       </div>
     </div>
   );
