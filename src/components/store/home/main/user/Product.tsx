@@ -13,7 +13,7 @@ export default function UserCardProducts({
         products={products}
         type="simple"
         slidesPerView={3}
-        spaceBetween={50}
+        spaceBetween={-5}
       />
     </div>
   );

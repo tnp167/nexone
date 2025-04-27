@@ -104,7 +104,7 @@ const HomeUserCard = async ({ products }: { products: SimpleProduct[] }) => {
           )}
         </div>
         {/* Ad swiper */}
-        <div className="w-full h-full flex-1 px-2 max-h-[400px] pb-[100px] mt-2">
+        <div className="w-full h-full flex-1 px-2 min-h-[300px] max-h-[400px] pb-[100px] mt-2">
           <div
             className="w-full h-full px-3 bg-[#f5f5f5] bg-cover rounded-md overflow-hidden"
             style={{

@@ -10,13 +10,15 @@ import HomeUserCard from "@/components/store/home/main/user/User";
 import MainSwiper from "@/components/store/shared/Swiper";
 import ProductSimpleCard from "@/components/store/cards/product/SimpleCard";
 import { SimpleProduct } from "@/lib/types";
-
+import Featured from "@/components/store/home/main/Featured";
 export default async function Home() {
   const { products } = await getProducts();
-  const { product_today_deals, product_user_card } = await getHomeDataDynamic([
-    { property: "offer", value: "today-deals", type: "simple" },
-    { property: "offer", value: "user-card", type: "simple" },
-  ]);
+  const { product_today_deals, product_user_card, product_featured } =
+    await getHomeDataDynamic([
+      { property: "offer", value: "today-deals", type: "simple" },
+      { property: "offer", value: "user-card", type: "simple" },
+      { property: "offer", value: "featured", type: "simple" },
+    ]);
   const categories = await getHomeFeatureCategories();
   return (
     <div>
@@ -41,6 +43,12 @@ export default async function Home() {
                 {/* Main Swiper */}
                 <HomeMainSwiper />
                 {/* Featured card */}
+                <Featured
+                  products={product_featured.filter(
+                    (product): product is SimpleProduct =>
+                      "variantSlug" in product
+                  )}
+                />
                 <div className="h-[200px]"></div>
               </div>
               {/* Right */}

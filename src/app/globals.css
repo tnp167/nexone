@@ -321,3 +321,32 @@
   bottom: -12px;
   animation: expandWith 0.3s;
 }
+
+/* Home main swiper */
+.awssld__wrapper {
+  border-radius: 6px !important;
+}
+
+.awssld__container {
+  padding-bottom: 36% !important;
+}
+
+.awssld__prev {
+  transform: scale(50%) !important;
+  left: -1rem !important;
+}
+
+.awssld__next {
+  transform: scale(50%) !important;
+  right: -1rem !important;
+}
+
+.swiper {
+  width: 100% !important;
+  max-width: 100% !important;
+  overflow: hidden !important;
+}
+
+.swiper-slide {
+  width: auto !important;
+}
