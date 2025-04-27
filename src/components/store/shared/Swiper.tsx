@@ -8,6 +8,7 @@ import "swiper/css/pagination";
 import ProductCard from "../cards/product/ProductCard";
 import { Navigation, Pagination } from "swiper/modules";
 import ProductSimpleCard from "../cards/product/SimpleCard";
+import ProductCardClean from "../cards/product/CleanCard";
 interface Props {
   children?: ReactNode;
   products: SimpleProduct[] | ProductType[];
@@ -40,6 +41,7 @@ const MainSwiper: FC<Props> = ({
 }) => {
   return (
     <div className="p-4 rounded-md cursor-pointer">
+      <div>{children}</div>
       <Swiper
         slidesPerView={slidesPerView}
         breakpoints={breakpoints}
@@ -52,7 +54,7 @@ const MainSwiper: FC<Props> = ({
             {type === "simple" ? (
               <ProductSimpleCard product={product as SimpleProduct} />
             ) : type === "curved" ? (
-              <div>Curved card</div>
+              <ProductCardClean product={product as ProductType} />
             ) : (
               <ProductCard product={product as ProductType} />
             )}

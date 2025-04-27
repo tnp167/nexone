@@ -12,15 +12,21 @@ import ProductSimpleCard from "@/components/store/cards/product/SimpleCard";
 import { SimpleProduct } from "@/lib/types";
 import Featured from "@/components/store/home/main/Featured";
 import AnimatedDeals from "@/components/store/home/AnimatedDeals";
-
+import Image from "next/image";
+import SuperDealsImg from "@/public/assets/images/ads/super-deals.avif";
 export default async function Home() {
   const { products } = await getProducts();
-  const { product_super_deals, product_user_card, product_featured } =
-    await getHomeDataDynamic([
-      { property: "offer", value: "super-deals", type: "simple" },
-      { property: "offer", value: "user-card", type: "simple" },
-      { property: "offer", value: "featured", type: "simple" },
-    ]);
+  const {
+    product_best_deals,
+    product_super_deals,
+    product_user_card,
+    product_featured,
+  } = await getHomeDataDynamic([
+    { property: "offer", value: "best-deals", type: "simple" },
+    { property: "offer", value: "super-deals", type: "full" },
+    { property: "offer", value: "user-card", type: "simple" },
+    { property: "offer", value: "featured", type: "simple" },
+  ]);
   const categories = await getHomeFeatureCategories();
   return (
     <div>
@@ -65,11 +71,25 @@ export default async function Home() {
             {/* Animated Deals */}
             <div className="mt-2 lg:block hidden">
               <AnimatedDeals
-                products={product_super_deals.filter(
+                products={product_best_deals.filter(
                   (product): product is SimpleProduct =>
                     "variantSlug" in product
                 )}
               />
+            </div>
+            <div className="mt-10 space-y-10">
+              <div className="bg-white rounded-md">
+                <MainSwiper products={product_super_deals} type="curved">
+                  <div className="mb-4 pl-4 flex items-center justify-between">
+                    <Image
+                      src={SuperDealsImg}
+                      alt="Super Deals"
+                      width={200}
+                      height={50}
+                    />
+                  </div>
+                </MainSwiper>
+              </div>
             </div>
           </div>
         </div>
