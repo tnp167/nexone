@@ -5,7 +5,7 @@ interface Props {
   value: string | number;
   type: "text" | "number";
   placeholder?: string;
-  onChange: (value: string | number) => void;
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   readOnly?: boolean;
 }
 
@@ -17,6 +17,7 @@ const Input: FC<Props> = ({
   onChange,
   readOnly,
 }) => {
+  const inputValue = type === "number" ? String(value) : value;
   return (
     <div className="w-full relative">
       <input
@@ -24,8 +25,8 @@ const Input: FC<Props> = ({
         className="w-full pr-6 pl-8 py-4 rounded-xl outline-none duration-200 ring-1 ring-transparent focus:ring-[#11BE86]"
         name={name}
         placeholder={placeholder}
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
+        value={inputValue}
+        onChange={onChange}
         readOnly={readOnly}
       />
     </div>

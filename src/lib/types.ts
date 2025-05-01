@@ -409,9 +409,9 @@ export type StoreType = {
   defaultShippingService: string;
   defaultDeliveryTimeMax?: number;
   defaultDeliveryTimeMin?: number;
-  defaultShippingFeeFixed?: number;
-  defaultShippingFeeForAdditionalItem?: number;
-  defaultShippingFeePerItem?: number;
+  defaultShippingFeesPerItem?: number;
+  defaultShippingFeesForAdditionalItem?: number;
   defaultShippingFeePerKg?: number;
+  defaultShippingFeeFixed?: number;
   returnPolicy?: string;
 };

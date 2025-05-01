@@ -5,8 +5,10 @@ import Instructions from "./Instructions";
 import ProgressBar from "./ProgressBar";
 import Step1 from "./steps/step-1/Step-1";
 import Step2 from "./steps/step-2/Step-2";
+import Step3 from "./steps/step-3/Step-3";
+import Step4 from "./steps/step-4/Step-4";
 const ApplySellerMultiFormm = () => {
-  const [step, setStep] = useState<number>(2);
+  const [step, setStep] = useState<number>(1);
   const [formData, setFormData] = useState<StoreType>({
     name: "",
     description: "",
@@ -19,8 +21,8 @@ const ApplySellerMultiFormm = () => {
     defaultDeliveryTimeMax: 0,
     defaultDeliveryTimeMin: 0,
     defaultShippingFeeFixed: 0,
-    defaultShippingFeeForAdditionalItem: 0,
-    defaultShippingFeePerItem: 0,
+    defaultShippingFeesForAdditionalItem: 0,
+    defaultShippingFeesPerItem: 0,
     defaultShippingFeePerKg: 0,
     returnPolicy: "",
   });
@@ -39,6 +41,15 @@ const ApplySellerMultiFormm = () => {
             setStep={setStep}
           />
         )}
+        {step === 3 && (
+          <Step3
+            formData={formData}
+            setFormData={setFormData}
+            step={step}
+            setStep={setStep}
+          />
+        )}
+        {step === 4 && <Step4 />}
       </div>
     </div>
   );

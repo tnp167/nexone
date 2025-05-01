@@ -15,6 +15,17 @@ import {
 import ImageUpload from "@/components/dashboard/shared/ImageUpload";
 import Input from "@/components/store/ui/input";
 import { Textarea } from "@/components/store/ui/textarea";
+import { ChangeEvent } from "react";
+
+interface FormData {
+  name: string;
+  description: string;
+  email: string;
+  phone: string;
+  url: string;
+  logo: { url: string }[];
+  cover: { url: string }[];
+}
 
 const Step2 = ({
   step,
@@ -28,8 +39,8 @@ const Step2 = ({
   setFormData: Dispatch<SetStateAction<StoreType>>;
 }) => {
   const form = useForm<z.infer<typeof StoreFormSchema>>({
-    mode: "onChange", // Form validation mode
-    resolver: zodResolver(StoreFormSchema), // Resolver for form validation
+    mode: "onChange",
+    resolver: zodResolver(StoreFormSchema),
     defaultValues: {
       logo: formData.logo ? [{ url: formData.logo }] : [],
       cover: formData.cover ? [{ url: formData.cover }] : [],
@@ -44,6 +55,26 @@ const Step2 = ({
   const handleSubmit = async (values: z.infer<typeof StoreFormSchema>) => {
     setStep((prev) => prev + 1);
   };
+
+  const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const { name, value, type } = e.target;
+    const parsedValue = type === "number" ? Number(value) : value;
+
+    setFormData((prev) => ({
+      ...prev,
+      [name]: parsedValue,
+    }));
+    form.setValue(name as keyof FormData, value);
+  };
+
+  const handleImageChange = (name: string, url: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      [name]: url,
+    }));
+    form.setValue(name as keyof FormData, [{ url }]);
+  };
+
   return (
     <div className="h-full">
       <AnimatedContainer>
@@ -62,10 +93,7 @@ const Step2 = ({
                           error={form.formState.errors.logo ? true : false}
                           type="profile"
                           value={field.value.map((image) => image.url)}
-                          onChange={(url) => {
-                            field.onChange([{ url }]);
-                            setFormData({ ...formData, logo: url });
-                          }}
+                          onChange={(url) => handleImageChange("logo", url)}
                           onRemove={(url) =>
                             field.onChange([
                               ...field.value.filter(
@@ -88,10 +116,7 @@ const Step2 = ({
                           error={form.formState.errors.logo ? true : false}
                           type="cover"
                           value={field.value.map((image) => image.url)}
-                          onChange={(url) => {
-                            field.onChange([{ url }]);
-                            setFormData({ ...formData, cover: url });
-                          }}
+                          onChange={(url) => handleImageChange("cover", url)}
                           onRemove={(url) =>
                             field.onChange([
                               ...field.value.filter(
@@ -117,13 +142,7 @@ const Step2 = ({
                         value={field.value}
                         type="text"
                         name="name"
-                        onChange={(e) => {
-                          field.onChange(e);
-                          setFormData((prev) => ({
-                            ...prev,
-                            url: field.value,
-                          }));
-                        }}
+                        onChange={handleInputChange}
                       />
                     </FormControl>
                     <FormMessage className="ml-1" />
@@ -163,13 +182,7 @@ const Step2 = ({
                         name="url"
                         type="text"
                         value={field.value}
-                        onChange={(e) => {
-                          field.onChange(e);
-                          setFormData((prev) => ({
-                            ...prev,
-                            url: field.value,
-                          }));
-                        }}
+                        onChange={handleInputChange}
                       />
                     </FormControl>
                     <FormMessage />
@@ -188,13 +201,7 @@ const Step2 = ({
                         name="email"
                         type="text"
                         value={field.value}
-                        onChange={(e) => {
-                          field.onChange(e);
-                          setFormData((prev) => ({
-                            ...prev,
-                            url: field.value,
-                          }));
-                        }}
+                        onChange={handleInputChange}
                       />
                     </FormControl>
                     <FormMessage />
@@ -213,13 +220,7 @@ const Step2 = ({
                         name="phone"
                         type="text"
                         value={field.value}
-                        onChange={(e) => {
-                          field.onChange(e);
-                          setFormData((prev) => ({
-                            ...prev,
-                            url: field.value,
-                          }));
-                        }}
+                        onChange={handleInputChange}
                       />
                     </FormControl>
                     <FormMessage />

@@ -4,9 +4,10 @@ import { db } from "@/lib/db";
 import {
   CountryWithShippingRatesType,
   StoreDefaultShippingDetailsType,
+  StoreType,
 } from "@/lib/types";
 import { currentUser } from "@clerk/nextjs/server";
-import { ShippingRate } from "@prisma/client";
+import { ShippingRate, StoreStatus } from "@prisma/client";
 import { Store } from "@prisma/client";
 
 //Upsert store details for seller
@@ -340,5 +341,71 @@ export const getStoreOrders = async (storeUrl: string) => {
   } catch (error) {
     console.log(error);
     throw new Error("Failed to get store orders");
+  }
+};
+
+export const applySeller = async (store: StoreType) => {
+  try {
+    if (!store) throw new Error("Store details are required");
+
+    const user = await currentUser();
+
+    if (!user) throw new Error("Unauthorized");
+
+    const existingStore = await db.store.findFirst({
+      where: {
+        AND: [
+          {
+            OR: [
+              {
+                name: store.name,
+              },
+              {
+                url: store.url,
+              },
+              {
+                phone: store.phone,
+              },
+              {
+                email: store.email,
+              },
+            ],
+          },
+        ],
+      },
+    });
+
+    if (existingStore) {
+      let errorMessage = "";
+      if (existingStore.name === store.name) {
+        errorMessage = "A store with the same name already exists";
+      } else if (existingStore.email === store.email) {
+        errorMessage = "A store with the same email already exists";
+      } else if (existingStore.phone === store.phone) {
+        errorMessage = "A store with the same phone number already exists";
+      } else if (existingStore.url === store.url) {
+        errorMessage = "A store with the same URL already exists";
+      }
+      throw new Error(errorMessage);
+    }
+
+    const storeDetails = await db.store.create({
+      data: {
+        ...store,
+        defaultShippingService:
+          store.defaultShippingService || "International Delivery",
+        returnPolicy:
+          store.returnPolicy || "Returns within 30 days of purchase.",
+        status: StoreStatus.PENDING,
+        averageRating: 0,
+        featured: false,
+        userId: user.id,
+      },
+    });
+
+    return storeDetails;
+  } catch (error) {
+    console.log(error);
+    throw new Error("Failed to create store");
   }
 };
