@@ -3,6 +3,7 @@ import { StoreType } from "@/lib/types";
 import React, { useState } from "react";
 import Instructions from "./Instructions";
 import ProgressBar from "./ProgressBar";
+import Step1 from "./steps/step-1/Step-1";
 const ApplySellerMultiFormm = () => {
   const [step, setStep] = useState<number>(1);
   const [formData, setFormData] = useState<StoreType>({
@@ -28,6 +29,7 @@ const ApplySellerMultiFormm = () => {
       <div className="relative p-5 w-full">
         <ProgressBar step={step} />
         {/* Steps */}
+        {step === 1 && <Step1 step={step} setStep={setStep} />}
       </div>
     </div>
   );

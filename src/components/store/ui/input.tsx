@@ -6,9 +6,17 @@ interface Props {
   type: "text" | "number";
   placeholder?: string;
   onChange: (value: string | number) => void;
+  readOnly?: boolean;
 }
 
-const Input: FC<Props> = ({ name, value, type, placeholder, onChange }) => {
+const Input: FC<Props> = ({
+  name,
+  value,
+  type,
+  placeholder,
+  onChange,
+  readOnly,
+}) => {
   return (
     <div className="w-full relative">
       <input
@@ -18,6 +26,7 @@ const Input: FC<Props> = ({ name, value, type, placeholder, onChange }) => {
         placeholder={placeholder}
         value={value}
         onChange={(e) => onChange(e.target.value)}
+        readOnly={readOnly}
       />
     </div>
   );

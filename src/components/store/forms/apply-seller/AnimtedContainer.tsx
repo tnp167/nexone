@@ -1,7 +1,7 @@
 import React, { ReactNode } from "react";
 import { motion } from "framer-motion";
 import { poppingTransition } from "./transition";
-const AnimtedContainer = ({ children }: { children: ReactNode }) => {
+const AnimatedContainer = ({ children }: { children: ReactNode }) => {
   return (
     <motion.div
       variants={poppingTransition}
@@ -17,4 +17,4 @@ const AnimtedContainer = ({ children }: { children: ReactNode }) => {
   );
 };
 
-export default AnimtedContainer;
+export default AnimatedContainer;
