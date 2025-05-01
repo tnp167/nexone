@@ -3,7 +3,7 @@ import React, { useRef } from "react";
 import Image from "next/image";
 import DefaultUserImg from "@/public/assets/images/default-user.jpg";
 import Input from "@/components/store/ui/input";
-const UserDeatils = () => {
+const UserDetails = () => {
   const { user } = useUser();
   const buttonContainerRef = useRef<HTMLDivElement>(null);
 
@@ -52,4 +52,4 @@ const UserDeatils = () => {
     </div>
   );
 };
-export default UserDeatils;
+export default UserDetails;

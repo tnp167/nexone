@@ -5,7 +5,7 @@ import Image from "next/image";
 import DefaultUserImg from "@/public/assets/images/default-user.jpg";
 import Link from "next/link";
 import { Button } from "@/components/store/ui/button";
-import UserDeatils from "./UserDeatils";
+import UserDetails from "./UserDetails";
 const Step1 = ({
   step,
   setStep,
@@ -26,7 +26,7 @@ const Step1 = ({
     <div className="w-full">
       <AnimatedContainer>
         {isSignedIn && user ? (
-          <UserDeatils />
+          <UserDetails />
         ) : (
           <div className="h-full">
             <div className="h-full flex flex-col justify-center space-y-4">

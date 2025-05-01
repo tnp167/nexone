@@ -5,6 +5,7 @@ import { FC, useEffect, useState } from "react";
 import { CldUploadWidget } from "next-cloudinary";
 import { Button } from "@/components/ui/button";
 import { Trash } from "lucide-react";
+import { cn } from "@/lib/utils";
 interface ImageUploadProps {
   disabled?: boolean;
   onChange: (value: string) => void;
@@ -12,6 +13,7 @@ interface ImageUploadProps {
   value: string[];
   type: "standard" | "profile" | "cover";
   dontShowPreview?: boolean;
+  error?: boolean;
 }
 
 const ImageUpload: FC<ImageUploadProps> = ({
@@ -21,9 +23,20 @@ const ImageUpload: FC<ImageUploadProps> = ({
   value,
   type,
   dontShowPreview,
+  error,
 }) => {
   const [isMounted, setIsMounted] = useState(false);
+  const [isBouncing, setIsBouncing] = useState(false);
 
+  useEffect(() => {
+    if (error) {
+      setIsBouncing(true);
+      const time = setTimeout(() => {
+        setIsBouncing(false);
+      }, 1500);
+      return () => clearTimeout(time);
+    }
+  }, [error]);
   useEffect(() => {
     setIsMounted(true);
   }, []);
@@ -36,7 +49,12 @@ const ImageUpload: FC<ImageUploadProps> = ({
 
   if (type === "profile") {
     return (
-      <div className="relative rounded-full w-52 h-52 bg-gray-200 border-2 border-white">
+      <div
+        className={cn(
+          "relative rounded-full w-52 h-52 bg-gray-200 border-2 border-white",
+          error && "bg-red-100"
+        )}
+      >
         {value.length > 0 && (
           <Image
             src={value[0]}
@@ -78,7 +96,11 @@ const ImageUpload: FC<ImageUploadProps> = ({
   } else if (type === "cover") {
     return (
       <div
-        className="relative w-full bg-gray-100 rounded-lg bg-gradient-to-b from-gray-200 to-gray-300"
+        className={cn(
+          "relative w-full bg-gray-100 rounded-lg bg-gradient-to-b from-gray-200 to-gray-300",
+          error && "from-red-100 to-red-200",
+          isBouncing && "animate-bounce"
+        )}
         style={{ height: "350px" }}
       >
         {value.length > 0 && (

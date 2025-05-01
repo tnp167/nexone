@@ -4,8 +4,9 @@ import React, { useState } from "react";
 import Instructions from "./Instructions";
 import ProgressBar from "./ProgressBar";
 import Step1 from "./steps/step-1/Step-1";
+import Step2 from "./steps/step-2/Step-2";
 const ApplySellerMultiFormm = () => {
-  const [step, setStep] = useState<number>(1);
+  const [step, setStep] = useState<number>(2);
   const [formData, setFormData] = useState<StoreType>({
     name: "",
     description: "",
@@ -30,6 +31,14 @@ const ApplySellerMultiFormm = () => {
         <ProgressBar step={step} />
         {/* Steps */}
         {step === 1 && <Step1 step={step} setStep={setStep} />}
+        {step === 2 && (
+          <Step2
+            formData={formData}
+            setFormData={setFormData}
+            step={step}
+            setStep={setStep}
+          />
+        )}
       </div>
     </div>
   );
