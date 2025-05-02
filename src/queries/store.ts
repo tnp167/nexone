@@ -409,3 +409,106 @@ export const applySeller = async (store: StoreType) => {
     throw new Error("Failed to create store");
   }
 };
+
+// Function: getAllStores
+// Description: Retrieves all stores from the database.
+// Permission Level: Admin only
+// Parameters: None
+// Returns: An array of store details.
+export const getAllStores = async () => {
+  try {
+    const user = await currentUser();
+
+    if (!user) throw new Error("Unauthorized");
+
+    if (user.privateMetadata.role !== "ADMIN")
+      throw new Error("Unauthorized. Admin only can get all stores");
+
+    const stores = await db.store.findMany({
+      include: {
+        user: true,
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+    });
+
+    return stores;
+  } catch (error) {
+    console.log(error);
+    throw new Error("Failed to get all stores");
+  }
+};
+
+export const updateStoreStatus = async (
+  storeId: string,
+  status: StoreStatus
+) => {
+  const user = await currentUser();
+  if (!user) throw new Error("User not found");
+
+  //Verify seller permission
+  if (user.privateMetadata.role !== "ADMIN")
+    throw new Error("Admin permission required");
+
+  //Verify store ownership
+  const store = await db.store.findUnique({
+    where: {
+      id: storeId,
+    },
+  });
+  if (!store) throw new Error("Store not found");
+
+  //Retrieve the order to be updated
+  const updatedStore = await db.store.update({
+    where: {
+      id: storeId,
+    },
+    data: {
+      status,
+    },
+  });
+
+  //Update the user role
+  if (store.status === "PENDING" && updatedStore.status === "ACTIVE") {
+    await db.user.update({
+      where: {
+        id: updatedStore.userId,
+      },
+      data: {
+        role: "SELLER",
+      },
+    });
+  }
+
+  return updatedStore.status;
+};
+
+// Function: deleteStore
+// Description: Deletes a store from the database.
+// Permission Level: Admin only
+// Parameters:
+//   - storeId: The ID of the store to be deleted.
+// Returns: Response indicating success or failure of the deletion operation.
+export const deleteStore = async (storeId: string) => {
+  try {
+    const user = await currentUser();
+    if (!user) throw new Error("User not found");
+
+    if (user.privateMetadata.role !== "ADMIN")
+      throw new Error("Admin permission required");
+
+    if (!storeId) throw new Error("Store ID is required");
+
+    const response = await db.store.delete({
+      where: {
+        id: storeId,
+      },
+    });
+
+    return response;
+  } catch (error) {
+    console.log(error);
+    throw new Error("Failed to delete store");
+  }
+};
