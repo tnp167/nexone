@@ -512,3 +512,30 @@ export const deleteStore = async (storeId: string) => {
     throw new Error("Failed to delete store");
   }
 };
+
+export const getStorePageDetails = async (storeUrl: string) => {
+  console.log("storeUrl", storeUrl);
+  try {
+    const store = await db.store.findUnique({
+      where: {
+        url: storeUrl,
+        status: "ACTIVE",
+      },
+      select: {
+        id: true,
+        name: true,
+        description: true,
+        logo: true,
+        cover: true,
+        averageRating: true,
+        numReviews: true,
+      },
+    });
+
+    if (!store) throw new Error("Store not found");
+    return store;
+  } catch (error) {
+    console.log(error);
+    throw new Error("Failed to get store page details");
+  }
+};

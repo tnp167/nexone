@@ -10,6 +10,7 @@ import {
   getAllStores,
   getStoreDefaultShippingDetails,
   getStoreOrders,
+  getStorePageDetails,
 } from "@/queries/store";
 import { getAllSubCategories } from "@/queries/subCategory";
 import {
@@ -398,6 +399,10 @@ export type ProductSimpleVariantType = {
 export type FeaturedCategoryType = Prisma.PromiseReturnType<
   typeof getHomeFeatureCategories
 >[0];
+
+export type StoreDetailsType = Prisma.PromiseReturnType<
+  typeof getStorePageDetails
+>;
 
 export type StoreType = {
   name: string;
