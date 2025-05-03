@@ -6,6 +6,7 @@ import React from "react";
 import StoreDetails from "@/components/store/store-page/StoreDetails";
 import ProductFilters from "@/components/store/browse-page/Filters";
 import ProductSort from "@/components/store/browse-page/Sort";
+import StoreProducts from "@/components/store/store-page/StoreProducts";
 const StorePage = async ({
   params,
   searchParams,
@@ -27,6 +28,7 @@ const StorePage = async ({
           <ProductFilters queries={searcParamsObj} storeUrl={storeUrl} />
           <div className="p-4 space-y-5">
             <ProductSort />
+            <StoreProducts searchParams={searcParamsObj} storeUrl={storeUrl} />
           </div>
         </div>
       </div>
