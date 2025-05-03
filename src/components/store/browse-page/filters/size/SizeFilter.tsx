@@ -6,7 +6,13 @@ import React, { useEffect, useState } from "react";
 import { FiltersQueryType } from "@/lib/types";
 import { getFilteredSizes } from "@/queries/size";
 import SizeLink from "./SizeLink";
-const SizeFilter = ({ queries }: { queries: FiltersQueryType }) => {
+const SizeFilter = ({
+  queries,
+  storeUrl,
+}: {
+  queries: FiltersQueryType;
+  storeUrl?: string;
+}) => {
   const { category, subCategory, offer, search } = queries;
   const [show, setShow] = useState<boolean>(false);
   const [sizes, setSizes] = useState<{ size: string }[]>([]);
@@ -19,7 +25,7 @@ const SizeFilter = ({ queries }: { queries: FiltersQueryType }) => {
 
   const handleGetSizes = async () => {
     const { sizes, count } = await getFilteredSizes(
-      { category, subCategory, offer },
+      { category, subCategory, offer, storeUrl },
       take
     );
     setSizes(sizes);

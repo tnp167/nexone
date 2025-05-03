@@ -51,7 +51,6 @@ const BrowsePage = async ({
           <ProductFilters queries={searcParamsObj} />
           <div className="p-4 space-y-5">
             <ProductSort />
-            {/* Product list */}
             <ProductList products={products} />
           </div>
         </div>
