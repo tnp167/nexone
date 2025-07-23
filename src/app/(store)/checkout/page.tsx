@@ -1,5 +1,5 @@
 import CheckoutContainer from "@/components/store/checkout-page/Container";
-import Header from "@/components/store/layout/header/Header";
+import Header from "@/components/store/layout/Header/Header";
 import { db } from "@/lib/db";
 import { Country } from "@/lib/types";
 import { getUserShippingAddresses } from "@/queries/user";

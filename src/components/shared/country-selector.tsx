@@ -59,6 +59,7 @@ export default function CountrySelector({
           disabled={disabled}
         >
           <span className="truncate flex items-center">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               alt={`${selectedValue.name}`}
               src={`https://purecatamphetamine.github.io/country-flag-icons/3x2/${selectedValue.code}.svg`}
@@ -135,12 +136,14 @@ export default function CountrySelector({
                         className="text-gray-900 cursor-default select-none relative py-2 pl-3 pr-9 flex items-center hover:bg-gray-50 transition"
                         id="listbox-option-0"
                         role="option"
+                        aria-selected="false"
                         onClick={() => {
                           onChange(value.name);
                           setQuery("");
                           onToggle();
                         }}
                       >
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img
                           alt={`${value.name}`}
                           src={`https://purecatamphetamine.github.io/country-flag-icons/3x2/${value.code}.svg`}

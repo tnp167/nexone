@@ -22,18 +22,18 @@ export async function GET(req: Request) {
   }
 
   try {
-    const response = await client.search<{ _source: Product }>({
-      index: "products",
-      body: {
-        query: {
-          match_phrase_prefix: {
-            name: query,
-          },
-        },
-      },
-    });
-    const results = response.hits.hits.map((hit: any) => hit._source);
-    return NextResponse.json(results);
+    // const response = await client.search<{ _source: Product }>({
+    //   index: "products",
+    //   body: {
+    //     query: {
+    //       match_phrase_prefix: {
+    //         name: query,
+    //       },
+    //     },
+    //   },
+    // });
+    // const results = response.hits.hits.map((hit: any) => hit._source);
+    // return NextResponse.json(results);
   } catch (error: any) {
     console.log(error);
     return NextResponse.json(

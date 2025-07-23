@@ -1,46 +1,34 @@
-import React from "react";
-import Header from "@/components/store/layout/header/Header";
-import { getProducts } from "@/queries/product";
-import ProductList from "@/components/store/shared/ProductList";
-import { FiltersQueryType } from "@/lib/types";
+import Header from "@/components/store/layout/Header/Header";
 import ProductFilters from "@/components/store/browse-page/Filters";
 import ProductSort from "@/components/store/browse-page/Sort";
-const BrowsePage = async ({
+import ProductList from "@/components/store/shared/ProductList";
+import { getProducts } from "@/queries/product";
+import { FiltersQueryType } from "@/lib/types";
+import { parseFiltersFromSearchParams } from "@/lib/utils";
+
+export default async function BrowsePage({
   searchParams,
 }: {
-  searchParams: FiltersQueryType;
-}) => {
-  const {
-    category,
-    subCategory,
-    search,
-    offer,
-    size,
-    sort,
-    minPrice,
-    maxPrice,
-    color,
-  } = await searchParams;
-
-  const searcParamsObj = await searchParams;
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+}) {
+  const filters: FiltersQueryType = parseFiltersFromSearchParams(
+    await searchParams
+  );
 
   const productsData = await getProducts(
     {
-      search,
-      category,
-      subCategory,
-      offer,
-      size: Array.isArray(size) ? size : size ? [size] : undefined,
-      minPrice,
-      maxPrice,
-      color: Array.isArray(color)
-        ? color.map((c) => encodeURIComponent(c))
-        : color
-        ? [encodeURIComponent(color)]
-        : undefined,
+      search: filters.search,
+      category: filters.category,
+      subCategory: filters.subCategory,
+      offer: filters.offer,
+      size: filters.size ? [filters.size] : undefined,
+      minPrice: filters.minPrice,
+      maxPrice: filters.maxPrice,
+      color: filters.color ? [encodeURIComponent(filters.color)] : undefined,
     },
-    sort
+    filters.sort
   );
+
   const { products } = productsData;
 
   return (
@@ -48,7 +36,7 @@ const BrowsePage = async ({
       <Header />
       <div className="max-w-[95%] mx-auto">
         <div className="flex mt-5 gap-x-5">
-          <ProductFilters queries={searcParamsObj} />
+          <ProductFilters queries={filters} />
           <div className="p-4 space-y-5">
             <ProductSort />
             <ProductList products={products} />
@@ -57,6 +45,4 @@ const BrowsePage = async ({
       </div>
     </>
   );
-};
-
-export default BrowsePage;
+}

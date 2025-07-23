@@ -4,7 +4,7 @@ import ColorThief from "colorthief";
 import { PrismaClient } from "@prisma/client";
 import { db } from "./db";
 import countries from "@/data/countries.json";
-import { CartProductType, Country } from "./types";
+import { CartProductType, Country, FiltersQueryType } from "./types";
 import { differenceInDays, differenceInHours } from "date-fns";
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -274,3 +274,19 @@ export const updateProductHistory = (variantSlug: string) => {
   //Save the updated history
   localStorage.setItem("productHistory", JSON.stringify(productHistory));
 };
+
+export function parseFiltersFromSearchParams(searchParams?: {
+  [key: string]: string | string[] | undefined;
+}): FiltersQueryType {
+  return {
+    search: String(searchParams?.search ?? ""),
+    category: String(searchParams?.category ?? ""),
+    subCategory: String(searchParams?.subCategory ?? ""),
+    offer: String(searchParams?.offer ?? ""),
+    size: String(searchParams?.size ?? ""),
+    sort: String(searchParams?.sort ?? ""),
+    minPrice: Number(searchParams?.minPrice ?? 0),
+    maxPrice: Number(searchParams?.maxPrice ?? 0),
+    color: String(searchParams?.color ?? ""),
+  };
+}

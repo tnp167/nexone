@@ -72,6 +72,8 @@
     "react-color": "^2.19.3",
     "react-datetime-picker": "^6.0.1",
     "react-day-picker": "^8.10.1",
+    "react-dnd": "^16.0.1",
+    "react-dnd-html5-backend": "^16.0.1",
     "react-dom": "^19.0.0",
     "react-hook-form": "^7.54.2",
     "react-hot-toast": "^2.5.2",
@@ -99,6 +101,7 @@
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
+    "@types/bun": "latest",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
@@ -107,8 +110,7 @@
     "postcss": "^8",
     "prisma": "^6.3.1",
     "tailwindcss": "^3.4.1",
-    "typescript": "^5",
-    "@types/bun": "latest"
+    "typescript": "^5"
   },
   "module": "index.ts",
   "type": "module"

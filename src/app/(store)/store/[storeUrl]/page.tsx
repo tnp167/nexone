@@ -1,5 +1,5 @@
 import CategoriesHeader from "@/components/store/layout/categories-header/CategoriesHeader";
-import Header from "@/components/store/layout/header/Header";
+import Header from "@/components/store/layout/Header/Header";
 import { FiltersQueryType } from "@/lib/types";
 import { getStorePageDetails } from "@/queries/store";
 import React from "react";
@@ -11,8 +11,8 @@ const StorePage = async ({
   params,
   searchParams,
 }: {
-  params: { storeUrl: string };
-  searchParams: FiltersQueryType;
+  params: Promise<{ storeUrl: string }>;
+  searchParams: Promise<FiltersQueryType>;
 }) => {
   const { storeUrl } = await params;
   const store = await getStorePageDetails(storeUrl);

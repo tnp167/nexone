@@ -1,9 +1,9 @@
 import { getProducts } from "@/queries/product";
 import ProductList from "@/components/store/shared/ProductList";
-import Header from "@/components/store/layout/header/Header";
+import Header from "@/components/store/layout/Header/Header";
 import CategoriesHeader from "@/components/store/layout/categories-header/CategoriesHeader";
 import { getHomeDataDynamic, getHomeFeatureCategories } from "@/queries/home";
-import Footer from "@/components/store/layout/footer/Footer";
+import Footer from "@/components/store/layout/Footer/Footer";
 import Sideline from "@/components/store/home/sideline/Sideline";
 import HomeMainSwiper from "@/components/store/home/main/HomeSwiper";
 import HomeUserCard from "@/components/store/home/main/user/User";

@@ -1,7 +1,7 @@
 import OrderInfo from "@/components/store/cards/order/Info";
 import OrderTotalDetailsCard from "@/components/store/cards/order/Total";
 import OrderUserDrtailsCard from "@/components/store/cards/order/User";
-import Header from "@/components/store/layout/header/Header";
+import Header from "@/components/store/layout/Header/Header";
 import OrderGroupsContainer from "@/components/store/order-page/GroupsContainer";
 import OrderHeader from "@/components/store/order-page/Header";
 import OrderPayment from "@/components/store/order-page/Payment";
@@ -10,7 +10,11 @@ import { getOrder } from "@/queries/order";
 import { redirect } from "next/navigation";
 import React from "react";
 
-const OrderPage = async ({ params }: { params: { orderId: string } }) => {
+const OrderPage = async ({
+  params,
+}: {
+  params: Promise<{ orderId: string }>;
+}) => {
   const { orderId } = await params;
   const order = await getOrder(orderId);
   if (!order) return redirect("/");
@@ -20,7 +24,7 @@ const OrderPage = async ({ params }: { params: { orderId: string } }) => {
     0
   );
 
-  //Calculate the total number of delivered items
+  // Calculate the total number of delivered items
   const deliveredItemsCount = order?.groups.reduce((total, group) => {
     if (group.status === "Delivered") {
       return total + group.items.length;

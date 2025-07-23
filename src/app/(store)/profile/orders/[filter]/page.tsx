@@ -5,7 +5,7 @@ import React from "react";
 const ProfileFilteredOrdersPage = async ({
   params,
 }: {
-  params: { filter: string };
+  params: Promise<{ filter: string }>;
 }) => {
   const { filter } = await params;
   const parsedFilter = filter ? (filter as OrderTableFilter) : "";

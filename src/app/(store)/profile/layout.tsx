@@ -1,4 +1,4 @@
-import Header from "@/components/store/layout/header/Header";
+import Header from "@/components/store/layout/Header/Header";
 import ProfileSidebar from "@/components/store/layout/profile-sidebar/Sidebar";
 import React from "react";
 

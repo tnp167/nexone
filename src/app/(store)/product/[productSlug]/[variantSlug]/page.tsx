@@ -1,4 +1,4 @@
-import ProductPageContainer from "@/components/store/product-page/Container";
+import ProductPageContainer from "@/components/store/product-page/container"; // Corrected casing
 import ProductDescription from "@/components/store/product-page/ProductDescription";
 import ProductSpecs from "@/components/store/product-page/ProductSpecs";
 import RelatedProducts from "@/components/store/product-page/RelatedProduct";
@@ -10,7 +10,7 @@ import StoreCard from "@/components/store/cards/StoreCard";
 import StoreProducts from "@/components/store/product-page/StoreProducts";
 import ProductReviews from "@/components/store/product-page/reviews/ProductReviews";
 import CategoriesHeader from "@/components/store/layout/categories-header/CategoriesHeader";
-import Header from "@/components/store/layout/header/Header";
+import Header from "@/components/store/layout/Header/Header";
 
 interface PageProps {
   params: Promise<{ productSlug: string; variantSlug: string }>;
@@ -38,12 +38,12 @@ const ProductVariantPage = async ({ params, searchParams }: PageProps) => {
     variantInfo,
   } = productData;
 
-  //If the size is provided, check if it is valid
+  // If the size is provided, check if it is valid
   if (sizeId) {
     const isValidSize = sizes.some((s) => s.id === sizeId);
     if (!isValidSize) return redirect(`/product/${productSlug}/${variantSlug}`);
   }
-  //If no sizeId is provided and theere's only one size, automatically redirect to the product variant page
+  // If no sizeId is provided and there's only one size, automatically redirect to the product variant page
   else if (sizes.length === 1) {
     return redirect(
       `/product/${productSlug}/${variantSlug}/?size=${sizes[0].id}`

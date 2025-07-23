@@ -6,7 +6,7 @@ import React from "react";
 const SelletStoreSettingsPage = async ({
   params,
 }: {
-  params: { storeUrl: string };
+  params: Promise<{ storeUrl: string }>;
 }) => {
   const { storeUrl } = await params;
   const storeDetails = await db.store.findUnique({

@@ -4,9 +4,14 @@ import ProductList from "@/components/store/shared/ProductList";
 import { getProductsByIds } from "@/queries/product";
 import React, { useEffect, useState } from "react";
 
-const ProfileHistoryPage = ({ params }: { params: { page: string } }) => {
+const ProfileHistoryPage = async ({
+  params,
+}: {
+  params: Promise<{ page: string }>;
+}) => {
+  const { page } = await params;
   const [products, setProducts] = useState<any>([]);
-  const [page, setPage] = useState<number>(Number(params.page) || 1);
+  const [currentPage, setPage] = useState<number>(Number(page) || 1);
   const [totalPages, setTotalPages] = useState<number>(0);
   const [loading, setLoading] = useState<boolean>(false);
 
@@ -22,9 +27,8 @@ const ProfileHistoryPage = ({ params }: { params: { page: string } }) => {
       try {
         setLoading(true);
         const parsedHistory = JSON.parse(historyString);
-        const page = Number(params.page);
 
-        const response = await getProductsByIds(parsedHistory, page);
+        const response = await getProductsByIds(parsedHistory, currentPage);
         setProducts(response.products);
         setTotalPages(response.totalPages);
         setLoading(false);
@@ -37,7 +41,7 @@ const ProfileHistoryPage = ({ params }: { params: { page: string } }) => {
     };
     setLoading(false);
     fetchHistory();
-  }, [params.page]);
+  }, [currentPage]);
   return (
     <div className="bg-white py-4 px-6">
       <h1 className="text-lg mb-3 font-bold">Your product view history</h1>
@@ -47,7 +51,11 @@ const ProfileHistoryPage = ({ params }: { params: { page: string } }) => {
         <div className="pb-16">
           <ProductList products={products} />
           <div className="mt-2">
-            <Pagination page={page} setPage={setPage} totalPages={totalPages} />
+            <Pagination
+              page={currentPage}
+              setPage={setPage}
+              totalPages={totalPages}
+            />
           </div>
         </div>
       ) : (

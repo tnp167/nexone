@@ -298,7 +298,7 @@ const ProductDetails: FC<ProductDetailsProps> = ({
     value: string;
   };
 
-  const countryOptions: CountryOption[] = countries.map((country) => ({
+  const countryOptions: CountryOption[] = (countries || []).map((country) => ({
     label: country.name,
     value: country.id,
   }));

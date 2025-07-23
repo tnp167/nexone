@@ -4,6 +4,9 @@ import DataTable from "@/components/ui/data-table";
 import { Plus } from "lucide-react";
 import CategoryDetails from "@/components/dashboard/forms/CategoryDetails";
 import { columns } from "./columns";
+
+export const dynamic = "force-dynamic";
+
 const AdminStoresPage = async () => {
   const stores = await getAllStores();
   if (!stores) return null;

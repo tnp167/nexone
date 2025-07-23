@@ -5,6 +5,7 @@ import { User } from "@prisma/client";
 import { db } from "@/lib/db";
 
 export async function POST(req: Request) {
+  /*
   const SIGNING_SECRET = process.env.SIGNING_SECRET;
 
   if (!SIGNING_SECRET) {
@@ -94,5 +95,5 @@ export async function POST(req: Request) {
     });
   }
 
-  return new Response("", { status: 200 });
+  return new Response("", { status: 200 });*/
 }

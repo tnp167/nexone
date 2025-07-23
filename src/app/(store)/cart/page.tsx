@@ -1,5 +1,5 @@
 import CartContainer from "@/components/store/cart/Container";
-import Header from "@/components/store/layout/header/Header";
+import Header from "@/components/store/layout/Header/Header";
 import { Country } from "@/lib/types";
 import { cookies } from "next/headers";
 

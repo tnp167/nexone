@@ -5,9 +5,9 @@ import React from "react";
 const ProfileWishlistPage = async ({
   params,
 }: {
-  params: { page: string };
+  params: Promise<{ page: string }>;
 }) => {
-  const page = params.page;
+  const { page } = await params;
   const wishlistData = await getUserWishlist(Number(page));
   const { wishlist, totalPages } = wishlistData;
   return (

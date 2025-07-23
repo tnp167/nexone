@@ -1148,7 +1148,7 @@ export const getProductShippingFee = async (
   weight: number,
   quantity: number
 ) => {
-  let shippingFee = 0;
+  const shippingFee = 0;
 
   // Get country details based on user country name and user country code
   const country = await db.country.findUnique({
