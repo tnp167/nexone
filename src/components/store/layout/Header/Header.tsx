@@ -3,7 +3,7 @@ import React from "react";
 import UserMenu from "./user-menu/UserMenu";
 import Cart from "./Cart";
 import DownloadApp from "./DownloadApp";
-import Search from "./search/Search";
+import Search from "./Search/Search";
 import { Country } from "@/lib/types";
 import { cookies } from "next/headers";
 import CountryLanguageCurrencySelector from "./CountryLangCurSelector";

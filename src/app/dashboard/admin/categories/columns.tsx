@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import CategoryDetails from "@/components/dashboard/Forms/CategoryDetails";
+import CategoryDetails from "@/components/dashboard/forms/CategoryDetails";
 import CustomModal from "@/components/dashboard/shared/CustomModal";
 import {
   AlertDialog,
